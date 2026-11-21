@@ -4,7 +4,7 @@
  * @slot label - Custom visible label.
  * @slot default - Default component content.
  */
-import { computed } from "vue";
+import { computed, getCurrentInstance } from "vue";
 import type { WlFieldSlotProps } from "../field-types";
 import type { WlPt } from "../pt-types";
 import { useWlLocale, useWlPt } from "../config";
@@ -51,7 +51,14 @@ const slots = defineSlots<{
   /** Custom field label; receives the label text and required state. */
   label?(props: { label: string | undefined; required: boolean }): unknown; }>();
 
-const uid = useWlId();
+const generatedId = useWlId();
+const instance = getCurrentInstance()!;
+// During hydration Vue attaches the server element to the vnode before setup.
+const element = instance.vnode.el;
+const serverId = element?.nodeType === 1 ? (element as Element).getAttribute("data-wl-field-uid") : null;
+// A new field in an existing root can draw a counter value already present in
+// a sibling's server HTML, even before that sibling starts hydrating.
+const uid = serverId ?? (instance.root.vnode.el ? `${generatedId}-client` : generatedId);
 const locale = useWlLocale();
 const section = useWlPt("field", computed(() => props.pt));
 const controlId = computed(() => props.id ?? `wl-field-${uid}`);
@@ -67,6 +74,7 @@ const describedBy = computed(() => [props.hint && descId.value, props.error && e
     class="wl-field"
     :class="{ 'is-invalid': Boolean(error) }"
     data-wl="field"
+    :data-wl-field-uid="id == null ? uid : undefined"
     :data-orientation="orientation ?? 'vertical'"
   >
     <label
