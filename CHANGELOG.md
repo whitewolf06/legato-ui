@@ -10,6 +10,7 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 ### Fixed
 
 - Keep each `WlField` label linked to its input when sibling `Suspense` branches hydrate in a different order. Replacing an input or inserting another field during hydration preserves unique control IDs.
+- Omit disabled `WlSelect` fields from native form submissions. Re-enabling the field submits its current value once.
 
 ## 1.2.0 — 2026-11-21
 

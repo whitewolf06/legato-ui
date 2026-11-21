@@ -46,6 +46,27 @@ describe("form control native attribute routing", () => {
     expect(onFocus).toHaveBeenCalledTimes(1);
   });
 
+  it.each([false, true])("submits the current Select value only while enabled (initial disabled=%s)", async (disabled) => {
+    const form = document.createElement("form");
+    const wrapper = mount(WlSelect<string>, {
+      attachTo: form,
+      attrs: { name: "status" },
+      props: { options: ["ok", "pending"], modelValue: "ok", disabled }
+    });
+    const submittedStatuses = () => new FormData(form).getAll("status");
+    try {
+      expect(submittedStatuses()).toEqual(disabled ? [] : ["ok"]);
+      await wrapper.setProps({ disabled: true });
+      expect(submittedStatuses()).toEqual([]);
+      await wrapper.setProps({ modelValue: "pending" });
+      expect(submittedStatuses()).toEqual([]);
+      await wrapper.setProps({ disabled: false });
+      expect(submittedStatuses()).toEqual(["pending"]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("routes MultiSelect, Autocomplete and DatePicker attrs to their inputs", () => {
     const multi = mount(WlMultiSelect<string>, {
       global,
