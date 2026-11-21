@@ -58,8 +58,11 @@ defineSlots<{
   /** Panel content; scope: { item }. */
   panel?(props: { item: Item }): unknown; }>();
 
-const selectedKey = computed(() => props.items.find((item) => item.key === model.value && !item.disabled)?.key
-  ?? props.items.find((item) => !item.disabled)?.key ?? "");
+const selectedIndex = computed(() => {
+  const index = props.items.findIndex((item) => item.key === model.value && !item.disabled);
+  return index >= 0 ? index : props.items.findIndex((item) => !item.disabled);
+});
+const selectedKey = computed(() => props.items[selectedIndex.value]?.key ?? "");
 const visited = shallowRef(new Set<Item["key"]>());
 watch(selectedKey, (key) => {
   if (key && !visited.value.has(key)) visited.value = new Set([...visited.value, key]);
@@ -95,8 +98,9 @@ const { active, tabIndex, onKeydown: navigate } = useWlRovingFocus({
   orientation: () => props.orientation,
   focus: (index) => buttons.value[index]?.focus()
 });
-watch(selectedKey, (key) => {
-  active.value = props.items.findIndex((item) => item.key === key);
+// The selected tab can move, or a different tab can become selected at the same index.
+watch([selectedIndex, selectedKey], ([index]) => {
+  active.value = index;
 }, { immediate: true });
 function onKeydown(event: KeyboardEvent, index: number): void {
   const arrows = props.orientation === "horizontal" ? ["ArrowLeft", "ArrowRight"] : ["ArrowUp", "ArrowDown"];

@@ -49,3 +49,38 @@ describe("Tabs ID relationships", () => {
     } finally { wrapper.unmount(); }
   });
 });
+
+describe("Tabs keyboard entry after item changes", () => {
+  const alpha = { key: "a", label: "Alpha" };
+  const beta = { key: "b", label: "Beta" };
+  const extra = { key: "c", label: "Extra" };
+  const disabled = { key: "d", label: "Disabled", disabled: true };
+
+  it.each([
+    { change: "a reorder", before: [alpha, beta], after: [beta, alpha] },
+    { change: "an insertion", before: [alpha, beta, disabled], after: [alpha, extra, beta, disabled] }
+  ])("keeps the selected tab as the only tab stop after $change", async ({ before, after }) => {
+    const outside = document.createElement("button");
+    document.body.append(outside);
+    const wrapper = mount(WlTabs, { attachTo: document.body, props: { items: before, modelValue: "b" } });
+    try {
+      outside.focus();
+      await wrapper.setProps({ items: after });
+      expect(document.activeElement).toBe(outside);
+      expect(wrapper.emitted("update:modelValue")).toBeUndefined();
+      const selected = wrapper.get<HTMLElement>('[role="tab"][aria-selected="true"]');
+      expect(selected.text()).toBe("Beta");
+      expect(wrapper.findAll('[role="tab"][tabindex="0"]').map((tab) => tab.text())).toEqual(["Beta"]);
+
+      selected.element.focus();
+      await selected.trigger("keydown", { key: "ArrowRight" });
+      const next = wrapper.get('[role="tab"][aria-selected="true"]');
+      expect(next.text()).toBe("Alpha");
+      expect(document.activeElement).toBe(next.element);
+      expect(wrapper.emitted("update:modelValue")).toEqual([["a"]]);
+    } finally {
+      wrapper.unmount();
+      outside.remove();
+    }
+  });
+});
