@@ -235,5 +235,10 @@
   "changelog.customThemeGuide": "Expand the customization guide and custom-theme starter with primary action states, links, focus, selection and scoped brand layers.",
   "changelog.applyThemeDraft": "Apply a draft palette across the Playground, restore it after reload and undo it from any page.",
   "changelog.duettoHome": "Update the Legato and Legato Dark homepages with the Duetto arch on paper, wider section spacing, unframed metrics and navigation, and compact project cards with diagonal corner accents. The browser tab shows a white script L on a rounded indigo square.",
-  "changelog.alignedHeader": "Align the Playground header with page content across all six sections and fix a WebKit resize error when navigating between them."
+  "changelog.alignedHeader": "Align the Playground header with page content across all six sections and fix a WebKit resize error when navigating between them.",
+  "changelog.fieldHydrationIds": "Keep each `WlField` label linked to its input when sibling `Suspense` branches hydrate in a different order. Replacing an input or inserting another field during hydration preserves unique control IDs.",
+  "changelog.disabledSelectSubmission": "Omit disabled `WlSelect` fields from native form submissions. Re-enabling the field submits its current value once.",
+  "changelog.reorderedTabFocus": "Keep the selected `WlTabs` tab in the Tab order when tabs are reordered or new tabs are inserted before it.",
+  "changelog.numberInputDecimalStep": "Stepping `WlNumberInput` from `0.2` by `0.1` now displays and emits `0.3` without requiring an explicit `precision`. Stepping back restores `0.2`.",
+  "changelog.nestedThemeTextRendering": "Full themes from `createWlTheme` now apply their own `text-rendering` setting when nested inside another theme."
 }
