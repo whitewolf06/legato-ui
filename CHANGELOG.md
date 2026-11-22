@@ -13,6 +13,7 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 - Omit disabled `WlSelect` fields from native form submissions. Re-enabling the field submits its current value once.
 - Keep the selected `WlTabs` tab in the Tab order when tabs are reordered or new tabs are inserted before it.
 - Stepping `WlNumberInput` from `0.2` by `0.1` now displays and emits `0.3` without requiring an explicit `precision`. Stepping back restores `0.2`.
+- Full themes from `createWlTheme` now apply their own `text-rendering` setting when nested inside another theme.
 
 ## 1.2.0 — 2026-11-21
 

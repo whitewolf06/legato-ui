@@ -118,6 +118,7 @@ export function createWlTheme(input: WlThemeConfig): WlThemeResult {
     "@layer wl.tokens {",
     `  ${selector} {`,
     `    color-scheme: ${theme.colorScheme};`,
+    ...(config.mode === "full" ? ["    text-rendering: var(--wl-type-text-rendering);"] : []),
     ...tokens.map((token) => {
       const value = overrides[token.name] ?? definitions.get(token.name)!.themes?.[config.baseTheme] ?? token.value;
       return `    ${token.name}: ${value};`;
