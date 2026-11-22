@@ -17,6 +17,8 @@ The contract includes props and requiredness, event payloads, slots, v-model,
 exposed methods, imports/exports, CSS classes, data attributes, tokens and PT
 sections. After a build, `pnpm verify:compatibility` selects the latest stable
 snapshot, compares its public contract and compiles its frozen Vue consumer.
+When the fixture includes an ESM consumer, the checker also type-checks that
+file and runs it in Node against the package exports.
 Additions are allowed; removal or narrowing blocks CI unless an exact,
 version-scoped migration policy permits the reviewed transition.
 
@@ -29,10 +31,11 @@ package paths remain strict. CI checks policy/consumer hashes and negative cases
 Later changes must not inherit a compatibility exception automatically; a
 migration note alone does not disable the gate.
 
-The [1.1.0 API/consumer snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.1.0/README.md)
-uses the published declarations and the source inventory from the release tag.
-Its consumer extends the [1.0.0 fixture](../../packages/ui-kit/tests/fixtures/compatibility-1.0.0/README.md)
-with a readonly ISO-date list and a predicate passed to `WlCalendar.disabledDates`.
+The 1.2.0 snapshot carries forward the 1.1.0 Calendar cases under the
+`legato-ui` package name. Its ESM consumer calls the parser and generator
+through `legato-ui/theme`. Later captures inherit both consumers.
+[1.2.0 snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.2.0/README.md) · [1.1.0 snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.1.0/README.md)
+
 `node scripts/check-compatibility.mjs --help` describes snapshot
 generation. Preserve existing fixtures and review the result rather than
 updating a baseline just to pass.

@@ -34,6 +34,9 @@ proposals, not remaining prerequisites for the already published 1.0.0.
 - The [1.1.0 API/consumer snapshot](packages/ui-kit/tests/fixtures/compatibility-1.1.0/README.md)
   is recorded from the published archive. Its frozen consumer covers both forms
   of `WlCalendar.disabledDates`.
+- The [1.2.0 API/consumer snapshot](packages/ui-kit/tests/fixtures/compatibility-1.2.0/README.md)
+  checks the renamed package and the published `legato-ui/theme` entry point
+  in TypeScript and Node.
 - Complete the [manual accessibility protocol](docs/maintainers/manual-accessibility.md)
   when the required devices and screen readers are available. The accepted gap
   remains visible until there is dated evidence.
