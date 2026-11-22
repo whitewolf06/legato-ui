@@ -14,6 +14,59 @@ describe("WlNumberInput", () => {
     expect(wrapper.emitted("update:modelValue")?.[1]).toEqual([3]);
   });
 
+  it.each([
+    { start: 0.2, step: 0.1, next: 0.3 },
+    { start: 0.25, step: 0.1, next: 0.35 },
+    { start: -0.3, step: 0.1, next: -0.2 },
+    { start: 0.1234567890123456, step: 0.1, next: 0.2234567890123456 },
+    { start: 1.2e-200, step: 1e-201, next: 1.3e-200 }
+  ])("steps from $start to $next and back with a decimal step of $step", async ({ start, step, next }) => {
+    const wrapper = mount(WlNumberInput, { props: { modelValue: start, step, min: -1 } });
+    try {
+      const input = wrapper.get<HTMLInputElement>('[role="spinbutton"]');
+      await wrapper.get('[aria-label="Increase"]').trigger("click");
+      expect({ model: wrapper.emitted("update:modelValue"), text: input.element.value })
+        .toEqual({ model: [[next]], text: String(next) });
+
+      await wrapper.setProps({ modelValue: next });
+      await input.trigger("keydown", { key: "ArrowDown" });
+      expect({ model: wrapper.emitted("update:modelValue"), text: input.element.value })
+        .toEqual({ model: [[next], [start]], text: String(start) });
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("clamps decimal steps to off-step bounds and emits each bound once", async () => {
+    const wrapper = mount(WlNumberInput, { props: { modelValue: 0.2, step: 0.1, min: 0.18, max: 0.25 } });
+    try {
+      const input = wrapper.get<HTMLInputElement>('[role="spinbutton"]');
+      await input.trigger("keydown", { key: "ArrowUp" });
+      expect(input.element.value).toBe("0.25");
+      await wrapper.setProps({ modelValue: 0.25 });
+      await input.trigger("keydown", { key: "ArrowUp" });
+      const decrease = wrapper.get('[aria-label="Decrease"]');
+      await decrease.trigger("click");
+      expect(input.element.value).toBe("0.18");
+      await wrapper.setProps({ modelValue: 0.18 });
+      await decrease.trigger("click");
+      expect(wrapper.emitted("update:modelValue")).toEqual([[0.25], [0.18]]);
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
+  it("uses the configured precision when a step falls halfway between two rounded values", async () => {
+    const wrapper = mount(WlNumberInput, { props: { modelValue: 0.1, step: 0.05, precision: 1, locale: "en" } });
+    try {
+      await wrapper.get('[aria-label="Increase"]').trigger("click");
+      expect(wrapper.emitted("update:modelValue")).toEqual([[0.2]]);
+      expect(wrapper.get<HTMLInputElement>("input").element.value).toBe("0.2");
+    } finally {
+      wrapper.unmount();
+    }
+  });
+
   it("clamps at min/max and does not re-emit the same value", async () => {
     const wrapper = mount(WlNumberInput, { props: { modelValue: 10, min: 0, max: 10 } });
     await wrapper.find('[aria-label="Increase"]').trigger("click");

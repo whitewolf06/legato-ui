@@ -24,3 +24,21 @@ export function roundToStep(value: number, step: number, min = 0): number {
   const result = min + Math.round((finiteOr(value, min) - min) / increment) * increment;
   return Number.isFinite(result) ? Number(result.toPrecision(15)) : finiteOr(value, min);
 }
+
+function decimalParts(value: number): { coefficient: bigint; exponent: number } {
+  const [mantissa = "", power = "0"] = String(value).split("e");
+  const [whole = "", fraction = ""] = mantissa.split(".");
+  return { coefficient: BigInt(whole + fraction), exponent: Number(power) - fraction.length };
+}
+
+/** Align the decimal operands so only the final sum is converted back to a number. */
+export function addDecimalStep(value: number, step: number): number {
+  const sum = value + step;
+  if (!Number.isFinite(sum) || (Number.isInteger(value) && Number.isInteger(step))) return sum;
+  const current = decimalParts(value);
+  const increment = decimalParts(step);
+  const exponent = Math.min(current.exponent, increment.exponent);
+  const coefficient = current.coefficient * 10n ** BigInt(current.exponent - exponent)
+    + increment.coefficient * 10n ** BigInt(increment.exponent - exponent);
+  return Number(`${coefficient}e${exponent}`);
+}
