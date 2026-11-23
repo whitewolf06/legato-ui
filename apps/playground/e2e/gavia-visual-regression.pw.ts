@@ -2,7 +2,7 @@ import { expect, type Locator, type Page, test } from "@playwright/test";
 import { russianPlaygroundUrl } from "./playground-url";
 import { chooseDropdownOption } from "./select-helpers";
 
-function gaviaUrl(baseURL: string | undefined, view: string, theme: string): string {
+function playgroundViewUrl(baseURL: string | undefined, view: string, theme: string): string {
   const url = new URL(baseURL ?? "http://127.0.0.1:4173/");
   url.search = new URLSearchParams({ view, theme }).toString();
   return url.href;
@@ -105,7 +105,7 @@ async function captureOpenComponent(page: Page, preview: Locator, component: str
 
 for (const theme of ["gavia", "gavia-dark"]) {
   test(`${theme}: home hero, installation grid and project panels`, async ({ page, baseURL }) => {
-    await page.goto(russianPlaygroundUrl(gaviaUrl(baseURL, "home", theme)), { waitUntil: "domcontentloaded" });
+    await page.goto(russianPlaygroundUrl(playgroundViewUrl(baseURL, "home", theme)), { waitUntil: "domcontentloaded" });
     const home = page.getByTestId("home-page");
     await expect(home).toBeVisible();
     await readyForDrawing(page, theme);
@@ -121,7 +121,7 @@ for (const theme of ["gavia", "gavia-dark"]) {
   });
 
   test(`${theme}: Cyrillic, Latin, numeral spacing and all six weights`, async ({ page, baseURL }) => {
-    await page.goto(russianPlaygroundUrl(gaviaUrl(baseURL, "font", theme)), { waitUntil: "domcontentloaded" });
+    await page.goto(russianPlaygroundUrl(playgroundViewUrl(baseURL, "font", theme)), { waitUntil: "domcontentloaded" });
     const font = page.getByTestId("font-page");
     await expect(font).toBeVisible();
     await readyForDrawing(page, theme);
@@ -133,7 +133,7 @@ for (const theme of ["gavia", "gavia-dark"]) {
   });
 
   test(`${theme}: form, selected control and dialog with actual font`, async ({ page, baseURL }) => {
-    await page.goto(russianPlaygroundUrl(gaviaUrl(baseURL, "system", theme)), { waitUntil: "domcontentloaded" });
+    await page.goto(russianPlaygroundUrl(playgroundViewUrl(baseURL, "system", theme)), { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: "Дизайн-система" })).toBeVisible();
     await readyForDrawing(page, theme);
     await prepareSectionCrops(page);
@@ -153,5 +153,31 @@ for (const theme of ["gavia", "gavia-dark"]) {
       await page.keyboard.press("Escape");
       await expect(page.locator(".wl-select-overlay, .wl-dialog")).toHaveCount(0);
     }
+  });
+}
+
+for (const theme of ["legato", "legato-dark"]) {
+  test(`${theme}: installation and profile form in the default typeface @windows`, async ({ page, baseURL }) => {
+    await page.goto(russianPlaygroundUrl(playgroundViewUrl(baseURL, "home", theme)), { waitUntil: "domcontentloaded" });
+    await expect(page.locator("html")).toHaveAttribute("data-wl-theme", theme);
+    await expect(page.locator("body")).toHaveCSS("font-family", /Legato Sans Core/);
+    const faces = await page.evaluate(async () => {
+      const loaded = await document.fonts.load('400 16px "Legato Sans Core"', "Типографика Legato");
+      await document.fonts.ready;
+      return loaded.length;
+    });
+    expect(faces).toBeGreaterThan(0);
+    await prepareSectionCrops(page);
+    await capture(page.getByTestId("home-page").locator(".home-onboarding"), `${theme}-installation.png`);
+
+    await page.goto(russianPlaygroundUrl(playgroundViewUrl(baseURL, "system", theme)), { waitUntil: "domcontentloaded" });
+    await page.locator('[data-testid="ds-recipes"] [data-recipe="ProfileForm"]').first().press("Enter");
+    const recipe = page.getByTestId("ds-recipe-preview");
+    await expect(recipe).toHaveAttribute("data-recipe", "ProfileForm");
+    await expect(recipe.locator("#recipe-profile-name")).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
+    await prepareSectionCrops(page);
+    await page.mouse.move(0, 0);
+    await capture(recipe, `${theme}-profile-form.png`);
   });
 }

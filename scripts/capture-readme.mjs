@@ -14,7 +14,7 @@ const browser = await chromium.launch({ channel: process.env.GAVIA_E2E_CHROMIUM_
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 1000 }, reducedMotion: "reduce" });
   const screenshots = [];
-  for (const theme of ["gavia", "gavia-dark"]) {
+  for (const theme of ["legato", "legato-dark"]) {
     const url = new URL(base);
     url.search = new URLSearchParams({ view: "system", lang: "en", theme }).toString();
     await page.goto(url.href, { waitUntil: "domcontentloaded" });
@@ -24,8 +24,10 @@ try {
     await preview.locator("#recipe-profile-email").fill("alex@example.com");
     assert.equal(await page.locator("html").getAttribute("data-wl-theme"), theme);
     await page.evaluate(async () => {
-      await document.fonts.load('400 14px "Gavia Sans"');
-      await document.fonts.load('600 14px "Gavia Sans"');
+      for (const weight of [400, 600]) {
+        const faces = await document.fonts.load(`${weight} 14px "Legato Sans Core"`, "Alex Morgan");
+        if (!faces.length) throw new Error("Missing Legato Sans Core");
+      }
       await document.fonts.ready;
     });
     await preview.evaluate((element, currentTheme) => {
@@ -35,7 +37,7 @@ try {
       panel.id = "readme-preview";
       panel.style.cssText = "position:fixed;left:0;top:0;z-index:10000;box-sizing:border-box;width:416px;padding:24px;display:flex;flex-direction:column;gap:16px;background:var(--wl-bg);color:var(--wl-text);border:1px solid var(--wl-border);border-radius:12px";
       const label = document.createElement("strong");
-      label.textContent = currentTheme === "gavia" ? "Gavia" : "Gavia Dark";
+      label.textContent = currentTheme === "legato" ? "Legato" : "Legato Dark";
       panel.append(label);
       const selectors = ['[data-wl="page-header"]', "#recipe-profile-name", "#recipe-profile-email", '[data-wl="switch"]', 'button[type="submit"]'];
       for (const selector of selectors) {
@@ -75,7 +77,7 @@ try {
   writeFileSync(path, output);
   mkdirSync(resolve(root, ".tmp/readme-preview"), { recursive: true });
   writeFileSync(resolve(root, ".tmp/readme-preview/evidence.json"), JSON.stringify({
-    url: base.href, themes: ["gavia", "gavia-dark"], components: ["WlPageHeader", "WlField", "WlInput", "WlSwitch", "WlButton"],
+    url: base.href, themes: ["legato", "legato-dark"], components: ["WlPageHeader", "WlField", "WlInput", "WlSwitch", "WlButton"],
     width: composed.width, height: composed.height, bytes: output.byteLength, capturedAt: new Date().toISOString()
   }, null, 2) + "\n");
   console.log(`Captured ${path}: ${composed.width}×${composed.height}, ${output.byteLength} bytes; review before committing.`);
