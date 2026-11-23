@@ -81,10 +81,18 @@ export async function checkPackedBrowser(consumerDir, artifactLabel = "consumer"
     assert.match(await readiness.text(), /Packed Gavia consumer/);
     browserServer = await chromium.launchServer({ channel: process.env.GAVIA_E2E_CHROMIUM_CHANNEL, timeout: 30_000 });
     browser = await chromium.connect(browserServer.wsEndpoint(), { timeout: 10_000 });
+    // Each page owns a fresh context. Open all three before the first app is loaded
+    // so Chromium can tear down each exercised context independently on Windows.
+    stage = "create isolated consumer pages";
+    const [desktopPage, mobilePage, ssrPage] = await withinDeadline(Promise.all([
+      browser.newPage({ viewport: { width: 1440, height: 900 } }),
+      browser.newPage({ viewport: { width: 390, height: 844 } }),
+      browser.newPage()
+    ]), 10_000, "Create isolated consumer pages");
     const evidence = [];
-    for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    for (const page of [desktopPage, mobilePage]) {
+      const viewport = page.viewportSize();
       stage = "consumer viewport=" + viewport.width;
-      const page = await withinDeadline(browser.newPage({ viewport }), 10_000, "Create consumer page");
       activePage = page;
       const errors = [];
       failures.push({ stage, errors });
@@ -152,7 +160,7 @@ export async function checkPackedBrowser(consumerDir, artifactLabel = "consumer"
     }
 
     stage = "SSR hydration";
-    const page = await withinDeadline(browser.newPage(), 10_000, "Create hydration page");
+    const page = ssrPage;
     page.setDefaultTimeout(5_000);
     activePage = page;
     const errors = [];
