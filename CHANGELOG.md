@@ -7,7 +7,7 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 
 ## Unreleased
 
-## 1.2.1
+## 1.2.1 — 2026-11-23
 
 ### Fixed
 
