@@ -1,6 +1,6 @@
 # Legato UI roadmap
 
-The latest published release is [Legato UI 1.2.0](docs/maintainers/releases.md).
+The latest published release is [Legato UI 1.2.1](docs/maintainers/releases.md).
 For the package rename and upgrade steps, see the [1.2.0 migration guide](docs/migration-1.2.0.md).
 
 ## Release history
