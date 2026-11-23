@@ -40,10 +40,9 @@ proposals, not remaining prerequisites for the already published 1.0.0.
 - Complete the [manual accessibility protocol](docs/maintainers/manual-accessibility.md)
   when the required devices and screen readers are available. The accepted gap
   remains visible until there is dated evidence.
-- Record post-publication starter acceptance from the registry, or an explicit
-  owner disposition. Exact-archive CI and matching published integrity are
-  already recorded; a separate registry-install record for all three starters
-  has not been retained.
+- All three starters were installed from the public registry and built with
+  `legato-ui@1.2.1` on 2026-11-23. The [release record](docs/maintainers/releases.md#starter-acceptance-for-121)
+  includes the browser checks and the Nuxt SSR result.
 - External announcements remain optional, unsent
   [drafts](docs/maintainers/release-announcements.md). Publication of the package
   does not authorize community posts or repository metadata changes.
