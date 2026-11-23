@@ -548,6 +548,42 @@
   --wl-display-flex: flex;
   --wl-layout-chip-list-display: var(--wl-display-flex);
   --wl-multiselect-chips-display: var(--wl-type-component-inherit);
+  --wl-component-small-font-size: var(--wl-type-component-inherit);
+  --wl-component-label-font-size: var(--wl-type-component-inherit);
+  --wl-component-control-font-size: var(--wl-type-component-inherit);
+  --wl-component-body-font-size: var(--wl-type-component-inherit);
+  --wl-component-subheading-font-size: var(--wl-type-component-inherit);
+  --wl-component-heading-font-size: var(--wl-type-component-inherit);
+  --wl-component-title-font-size: var(--wl-type-component-inherit);
+  --wl-space-1: 1px;
+  --wl-space-unit: var(--wl-space-1);
+  --wl-dimension-choice-measure: 380px;
+  --wl-layout-choice-measure: var(--wl-dimension-choice-measure);
+  --wl-checkline-max-width: var(--wl-layout-choice-measure);
+  --wl-dimension-compact-measure: 320px;
+  --wl-layout-compact-measure: var(--wl-dimension-compact-measure);
+  --wl-progress-max-width: var(--wl-layout-compact-measure);
+  --wl-empty-description-max-width: var(--wl-layout-compact-measure);
+  --wl-dimension-steps-measure: 100%;
+  --wl-layout-steps-measure: var(--wl-dimension-steps-measure);
+  --wl-steps-max-width: var(--wl-layout-steps-measure);
+  --wl-dimension-swatches-measure: 240px;
+  --wl-layout-swatches-measure: var(--wl-dimension-swatches-measure);
+  --wl-color-picker-max-width: var(--wl-layout-swatches-measure);
+  --wl-calendar-max-width: var(--wl-layout-choice-measure);
+  --wl-dimension-date-hint-measure: 238px;
+  --wl-layout-date-hint-measure: var(--wl-dimension-date-hint-measure);
+  --wl-date-picker-hint-max-width: var(--wl-layout-date-hint-measure);
+  --wl-dimension-file-name-measure: 260px;
+  --wl-layout-file-name-measure: var(--wl-dimension-file-name-measure);
+  --wl-upload-error-name-max-width: var(--wl-layout-file-name-measure);
+  --wl-dimension-header-measure: 820px;
+  --wl-layout-header-measure: var(--wl-dimension-header-measure);
+  --wl-page-header-content-max-width: var(--wl-layout-header-measure);
+  --wl-dimension-description-measure: 720px;
+  --wl-layout-description-measure: var(--wl-dimension-description-measure);
+  --wl-page-header-description-max-width: var(--wl-layout-description-measure);
+  --wl-tooltip-max-width: var(--wl-layout-compact-measure);
 }
 @media (prefers-reduced-motion: reduce) {
 [data-wl-theme="newspaper"] {

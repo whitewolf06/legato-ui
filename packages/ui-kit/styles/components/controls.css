@@ -64,7 +64,7 @@
   .wl-tags-input__remove:disabled { cursor: not-allowed; }
   .wl-tooltip-component__trigger { display: inline-flex; align-items: center; max-width: 100%; }
   .wl-tooltip-component__trigger:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; border-radius: var(--wl-radius-sm); }
-  .wl-tooltip-component { pointer-events: auto; max-width: min(320px, calc(100vw - 8px)); }
+  .wl-tooltip-component { pointer-events: auto; max-width: min(var(--wl-tooltip-max-width), calc(100vw - var(--wl-space-sm))); }
   .wl-tooltip-component :where(.wl-tooltip__text) { white-space: normal; overflow-wrap: anywhere; }
   .wl-tooltip-component-motion-enter-active, .wl-tooltip-component-motion-leave-active { transition: opacity var(--wl-dur-3) var(--wl-ease), transform var(--wl-dur-3) var(--wl-ease); }
   .wl-tooltip-component-motion-enter-from, .wl-tooltip-component-motion-leave-to { opacity: 0; transform: translateY(4px); }

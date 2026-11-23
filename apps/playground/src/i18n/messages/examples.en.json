@@ -1083,5 +1083,6 @@
   "examples.sliderMarked": "Slider with marks",
   "examples.sliderMarkedValue": "Value:",
   "examples.sliderRange": "Range with marks",
-  "examples.sliderRangeValue": "Range:"
+  "examples.sliderRangeValue": "Range:",
+  "examples.componentSizeRoles": "Field labels follow the label role, hints use small and tab labels use control. Use rem for a role that should follow the reader's font size."
 }

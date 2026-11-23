@@ -4979,6 +4979,294 @@ export const wlDesignTokens = [
     "category": "layout",
     "description": "Layout of selected chips in MultiSelect. The semantic scale enables wrapping.",
     "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-small-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of small text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-label-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of label text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-control-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of control text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-body-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of body text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-subheading-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of subheading text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-heading-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of heading text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-component-title-font-size",
+    "layer": "component",
+    "type": "string",
+    "category": "typography",
+    "description": "Size of title text in components. The default uses the component's original size.",
+    "value": "var(--wl-type-component-inherit)"
+  },
+  {
+    "name": "--wl-space-1",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "spacing",
+    "description": "Base length for spacing between the main scale steps.",
+    "value": "1px"
+  },
+  {
+    "name": "--wl-space-unit",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "spacing",
+    "description": "Unit for intermediate component padding, margins and gaps.",
+    "value": "var(--wl-space-1)"
+  },
+  {
+    "name": "--wl-dimension-choice-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default choice measure.",
+    "value": "380px"
+  },
+  {
+    "name": "--wl-layout-choice-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for choice layouts.",
+    "value": "var(--wl-dimension-choice-measure)"
+  },
+  {
+    "name": "--wl-checkline-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Checkline label and control width limit.",
+    "value": "var(--wl-layout-choice-measure)"
+  },
+  {
+    "name": "--wl-dimension-compact-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default compact measure.",
+    "value": "320px"
+  },
+  {
+    "name": "--wl-layout-compact-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for compact layouts.",
+    "value": "var(--wl-dimension-compact-measure)"
+  },
+  {
+    "name": "--wl-progress-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Progress track width limit.",
+    "value": "var(--wl-layout-compact-measure)"
+  },
+  {
+    "name": "--wl-empty-description-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Empty state description width limit.",
+    "value": "var(--wl-layout-compact-measure)"
+  },
+  {
+    "name": "--wl-dimension-steps-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default steps measure.",
+    "value": "100%"
+  },
+  {
+    "name": "--wl-layout-steps-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for steps layouts.",
+    "value": "var(--wl-dimension-steps-measure)"
+  },
+  {
+    "name": "--wl-steps-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Step navigation width limit.",
+    "value": "var(--wl-layout-steps-measure)"
+  },
+  {
+    "name": "--wl-dimension-swatches-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default swatches measure.",
+    "value": "240px"
+  },
+  {
+    "name": "--wl-layout-swatches-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for swatches layouts.",
+    "value": "var(--wl-dimension-swatches-measure)"
+  },
+  {
+    "name": "--wl-color-picker-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Color swatch grid width limit.",
+    "value": "var(--wl-layout-swatches-measure)"
+  },
+  {
+    "name": "--wl-calendar-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Month grid width limit.",
+    "value": "var(--wl-layout-choice-measure)"
+  },
+  {
+    "name": "--wl-dimension-date-hint-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default date-hint measure.",
+    "value": "238px"
+  },
+  {
+    "name": "--wl-layout-date-hint-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for date-hint layouts.",
+    "value": "var(--wl-dimension-date-hint-measure)"
+  },
+  {
+    "name": "--wl-date-picker-hint-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Date range hint width limit.",
+    "value": "var(--wl-layout-date-hint-measure)"
+  },
+  {
+    "name": "--wl-dimension-file-name-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default file-name measure.",
+    "value": "260px"
+  },
+  {
+    "name": "--wl-layout-file-name-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for file-name layouts.",
+    "value": "var(--wl-dimension-file-name-measure)"
+  },
+  {
+    "name": "--wl-upload-error-name-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Filename in upload errors width limit.",
+    "value": "var(--wl-layout-file-name-measure)"
+  },
+  {
+    "name": "--wl-dimension-header-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default header measure.",
+    "value": "820px"
+  },
+  {
+    "name": "--wl-layout-header-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for header layouts.",
+    "value": "var(--wl-dimension-header-measure)"
+  },
+  {
+    "name": "--wl-page-header-content-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Page header content width limit.",
+    "value": "var(--wl-layout-header-measure)"
+  },
+  {
+    "name": "--wl-dimension-description-measure",
+    "layer": "foundation",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Default description measure.",
+    "value": "720px"
+  },
+  {
+    "name": "--wl-layout-description-measure",
+    "layer": "semantic",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Width limit for description layouts.",
+    "value": "var(--wl-dimension-description-measure)"
+  },
+  {
+    "name": "--wl-page-header-description-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Page header description width limit.",
+    "value": "var(--wl-layout-description-measure)"
+  },
+  {
+    "name": "--wl-tooltip-max-width",
+    "layer": "component",
+    "type": "dimension",
+    "category": "layout",
+    "description": "Tooltip text width limit.",
+    "value": "var(--wl-layout-compact-measure)"
   }
 ] as const satisfies readonly WlDesignTokenDefinition[];
 export type WlDesignTokenName = (typeof wlDesignTokens)[number]["name"];

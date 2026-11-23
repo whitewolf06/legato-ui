@@ -36,7 +36,7 @@
     display: grid;
     gap: 0.25rem;
     color: var(--wl-text);
-    font-size: 0.8125rem;
+    font-size: var(--wl-component-label-font-size, 0.8125rem);
   }
 
   .wl-color-picker__channel-input {

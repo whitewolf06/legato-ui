@@ -187,15 +187,16 @@ test("selection typography stays local to the section and its teleported panels"
     await control.press("Escape");
   }
   const autocomplete = fixture.getByRole("combobox", { name: "Neighbouring autocomplete" });
+  await autocomplete.fill("Alpha");
+  const suggestions = page.getByRole("listbox");
+  await expect(suggestions).toBeVisible();
+  expect(await fontSizes(suggestions.getByRole("option").first())).toEqual(["13.5px"]);
   await page.locator("html").evaluate((root) => {
     root.classList.add("wl-type-scale");
     root.style.setProperty("--wl-type-control-size", "20px");
     root.style.setProperty("--wl-type-small-size", "16px");
   });
-  await autocomplete.fill("Alpha");
-  const suggestions = page.getByRole("listbox");
-  await expect(suggestions).toBeVisible();
-  expect(await fontSizes(suggestions.getByRole("option").first())).toEqual(["13.5px"]);
+  await expect(suggestions.getByRole("option").first()).toHaveCSS("font-size", "20px");
   await fixture.getByLabel("Local scale").uncheck();
   await group.evaluate((el) => {
     el.setAttribute("data-wl-theme", "newspaper");
@@ -209,7 +210,7 @@ test("selection typography stays local to the section and its teleported panels"
     await autocomplete.press("Escape");
     await fixture.getByLabel("Options", { exact: true }).selectOption(state);
     await autocomplete.fill(state);
-    await expect(suggestions.locator(".wl-select__empty")).toHaveCSS("font-size", "13px");
+    await expect(suggestions.locator(".wl-select__empty")).toHaveCSS("font-size", "16px");
   }
 });
 

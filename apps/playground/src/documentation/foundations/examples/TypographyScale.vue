@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../../i18n";
 const { t } = usePlaygroundI18n();
-import { WlAccordion, WlAlert, WlCard, WlCheckbox, WlMultiSelect, WlSegmented, WlSelect, wlTypography } from "legato-ui";
+import { WlAccordion, WlAlert, WlCard, WlCheckbox, WlField, WlInput, WlMultiSelect, WlSegmented, WlSelect, wlTypography } from "legato-ui";
 import { computed, ref } from "vue";
 const semantic = ref(false);
 const choice = ref<"draft" | "published" | null>("draft");
 const status = ref<"draft" | "published" | null>(null);
 const statuses = ref<("draft" | "published")[]>(["draft"]);
 const scale = {
-  "--wl-type-body-size": "18px", "--wl-type-body-line-height": "28px",
+  "--wl-type-body-size": "1.125rem", "--wl-type-body-line-height": "28px",
   "--wl-type-subheading-size": "22px", "--wl-type-subheading-line-height": "30px",
-  "--wl-type-control-size": "18px", "--wl-type-small-size": "14px",
+  "--wl-type-control-size": "1.125rem", "--wl-type-small-size": ".875rem",
   "--wl-type-small-line-height": "22px", "--wl-type-label-line-height": "26px"
 };
 const selectPanel = computed(() => semantic.value ? { overlay: { class: "wl-type-scale", style: scale } } : undefined);
@@ -73,6 +73,9 @@ const roleText = {
       data-space="md"
       data-testid="semantic-component-example"
     >
+      <WlField v-slot="field" :label="t('examples.selectScaleStatus')" :hint="t('examples.componentSizeRoles')">
+        <WlInput :id="field.id" :aria-describedby="field.ariaDescribedby" />
+      </WlField>
       <WlCard>
         <template #title>{{ t("examples.team_guide_0016") }}</template>
         <template #subtitle>{{ t("examples.updated_october_1_0023") }}</template>

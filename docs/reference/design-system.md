@@ -192,6 +192,42 @@ own spacing-scale contract.
 `--wl-text-3` remains for decorative details and should not carry essential
 instructions. Actual contrast depends on the surface behind the text.
 
+### Component text, spacing and width
+
+Import `legato-ui/styles/primitives.css` and put `wl-type-scale` on the theme
+root or on the section whose text should scale. Set the role on that same
+element. A value in `rem` follows the reader's root font size. A nested theme
+restores its own defaults. Apply the class and values to a teleported panel
+through its documented pass-through section when scoping a theme locally.
+
+| Role | Examples |
+| --- | --- |
+| `--wl-type-control-size` | Tabs, menu options, date choices and pagination buttons |
+| `--wl-type-label-size` | Field labels, checkboxes and table headers |
+| `--wl-type-small-size` | Hints, counts, navigation metadata and validation messages |
+| `--wl-type-body-size` | Table cells, dialog content and page descriptions |
+| `--wl-type-subheading-size`, `--wl-type-heading-size`, `--wl-type-title-size` | Dialog titles, statistics and page headers |
+
+Standard insets and gaps use the spacing scale. Intermediate distances such as
+a 10 px menu inset use `--wl-space-unit`, which defaults to 1 px. For example:
+
+```css
+.preferences.wl-type-scale {
+  --wl-type-control-size: 1.125rem;
+  --wl-type-small-size: .875rem;
+  --wl-space-md: 1rem;
+  --wl-space-unit: .0625rem;
+}
+```
+
+`wl-fluid` also removes the caps on checkboxes and radio labels, progress bars,
+calendars and swatch grids. Steps fill the container by default and accept a local
+`--wl-steps-max-width` for narrower navigation. A local `--wl-calendar-max-width` can set a
+specific limit. Text measures such as `--wl-page-header-description-max-width`
+accept lengths such as `60ch`. A tooltip always fits the viewport. Avatar
+initials fit the selected avatar diameter. Borders, focus outlines, icon gutters,
+slider travel and one-pixel alignment offsets keep their geometric dimensions.
+
 ## Spacing, grid and surfaces
 
 | `data-space` key | none | 2xs | xs | sm | md | lg | xl | 2xl | 3xl | 4xl |

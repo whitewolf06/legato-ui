@@ -1083,5 +1083,6 @@
   "examples.sliderMarked": "Слайдер с разметкой",
   "examples.sliderMarkedValue": "Значение:",
   "examples.sliderRange": "Диапазон с разметкой",
-  "examples.sliderRangeValue": "Диапазон:"
+  "examples.sliderRangeValue": "Диапазон:",
+  "examples.componentSizeRoles": "Для подписи поля используется роль label, для подсказки — small, для вкладки — control. Задайте размер роли в rem, чтобы текст учитывал размер шрифта в браузере."
 }
