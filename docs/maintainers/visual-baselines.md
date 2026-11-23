@@ -8,8 +8,11 @@ Playwright `toHaveScreenshot` rather than only taking screenshots. It compares s
 recipes, complex content, button/palette focus, invalid fields and open
 Select/Dialog/Drawer in Classic, Classic Dark and Newspaper on desktop/mobile.
 Separate Gavia and Gavia Dark baselines check real Gavia Sans, home,
-font page and open Select/Dialog. These five themes have saved PNGs. The Pages
-and accessibility suites also exercise Legato and Legato Dark on the running site.
+font page and open Select/Dialog. On Windows, Legato and Legato Dark also have
+desktop and mobile baselines for installation, the profile form, and open
+WlSelect and WlMultiSelect. The installation images show the public package
+name, published version and current token count. Check these values against
+the site when reviewing an image change.
 
 Baselines: `apps/playground/e2e/visual-baselines/`.
 Canonical environment: Windows + Chromium from pinned Playwright 1.58.2;
