@@ -15,8 +15,10 @@ breaking changes required a minor and a Breaking changes notice.
 
 The contract includes props and requiredness, event payloads, slots, v-model,
 exposed methods, imports/exports, CSS classes, data attributes, tokens and PT
-sections. After a build, `pnpm verify:compatibility` compares declarations with
-the immutable 1.0.0 snapshot. Earlier snapshots also remain preserved.
+sections. After a build, `pnpm verify:compatibility` selects the latest stable
+snapshot, compares its public contract and compiles its frozen Vue consumer.
+When the fixture includes an ESM consumer, the checker also type-checks that
+file and runs it in Node against the package exports.
 Additions are allowed; removal or narrowing blocks CI unless an exact,
 version-scoped migration policy permits the reviewed transition.
 
@@ -29,10 +31,12 @@ package paths remain strict. CI checks policy/consumer hashes and negative cases
 Later changes must not inherit a compatibility exception automatically; a
 migration note alone does not disable the gate.
 
-The immutable [1.0.0 API/consumer snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.0.0/README.md)
-was captured separately from the integrity-verified published archive at its
-exact release tag. Later versions use it without the historical 1.0 migration
-exception. `node scripts/check-compatibility.mjs --help` describes snapshot
+The 1.2.0 snapshot carries forward the 1.1.0 Calendar cases under the
+`legato-ui` package name. Its ESM consumer calls the parser and generator
+through `legato-ui/theme`. Later captures inherit both consumers.
+[1.2.0 snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.2.0/README.md) · [1.1.0 snapshot](../../packages/ui-kit/tests/fixtures/compatibility-1.1.0/README.md)
+
+`node scripts/check-compatibility.mjs --help` describes snapshot
 generation. Preserve existing fixtures and review the result rather than
 updating a baseline just to pass.
 

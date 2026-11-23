@@ -11,7 +11,7 @@ import type { WlDensity, WlSizeSm } from "../types";
 import { mergeWlAttrs, useWlLocale, useWlPt } from "../config";
 import { formatWlNumber } from "../utils/format";
 import { getWlControlProps, splitInputAttrs } from "../utils/inputAttrs";
-import { clamp as clampNumber, roundToStep } from "../utils/number";
+import { addDecimalStep, clamp as clampNumber, roundToStep } from "../utils/number";
 import { parseWlNumber } from "../utils/parseNumber";
 import WlIcon from "./WlIcon.vue";
 defineOptions({ inheritAttrs: false });
@@ -182,7 +182,8 @@ function bump(direction: 1 | -1): void {
   if (props.disabled || readonly.value)
     return;
   const value = Number.isFinite(model.value) ? model.value : clamp(model.value);
-  commit(value + direction * increment.value);
+  const step = direction * increment.value;
+  commit(precisionValue.value === undefined ? addDecimalStep(value, step) : value + step);
 }
 
 function commitDraft(): void {

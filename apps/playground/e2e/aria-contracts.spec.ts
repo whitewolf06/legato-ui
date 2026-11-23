@@ -1,5 +1,23 @@
 import { expect, test } from "@playwright/test";
 
+test("Tab enters the selected tab after the tabs change order", { tag: "@cross-browser" }, async ({ page }) => {
+  await page.goto("/e2e.html?review-tabs-order");
+  const fixture = page.getByRole("region", { name: "Tab order" });
+  const tabs = fixture.getByRole("tab");
+  const beta = fixture.getByRole("tab", { name: "Beta" });
+  const reverse = fixture.getByRole("button", { name: "Reverse tabs" });
+  await expect(tabs).toHaveText(["Alpha", "Beta"]);
+  await beta.click();
+  await expect(beta).toHaveAttribute("aria-selected", "true");
+
+  await reverse.press("Enter");
+  await expect(tabs).toHaveText(["Beta", "Alpha"]);
+  await expect(reverse).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(beta).toBeFocused();
+  await expect(beta).toHaveAttribute("aria-selected", "true");
+});
+
 // Authored contracts, not automatically accepted snapshots. Run and review with
 // the separately authorized production browser matrix before release.
 test("list and tab accessibility trees retain names and selection", { tag: "@cross-browser" }, async ({ page, baseURL }) => {

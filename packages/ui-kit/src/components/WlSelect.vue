@@ -244,6 +244,7 @@ function onKeydown(event: KeyboardEvent): void {
       v-if="attrGroups.inputAttrs.name"
       type="hidden"
       :name="String(attrGroups.inputAttrs.name)"
+      :disabled="disabled"
       :value="model == null ? '' : String(model)"
     />
   </div>

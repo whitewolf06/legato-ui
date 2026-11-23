@@ -14,6 +14,9 @@ initial hydration. Library-generated IDs are scoped to an application root;
 conditional changes before hydration can still change the rendered tree. Supply
 stable application IDs for fields or relationships that need an explicit name.
 Use `WlField` slot values to connect the actual input's ID and descriptions.
+`WlField` preserves that ID when sibling `Suspense` branches hydrate in a
+different order. If you call `useWlId()` directly, keep its calls in the same
+order on the server and client.
 
 Overlay opening, media-query behavior, focus and live announcements take effect
 in the browser. Consumer code must guard its own browser APIs. Server rendering

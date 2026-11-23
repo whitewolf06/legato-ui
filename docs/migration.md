@@ -4,6 +4,8 @@ Choose the section for the version or contract you are changing. Historical
 sections describe that release; they do not report current validation or a new
 publication. Stable public namespaces remain `Wl*`, `wl-*` and `--wl-*`.
 
+For the 1.2.1 patch, see [Upgrading from 1.2.0](migration-1.2.1.md).
+
 <a id="migration-1-2"></a>
 ## Upgrading from 1.1 to 1.2
 

@@ -1,5 +1,7 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { compileStyle } from "vue/compiler-sfc";
 import type { WlDesignTokenDefinition } from "../src/design-system/types";
 import { wlDesignThemes, wlDesignTokens } from "../src/design-system";
 import { createWlTheme, parseWlThemeConfig, type WlThemeConfig } from "../src/theme/index";
@@ -7,7 +9,32 @@ import { createWlTheme, parseWlThemeConfig, type WlThemeConfig } from "../src/th
 const basic: WlThemeConfig = { schemaVersion: 2, name: "brand", baseTheme: "gavia" };
 const tokens: readonly WlDesignTokenDefinition[] = wlDesignTokens;
 
+function themeDeclarations(css: string, selector: string): Record<string, string> {
+  const { errors, rawResult } = compileStyle({ source: css, filename: "theme.css", id: "theme" });
+  expect(errors).toEqual([]);
+  const declarations: Record<string, string> = {};
+  rawResult?.root.walkRules((rule) => {
+    const layer = rule.parent;
+    if (layer?.type !== "atrule" || layer.name !== "layer" || layer.params !== "wl.tokens") return;
+    if (!rule.selectors.includes(selector)) return;
+    for (const node of rule.nodes) {
+      if (node.type === "decl") declarations[node.prop] = node.value;
+    }
+  });
+  return declarations;
+}
+
 describe("public theme generation", () => {
+  it.each(wlDesignThemes)("matches the shipped $name text-rendering and token declarations in full mode", ({ name }) => {
+    const shippedCss = readFileSync(new URL(`../themes/${name}.css`, import.meta.url), "utf8");
+    const shipped = themeDeclarations(shippedCss, `[data-wl-theme="${name}"]`);
+    const full = createWlTheme({ ...basic, baseTheme: name, mode: "full" });
+    const generated = themeDeclarations(full.css, '[data-wl-theme="brand"]');
+    expect(shipped["text-rendering"]).toBe("var(--wl-type-text-rendering)");
+    expect(generated["text-rendering"]).toBe(shipped["text-rendering"]);
+    expect(generated).toEqual(shipped);
+  });
+
   it.each(wlDesignThemes)("preserves the complete $name base when no colors change", ({ name }) => {
     const result = createWlTheme({ ...basic, baseTheme: name });
     expect(result.overrides).toEqual({});

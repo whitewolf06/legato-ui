@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -271,6 +271,9 @@ async function main() {
       snapshot.declarationHashes[name] = createHash("sha256").update(contents).digest("hex");
     }
     writeFileSync(join(baselineDir, "consumer.vue"), consumer);
+    const previousRuntimeConsumer = join(previousBaselineDir, "consumer.mjs");
+    if (existsSync(previousRuntimeConsumer))
+      copyFileSync(previousRuntimeConsumer, join(baselineDir, "consumer.mjs"));
     writeFileSync(join(baselineDir, "contract.json"), `${JSON.stringify(snapshot, null, 2)}\n`);
     console.log(`Captured released ${snapshot.version}: ${snapshot.components.length} components, ${snapshot.tokens.length} tokens, ${snapshot.declarationExports.length} public declarations.`);
     return;
@@ -278,6 +281,8 @@ async function main() {
   if (args.length)
     throw new Error("Usage: node scripts/check-compatibility.mjs");
   const baseline = readJson(join(baselineDir, "contract.json"));
+  const runtimeConsumer = join(baselineDir, "consumer.mjs");
+  const hasRuntimeConsumer = existsSync(runtimeConsumer);
   const current = await inventory(repoRoot);
   const migration = loadMigrationPolicy(repoRoot, baselineDir, baseline, current.version);
   const errors = [];
@@ -329,9 +334,15 @@ async function main() {
     };
     const consumerCheck = (name, consumerPath) => {
       const config = {
-        compilerOptions: { target: "ES2022", module: "ESNext", moduleResolution: "Bundler", strict: true, noEmit: true, skipLibCheck: false, lib: ["ESNext", "DOM", "DOM.Iterable"], types: [], paths: { "gavia-ui": [join(kitDir, "dist/index.d.ts").replaceAll("\\", "/")] } },
+        compilerOptions: {
+          target: "ES2022", module: "ESNext", moduleResolution: "Bundler",
+          strict: true, noEmit: true, skipLibCheck: false,
+          allowJs: hasRuntimeConsumer, checkJs: hasRuntimeConsumer,
+          lib: ["ESNext", "DOM", "DOM.Iterable"], types: [],
+          paths: { "gavia-ui": [join(kitDir, "dist/index.d.ts").replaceAll("\\", "/")] }
+        },
         vueCompilerOptions: { strictTemplates: true, dataAttributes: ["data-*"] },
-        files: [consumerPath]
+        files: hasRuntimeConsumer ? [consumerPath, runtimeConsumer] : [consumerPath]
       };
       const configPath = join(temporary, `${name}.json`);
       writeFileSync(configPath, JSON.stringify(config));
@@ -372,6 +383,10 @@ async function main() {
   }
   if (errors.length)
     throw new Error(errors.join("\n"));
+  if (hasRuntimeConsumer) {
+    execFileSync(process.execPath, [runtimeConsumer], { cwd: kitDir, stdio: "inherit" });
+    console.log(`Released ${baseline.version} ESM consumer passed.`);
+  }
   const boundary = migration ? `Compatibility with ${baseline.version} after approved ${migration.targetMinor} migration passed` : `Compatibility with ${baseline.version} passed`;
   console.log(`${boundary}: ${baseline.components.length} components, public types/events/slots/models, ${baseline.classes.length} CSS classes, ${baseline.tokens.length} tokens, exports, data-wl and pt sections.`);
 }

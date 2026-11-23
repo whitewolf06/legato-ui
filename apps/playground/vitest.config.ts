@@ -10,7 +10,8 @@ export default defineConfig({
   test: {
     name: "playground",
     environment: "jsdom",
-    include: ["tests/**/*.test.ts"],
+    // Run the field hydration contract against the Playground's Vue 3.5 runtime too.
+    include: ["tests/**/*.test.ts", "../../packages/ui-kit/tests/contracts/field-async-hydration.test.ts"],
     setupFiles: ["tests/setup.ts"],
     maxWorkers: 4,
     // Preserve the existing fixture lifecycle while migrating the runner.

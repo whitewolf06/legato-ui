@@ -2,7 +2,7 @@
 import {
   useWlConfirm, useWlToast, WlAutocomplete, WlButton, WlCheckbox, WlCommandPalette, WlConfirmDialog, WlDatePicker,
   WlDialog, WlDrawer, WlField, WlMenu, type WlMenuExpose, WlMultiSelect, WlPopover,
-  type WlPopoverExpose, WlSelect, WlTable, WlTimePicker, WlToast } from "legato-ui";
+  type WlPopoverExpose, WlSelect, WlTable, WlTabs, WlTimePicker, WlToast } from "legato-ui";
 import { computed, ref } from "vue";
 import ControlWidthFixture from "./ControlWidthFixture.vue";
 import SliderGeometryFixture from "./SliderGeometryFixture.vue";
@@ -13,6 +13,9 @@ const reviewListbox = new URLSearchParams(window.location.search).has("review-li
 const reviewControlWidth = new URLSearchParams(window.location.search).has("review-control-width");
 const reviewSliderGeometry = new URLSearchParams(window.location.search).has("review-slider-geometry");
 const reviewTimePicker = new URLSearchParams(window.location.search).has("review-time-picker");
+const reviewTabsOrder = new URLSearchParams(window.location.search).has("review-tabs-order");
+const tabItems = ref([{ key: "a", label: "Alpha" }, { key: "b", label: "Beta" }]);
+const activeTab = ref("a");
 const nativeTime = ref<string | null>("09:30");
 const nativeTimeDisabled = ref(false);
 const nativeTimeInvalid = ref(false);
@@ -62,6 +65,10 @@ function ask(): void {
   <SliderGeometryFixture v-if="reviewSliderGeometry" />
   <main class="fixture">
     <h1>Legato UI regression</h1>
+    <section v-if="reviewTabsOrder" class="fixture-card" aria-label="Tab order">
+      <button type="button" @click="tabItems.reverse()">Reverse tabs</button>
+      <WlTabs v-model="activeTab" :items="tabItems" />
+    </section>
     <section v-if="reviewTimePicker" class="fixture-card" data-testid="native-time-explorer">
       <WlCheckbox v-model="nativeTimeDisabled">disabled</WlCheckbox>
       <WlCheckbox v-model="nativeTimeInvalid">invalid</WlCheckbox>
