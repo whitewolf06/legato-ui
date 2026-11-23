@@ -584,5 +584,17 @@
   "tokens.token.--wl-accordion-title-padding-block.description": "Vertical inset of an Accordion summary.",
   "tokens.token.--wl-accordion-padding-inline.description": "Horizontal inset of Accordion summary and content.",
   "tokens.token.--wl-accordion-body-padding-block-end.description": "Bottom inset of Accordion content.",
-  "tokens.token.--wl-segmented-item-min-height.description": "Minimum item height in the semantic scale; retain the previous cascade by default."
+  "tokens.token.--wl-segmented-item-min-height.description": "Minimum item height in the semantic scale; retain the previous cascade by default.",
+  "tokens.token.--wl-font-control-lg-size.description": "Default text size for large selection fields.",
+  "tokens.token.--wl-metric-control-lg-size.description": "Large control text in the default scale.",
+  "tokens.token.--wl-metric-chip-font-size.description": "Compact chip text in the default scale.",
+  "tokens.token.--wl-select-font-size.description": "Text in medium Select and MultiSelect fields. The default falls back to the local input font size.",
+  "tokens.token.--wl-select-sm-font-size.description": "Placeholder and selected text in small Select and MultiSelect fields.",
+  "tokens.token.--wl-select-lg-font-size.description": "Placeholder and selected text in large Select and MultiSelect fields.",
+  "tokens.token.--wl-select-option-font-size.description": "Option text in Select and MultiSelect panels.",
+  "tokens.token.--wl-select-message-font-size.description": "Loading and empty messages in Select and MultiSelect panels.",
+  "tokens.token.--wl-multiselect-chip-font-size.description": "Selected chip text in MultiSelect fields.",
+  "tokens.token.--wl-display-flex.description": "Flex formatting context for groups of items.",
+  "tokens.token.--wl-layout-chip-list-display.description": "Layout for a collection of chips that can wrap across lines.",
+  "tokens.token.--wl-multiselect-chips-display.description": "Layout of selected chips in MultiSelect. The semantic scale enables wrapping."
 }

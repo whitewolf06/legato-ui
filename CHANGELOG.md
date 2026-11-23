@@ -7,6 +7,10 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 
 ## Unreleased
 
+### Added
+
+- Connect text sizes in `WlSelect` and `WlMultiSelect` to the opt-in `wl-type-scale`. Medium fields and options use the control role. Chips and list messages use the small role.
+
 ## 1.2.1 — 2026-11-23
 
 ### Fixed

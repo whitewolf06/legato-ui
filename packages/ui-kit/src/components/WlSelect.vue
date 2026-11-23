@@ -288,7 +288,7 @@ function onKeydown(event: KeyboardEvent): void {
             role="listbox"
             :aria-busy="loading || undefined"
           >
-            <div v-if="loading" v-bind="section('loadingMessage')" class="wl-select__empty">
+            <div v-if="loading" v-bind="section('loadingMessage')" class="wl-select__empty wl-select-panel__message">
               <slot name="loading">{{ locale.loading }}</slot>
             </div>
             <div
@@ -313,7 +313,7 @@ function onKeydown(event: KeyboardEvent): void {
                 v-bind="section('option', { focused: active === index, selected: Object.is(valueOf(option), model) })"
                 :id="optionId(index)"
                 :key="keyOf(option, index)"
-                class="wl-select__option"
+                class="wl-select__option wl-select-panel__option"
                 role="option"
                 :aria-selected="Object.is(valueOf(option), model)"
                 :aria-disabled="isDisabled(option) || undefined"
@@ -337,7 +337,11 @@ function onKeydown(event: KeyboardEvent): void {
                 </slot>
               </div>
             </div>
-            <div v-if="!loading && filtered.length === 0" v-bind="section('emptyMessage')" class="wl-select__empty">
+            <div
+              v-if="!loading && filtered.length === 0"
+              v-bind="section('emptyMessage')"
+              class="wl-select__empty wl-select-panel__message"
+            >
               <slot name="empty">{{ locale.noOptions }}</slot>
             </div>
           </div>

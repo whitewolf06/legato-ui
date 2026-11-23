@@ -4926,6 +4926,102 @@
       "category": "typography",
       "description": "Minimum item height in the semantic scale; retain the previous cascade by default.",
       "value": "var(--wl-type-component-inherit)"
+    },
+    {
+      "name": "--wl-font-control-lg-size",
+      "layer": "foundation",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Default text size for large selection fields.",
+      "value": "14.5px"
+    },
+    {
+      "name": "--wl-metric-control-lg-size",
+      "layer": "semantic",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Large control text in the default scale.",
+      "value": "var(--wl-font-control-lg-size)"
+    },
+    {
+      "name": "--wl-metric-chip-font-size",
+      "layer": "semantic",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Compact chip text in the default scale.",
+      "value": "var(--wl-font-small-size)"
+    },
+    {
+      "name": "--wl-select-font-size",
+      "layer": "component",
+      "type": "string",
+      "category": "typography",
+      "description": "Text in medium Select and MultiSelect fields. The default falls back to the local input font size.",
+      "value": "var(--wl-type-component-inherit)"
+    },
+    {
+      "name": "--wl-select-sm-font-size",
+      "layer": "component",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Placeholder and selected text in small Select and MultiSelect fields.",
+      "value": "var(--wl-metric-component-subtitle-size)"
+    },
+    {
+      "name": "--wl-select-lg-font-size",
+      "layer": "component",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Placeholder and selected text in large Select and MultiSelect fields.",
+      "value": "var(--wl-metric-control-lg-size)"
+    },
+    {
+      "name": "--wl-select-option-font-size",
+      "layer": "component",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Option text in Select and MultiSelect panels.",
+      "value": "var(--wl-metric-component-content-size)"
+    },
+    {
+      "name": "--wl-select-message-font-size",
+      "layer": "component",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Loading and empty messages in Select and MultiSelect panels.",
+      "value": "var(--wl-metric-component-small-size)"
+    },
+    {
+      "name": "--wl-multiselect-chip-font-size",
+      "layer": "component",
+      "type": "dimension",
+      "category": "typography",
+      "description": "Selected chip text in MultiSelect fields.",
+      "value": "var(--wl-metric-chip-font-size)"
+    },
+    {
+      "name": "--wl-display-flex",
+      "layer": "foundation",
+      "type": "string",
+      "category": "layout",
+      "description": "Flex formatting context for groups of items.",
+      "value": "flex"
+    },
+    {
+      "name": "--wl-layout-chip-list-display",
+      "layer": "semantic",
+      "type": "string",
+      "category": "layout",
+      "description": "Layout for a collection of chips that can wrap across lines.",
+      "value": "var(--wl-display-flex)"
+    },
+    {
+      "name": "--wl-multiselect-chips-display",
+      "layer": "component",
+      "type": "string",
+      "category": "layout",
+      "description": "Layout of selected chips in MultiSelect. The semantic scale enables wrapping.",
+      "value": "var(--wl-type-component-inherit)"
     }
   ],
   "spacing": {
@@ -5228,6 +5324,11 @@
     "--wl-segmented-sm-font-size": "--wl-type-small-size",
     "--wl-segmented-sm-line-height": "--wl-type-small-line-height",
     "--wl-segmented-item-height": "--wl-layout-content-height",
-    "--wl-segmented-item-min-height": "--wl-metric-segmented-item-height"
+    "--wl-segmented-item-min-height": "--wl-metric-segmented-item-height",
+    "--wl-select-font-size": "--wl-type-control-size",
+    "--wl-select-option-font-size": "--wl-type-control-size",
+    "--wl-select-message-font-size": "--wl-type-small-size",
+    "--wl-multiselect-chip-font-size": "--wl-type-small-size",
+    "--wl-multiselect-chips-display": "--wl-layout-chip-list-display"
   }
 }

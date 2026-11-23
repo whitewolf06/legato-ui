@@ -117,6 +117,8 @@ Playground presentation and the full Axe sweep. Configured
 scenarios are the matrix, rather than a second hard-coded case count here.
 
 Windows visual baselines cover Classic, Classic Dark, Newspaper, Gavia and Gavia Dark.
+For Legato and Legato Dark, the Windows suite also compares an open Select and
+MultiSelect on desktop and mobile against the approved 1.2.1 screenshots.
 The Chromium accessibility sweep also covers Legato and Legato Dark,
 including component states and quality/documentation pages. Secondary projects
 do not register the same Axe cases or accumulate runtime skips. Narrow Alert

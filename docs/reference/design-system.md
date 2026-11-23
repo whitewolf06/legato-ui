@@ -139,6 +139,38 @@ override takes precedence. Reapply the class at a nested theme/scale boundary.
 | `--wl-alert-title-*` | inherited | subheading |
 | `--wl-segmented-*` | 13 px | control size; label line height, weight and family |
 
+Select and MultiSelect share the following font sizes. Field sizes apply to both
+the placeholder and the selected text, including comma-separated values.
+
+| Component token | Default | With `wl-type-scale` |
+| --- | --- | --- |
+| `--wl-select-font-size` | Local `--wl-input-font-size` (13.5 px by default) | `--wl-type-control-size` |
+| `--wl-select-sm-font-size` | 12.5 px | Same token |
+| `--wl-select-lg-font-size` | 14.5 px | Same token |
+| `--wl-select-option-font-size` | 13.5 px | `--wl-type-control-size` |
+| `--wl-select-message-font-size` (empty or loading) | 13 px | `--wl-type-small-size` |
+| `--wl-multiselect-chip-font-size` | 12 px | `--wl-type-small-size` |
+
+With the scale enabled, selected chips wrap when they run out of space. A long
+chip label leaves room for its remove button and the open list shows the full text.
+
+A scale on `html` reaches the field and its open list. A local section and its
+teleported list have different DOM parents. Put the same class and role values
+on the section and on `pt.overlay`. Both components accept this setting.
+
+```vue
+<script setup>
+const scale = { "--wl-type-control-size": "18px", "--wl-type-small-size": "14px" };
+const panel = { overlay: { class: "wl-type-scale", style: scale } };
+</script>
+
+<template>
+  <section class="wl-type-scale" :style="scale">
+    <WlSelect :options="['Draft', 'Published']" aria-label="Status" :pt="panel" />
+  </section>
+</template>
+```
+
 Small Segmented keeps its existing small-size role and exposes
 `--wl-segmented-sm-font-size` / `--wl-segmented-sm-line-height`. Without an explicit
 component size, it resolves `--wl-type-small-size` at the item so local semantic

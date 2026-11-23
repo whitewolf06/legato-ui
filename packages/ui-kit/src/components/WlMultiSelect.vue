@@ -250,17 +250,17 @@ useWlResultsAnnouncement({
     @click="open"
   >
     <div v-bind="section('labelContainer')" class="wl-multiselect__label-container">
-      <div v-if="display === 'chip' && selectedOptions.length" class="wl-multiselect__label">
+      <div v-if="display === 'chip' && selectedOptions.length" class="wl-multiselect__label wl-multiselect__chips">
         <span
           v-for="(option, index) in selectedOptions"
           :key="keyOf(option, index)"
           v-bind="mergeWlAttrs(section('chipItem'), section('chip.root'))"
-          class="wl-multiselect__chip"
+          class="wl-multiselect__chip wl-multiselect__value-chip"
         >
           <slot name="chip" :option="option" :remove="() => remove(valueOf(option))">
             <span
               v-bind="section('chip.label')"
-              class="wl-multiselect__chip-label"
+              class="wl-multiselect__chip-label wl-multiselect__value-chip-label"
             >{{ resolveOptionLabel(option, props.optionLabel) }}</span>
             <button
               v-bind="section('chip.removeIcon')"
@@ -372,7 +372,7 @@ useWlResultsAnnouncement({
             aria-multiselectable="true"
             :aria-busy="loading || undefined"
           >
-            <div v-if="loading" v-bind="section('loadingMessage')" class="wl-select__empty">
+            <div v-if="loading" v-bind="section('loadingMessage')" class="wl-select__empty wl-select-panel__message">
               <slot name="loading">{{ locale.loading }}</slot>
             </div>
             <div
@@ -399,7 +399,7 @@ useWlResultsAnnouncement({
                 })"
                 :id="optionId(index)"
                 :key="keyOf(option, index)"
-                class="wl-select__option"
+                class="wl-select__option wl-select-panel__option"
                 role="option"
                 :data-active="active === index"
                 :aria-selected="model.some((value) => Object.is(value, valueOf(option)))"
@@ -419,7 +419,11 @@ useWlResultsAnnouncement({
                 </slot>
               </div>
             </div>
-            <div v-if="!loading && filtered.length === 0" v-bind="section('emptyMessage')" class="wl-select__empty">
+            <div
+              v-if="!loading && filtered.length === 0"
+              v-bind="section('emptyMessage')"
+              class="wl-select__empty wl-select-panel__message"
+            >
               <slot name="empty">{{ locale.noOptions }}</slot>
             </div>
           </div>

@@ -228,6 +228,8 @@
     --wl-dimension-segmented-padding: 3px;
     --wl-dimension-segmented-item-height: 30px;
     --wl-dimension-content-height: auto;
+    --wl-font-control-lg-size: 14.5px;
+    --wl-display-flex: flex;
     /* semantic */
     --wl-type-text-rendering: var(--wl-font-text-rendering);
     --wl-bg: var(--wl-palette-bg);
@@ -418,6 +420,9 @@
     --wl-inset-segmented: var(--wl-dimension-segmented-padding);
     --wl-metric-segmented-item-height: var(--wl-dimension-segmented-item-height);
     --wl-layout-content-height: var(--wl-dimension-content-height);
+    --wl-metric-control-lg-size: var(--wl-font-control-lg-size);
+    --wl-metric-chip-font-size: var(--wl-font-small-size);
+    --wl-layout-chip-list-display: var(--wl-display-flex);
     /* component */
     --wl-btn-height: var(--wl-control-height-md);
     --wl-btn-height-sm: var(--wl-control-height-sm);
@@ -545,6 +550,13 @@
     --wl-accordion-padding-inline: var(--wl-inset-component-content);
     --wl-accordion-body-padding-block-end: var(--wl-inset-component-content);
     --wl-segmented-item-min-height: var(--wl-type-component-inherit);
+    --wl-select-font-size: var(--wl-type-component-inherit);
+    --wl-select-sm-font-size: var(--wl-metric-component-subtitle-size);
+    --wl-select-lg-font-size: var(--wl-metric-control-lg-size);
+    --wl-select-option-font-size: var(--wl-metric-component-content-size);
+    --wl-select-message-font-size: var(--wl-metric-component-small-size);
+    --wl-multiselect-chip-font-size: var(--wl-metric-chip-font-size);
+    --wl-multiselect-chips-display: var(--wl-type-component-inherit);
   }
 }
 /* @wl-tokens:end */

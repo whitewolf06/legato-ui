@@ -536,6 +536,18 @@
   --wl-accordion-padding-inline: var(--wl-inset-component-content);
   --wl-accordion-body-padding-block-end: var(--wl-inset-component-content);
   --wl-segmented-item-min-height: var(--wl-type-component-inherit);
+  --wl-font-control-lg-size: 14.5px;
+  --wl-metric-control-lg-size: var(--wl-font-control-lg-size);
+  --wl-metric-chip-font-size: var(--wl-font-small-size);
+  --wl-select-font-size: var(--wl-type-component-inherit);
+  --wl-select-sm-font-size: var(--wl-metric-component-subtitle-size);
+  --wl-select-lg-font-size: var(--wl-metric-control-lg-size);
+  --wl-select-option-font-size: var(--wl-metric-component-content-size);
+  --wl-select-message-font-size: var(--wl-metric-component-small-size);
+  --wl-multiselect-chip-font-size: var(--wl-metric-chip-font-size);
+  --wl-display-flex: flex;
+  --wl-layout-chip-list-display: var(--wl-display-flex);
+  --wl-multiselect-chips-display: var(--wl-type-component-inherit);
 }
 @media (prefers-reduced-motion: reduce) {
 [data-wl-theme="gavia-dark"] {

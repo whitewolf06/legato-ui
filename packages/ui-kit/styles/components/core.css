@@ -293,10 +293,11 @@
     width: 100%;
     max-width: var(--wl-select-max-width);
     height: var(--wl-input-height);
+    min-height: calc(1lh + 2px);
     padding: 0 32px 0 12px;
     border: 1px solid var(--wl-border);
     border-radius: var(--wl-input-radius);
-    font-size: var(--wl-input-font-size);
+    font-size: var(--wl-select-font-size, var(--wl-input-font-size));
     color: var(--wl-text);
     background: var(--wl-bg);
     cursor: pointer;
@@ -324,12 +325,12 @@
   }
   .wl-select--sm {
     height: var(--wl-input-height-sm);
-    font-size: 12.5px;
+    font-size: var(--wl-select-sm-font-size);
     border-radius: var(--wl-radius-sm);
   }
   .wl-select--lg {
     height: var(--wl-input-height-lg);
-    font-size: 14.5px;
+    font-size: var(--wl-select-lg-font-size);
   }
   .wl-select.is-compact {
     --wl-input-height: 34px;
@@ -411,6 +412,14 @@
     text-align: center;
   }
 
+  .wl-select-panel__option {
+    font-size: var(--wl-select-option-font-size);
+    overflow-wrap: anywhere;
+  }
+  .wl-select-panel__message {
+    font-size: var(--wl-select-message-font-size);
+  }
+
   /* ---------- MultiSelect ---------- */
   .wl-multiselect {
     position: relative;
@@ -422,7 +431,7 @@
     padding: 3px 32px 3px 10px;
     border: 1px solid var(--wl-border);
     border-radius: var(--wl-input-radius);
-    font-size: var(--wl-input-font-size);
+    font-size: var(--wl-select-font-size, var(--wl-input-font-size));
     color: var(--wl-text);
     background: var(--wl-bg);
     cursor: pointer;
@@ -450,12 +459,12 @@
   }
   .wl-multiselect--sm {
     min-height: var(--wl-input-height-sm);
-    font-size: 12.5px;
+    font-size: var(--wl-select-sm-font-size);
     border-radius: var(--wl-radius-sm);
   }
   .wl-multiselect--lg {
     min-height: var(--wl-input-height-lg);
-    font-size: 14.5px;
+    font-size: var(--wl-select-lg-font-size);
   }
   .wl-multiselect.is-compact {
     --wl-input-height: 34px;
@@ -507,10 +516,26 @@
     font-size: 12px;
     color: var(--wl-text);
   }
+  .wl-multiselect__chips {
+    display: var(--wl-multiselect-chips-display, block);
+    flex-wrap: wrap;
+  }
+  .wl-multiselect__value-chip {
+    max-width: 100%;
+    height: auto;
+    min-height: 24px;
+    font-size: var(--wl-multiselect-chip-font-size);
+  }
+  .wl-multiselect__value-chip-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
   .wl-multiselect__chip-label {
     white-space: nowrap;
   }
   .wl-multiselect__chip-remove {
+    flex-shrink: 0;
     position: relative;
     z-index: 1;
     width: 12px;

@@ -240,5 +240,6 @@
   "changelog.disabledSelectSubmission": "При отправке формы браузер пропускает отключённый `WlSelect`. Если снова включить поле, его текущее значение попадёт в данные формы один раз.",
   "changelog.reorderedTabFocus": "В `WlTabs` клавиша `Tab` переводит фокус на выбранную вкладку, даже если вкладки поменяли местами или добавили новые перед выбранной.",
   "changelog.numberInputDecimalStep": "Если в `WlNumberInput` прибавить к `0.2` шаг `0.1`, поле покажет `0.3` и передаст это же значение в `v-model`. Шаг назад вернёт `0.2`. Задавать `precision` для этого не нужно.",
-  "changelog.nestedThemeTextRendering": "Полная тема, созданная через `createWlTheme`, применяет собственное значение `text-rendering`, даже если вложена в другую тему."
+  "changelog.nestedThemeTextRendering": "Полная тема, созданная через `createWlTheme`, применяет собственное значение `text-rendering`, даже если вложена в другую тему.",
+  "changelog.selectTypography": "В `WlSelect` и `WlMultiSelect` можно включить `wl-type-scale`. Размер текста в полях md и пунктах списка задаёт роль control, а в чипах и сообщениях списка — роль small."
 }
