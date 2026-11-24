@@ -114,7 +114,7 @@ export const inputsManifest = /* @__PURE__ */ defineComponentManifest([
   {
     name: "WlNumberInput",
     category: "inputs",
-    description: "Числовое поле с кнопками +/− и вводом с клавиатуры. Значение остаётся в пределах [min, max].",
+    description: "Число можно ввести с клавиатуры, увеличить или уменьшить кнопками. Значение остаётся в пределах [min, max].",
     props: [
       { name: "min", type: "number", default: 0, description: "Минимум." },
       { name: "max", type: "number", default: 99, description: "Максимум." },

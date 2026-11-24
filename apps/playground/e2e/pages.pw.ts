@@ -303,7 +303,10 @@ test("Theme builder scopes live colors, restores its draft and exports a working
   const headerSearch = page.locator(".pg-search");
   await expect(headerSearch).toHaveText("Поиск");
   await expect(headerSearch).toHaveAttribute("title", "Поиск");
-  await expect(page.locator(".pg-logo")).toHaveCSS("width", page.viewportSize()!.width <= 360 ? "28px" : page.viewportSize()!.width <= 760 ? "88px" : "104px");
+  const homeLink = page.getByRole("link", { name: "Legato UI — главная", exact: true });
+  await expect(homeLink).toBeVisible();
+  await expect(homeLink).toHaveAttribute("href", pagesPath);
+  await expect(homeLink.locator("span")).toHaveCSS("mask-image", /legato-wordmark/);
   await navigateMainView(page, "Подбор темы");
   await expect(page).toHaveURL((url) => url.pathname === pagesPath + "ru/theme-builder/");
   expectPagesLocation(page, "theme-builder");

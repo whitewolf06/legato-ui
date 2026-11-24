@@ -242,6 +242,7 @@
   "changelog.numberInputDecimalStep": "Stepping `WlNumberInput` from `0.2` by `0.1` now displays and emits `0.3` without requiring an explicit `precision`. Stepping back restores `0.2`.",
   "changelog.nestedThemeTextRendering": "Full themes from `createWlTheme` now apply their own `text-rendering` setting when nested inside another theme.",
   "changelog.websiteCatalog": "Add a searchable component catalog in English and Russian, with shared navigation between documentation, examples and the project landing page.",
+  "changelog.websiteCatalogFont": "Clarify the WlNumberInput manifest description so the catalog loads only the core font subset on first visit.",
   "changelog.selectTypography": "Connect text sizes in `WlSelect` and `WlMultiSelect` to the opt-in `wl-type-scale`. Medium fields and options use the control role. Chips and list messages use the small role.",
   "changelog.componentSizing": "Scale component text with semantic roles and adjust component spacing and width limits. The `wl-fluid` class also removes the width caps on checkboxes, progress bars, calendars and color swatches."
 }

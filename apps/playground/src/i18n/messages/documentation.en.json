@@ -1130,7 +1130,7 @@
     "s1128": "Password field with a show/hide button.",
     "s1129": "Input aria-label.",
     "s1130": "Password value (default \"\").",
-    "s1131": "Numeric field with +/− buttons and keyboard input. The value stays within [min, max].",
+    "s1131": "Type a number or use the buttons to increase or decrease it. The value stays within [min, max].",
     "s1132": "Minimum.",
     "s1133": "Maximum.",
     "s1134": "Numeric step.",

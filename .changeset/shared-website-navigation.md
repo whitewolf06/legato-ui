@@ -1,4 +1,5 @@
 ---
+"legato-ui": patch
 ---
 
-Unify the landing and documentation navigation and add a searchable component catalog in both languages. This website change does not change the published package.
+Clarify the number input description in the component manifest. The searchable website catalog can now show every description using the core font subset.
