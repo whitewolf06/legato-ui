@@ -4,6 +4,11 @@ Release history is in [GitHub Releases](https://github.com/whitewolf06/legato-ui
 and the preserved [release evidence ledger](../archive/release-history.md). Historical
 counts, hashes and deployment statements are not current verification.
 
+Legato UI 1.3.0 was published to npm `latest` on 2026-11-24.
+The downloaded `legato-ui-1.3.0.tgz` matched the archive tested in the release job.
+Its SHA-256 is `21b8c576f474a2f00124d16b1e7c76dac5e3d58c5da087af775908bfb16278ad`.
+[Published package](https://www.npmjs.com/package/legato-ui/v/1.3.0) · [Release job](https://github.com/whitewolf06/legato-ui/actions/runs/45313092781/job/138180013473) · [GitHub Release](https://github.com/whitewolf06/legato-ui/releases/tag/v1.3.0)
+
 Legato UI 1.2.1 was published to npm `latest` on 2026-11-23.
 The downloaded tarball matched the archive tested in the release job, with
 SHA-256 `702b68c0186d4e1b79b21b4407c6ec8c75a52a7a2ffec77a010d9f88e3ce713b`. [Published package](https://www.npmjs.com/package/legato-ui/v/1.2.1) · [Release job](https://github.com/whitewolf06/legato-ui/actions/runs/45091389536/job/137424168733)
