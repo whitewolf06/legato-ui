@@ -643,6 +643,8 @@
   "shell.seo.theme-builder.description": "Посмотрите цвета Legato UI, проверьте контраст выбранных пар и экспортируйте CSS, JSON или задание для агента.",
   "shell.seo.project.title": "Changelog — Legato UI",
   "shell.seo.project.description": "Версии Legato UI, исправления, подготовленные изменения и заметки по миграции.",
+  "shell.seo.section.components": "Каталог компонентов",
+  "shell.catalog.description": "Найдите компонент по названию или назначению. На его странице есть рабочий пример, свойства, события и слоты.",
   "shell.seo.section.typography": "Типографика",
   "shell.seo.section.layout": "Layout и сетка",
   "shell.seo.section.responsive": "Адаптивность",

@@ -36,6 +36,9 @@ jobs:
         run: pnpm size
       - name: Verify source API metadata
         run: pnpm api:check
+      - name: Verify static site activation and rollback
+        if: matrix.node-version == '24'
+        run: python3 scripts/site/test_switch.py
       - name: Verify release tooling
         run: pnpm test:release-tools
       - name: Verify quality report generation

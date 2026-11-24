@@ -7,6 +7,8 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 
 ## Unreleased
 
+- Add a searchable component catalog in English and Russian, with shared navigation between documentation, examples and the project landing page.
+
 ## 1.3.0 — 2026-11-24
 
 ### Added

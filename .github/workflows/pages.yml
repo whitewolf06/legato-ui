@@ -11,7 +11,7 @@ permissions:
   contents: read
 jobs:
   pages:
-    timeout-minutes: 20
+    timeout-minutes: 30
     name: Publish documentation to GitHub Pages
     # The build uses /legato-ui/. Keep the existing Pages deployment during the repository rename.
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.head_repository.full_name == github.repository && github.repository_owner == 'whitewolf06' && github.repository_id == '1305645644' && github.event.repository.name == 'legato-ui'
@@ -73,4 +73,5 @@ jobs:
       - uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5
         id: deployment
     env:
+      LEGATO_PAGES_NOINDEX: ${{ vars.LEGATO_PAGES_NOINDEX }}
       VERIFIED_SHA: ${{ github.event.workflow_run.head_sha }}

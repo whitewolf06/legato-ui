@@ -6,7 +6,9 @@ import { playgroundCatalogSummary } from "./build/catalog-summary";
 import { playgroundChunkGraph, playgroundManualChunks } from "./build/chunks";
 import { gaviaFontDownload } from "./build/font-download";
 import { playgroundI18nPlugins } from "./build/i18n";
+import { landingPreview } from "./build/landing-preview";
 import { gaviaSeoAssets } from "./build/seo-assets";
+import { siteAddress } from "./build/site-address";
 
 const source = (path: string) => fileURLToPath(new URL(`../../packages/ui-kit/src/${path}`, import.meta.url));
 
@@ -19,35 +21,48 @@ export const playgroundSourceAliases = [
     : [])
 ];
 
-export default defineConfig({
-  plugins: [vue(), ...playgroundI18nPlugins(), playgroundCatalogSummary(), gaviaFontDownload(), gaviaSeoAssets(), playgroundChunkGraph()],
-  // Source aliases provide HMR; installed-archive checks separately validate dist.
-  resolve: { alias: playgroundSourceAliases, dedupe: ["vue"] },
-  build: {
-    target: "es2020",
-    // CI interaction checks exercise production output; the public Pages build
-    // does not include the synthetic component fixture.
-    rolldownOptions: {
-      ...(process.env.GAVIA_E2E_BUILD === "1"
-        ? {
-            input: {
-              index: fileURLToPath(new URL("./index.html", import.meta.url)),
-              e2e: fileURLToPath(new URL("./e2e.html", import.meta.url))
+export default defineConfig(({ mode }) => {
+  const excludeMirror = mode === "pages" && process.env.LEGATO_PAGES_NOINDEX === "true";
+  const publicUrl = siteAddress(mode, process.env.LEGATO_PUBLIC_URL, excludeMirror);
+  const landingDir = process.env.LEGATO_LANDING_DIR || fileURLToPath(new URL("../../../legato-ui-site/", import.meta.url));
+  const release = process.env.LEGATO_RELEASE_ID || "local";
+  if (mode === "site" && !/^(?:local|\d+-\d+)$/.test(release)) throw new Error("Invalid site release ID");
+  return {
+    define: { "import.meta.env.VITE_LEGATO_PUBLIC_URL": JSON.stringify(publicUrl) },
+    plugins: [
+      vue(), ...playgroundI18nPlugins(), playgroundCatalogSummary(), gaviaFontDownload(),
+      gaviaSeoAssets(publicUrl, mode, excludeMirror), playgroundChunkGraph(),
+      ...(mode === "site" ? [landingPreview(landingDir)] : [])
+    ],
+    // Source aliases provide HMR; installed-archive checks separately validate dist.
+    resolve: { alias: playgroundSourceAliases, dedupe: ["vue"] },
+    build: {
+      target: "es2020",
+      assetsDir: mode === "site" ? `_playground/${release}/assets` : "assets",
+      // CI interaction checks exercise production output; the public Pages build
+      // does not include the synthetic component fixture.
+      rolldownOptions: {
+        ...(process.env.GAVIA_E2E_BUILD === "1"
+          ? {
+              input: {
+                index: fileURLToPath(new URL("./index.html", import.meta.url)),
+                e2e: fileURLToPath(new URL("./e2e.html", import.meta.url))
+              }
             }
+          : {}),
+        output: {
+          codeSplitting: {
+            includeDependenciesRecursively: false,
+            groups: [{ name: "playground-runtime", test: (id) => playgroundManualChunks(id) === "playground-runtime" }]
           }
-        : {}),
-      output: {
-        codeSplitting: {
-          includeDependenciesRecursively: false,
-          groups: [{ name: "playground-runtime", test: (id) => playgroundManualChunks(id) === "playground-runtime" }]
         }
       }
+    },
+    server: {
+      watch: {
+        // Playwright traces contain HTML; saving them must not reload the tested page.
+        ignored: ["**/test-results/**", "**/test-results-*/**", "**/playwright-report/**"]
+      }
     }
-  },
-  server: {
-    watch: {
-      // Playwright traces contain HTML; saving them must not reload the tested page.
-      ignored: ["**/test-results/**", "**/test-results-*/**", "**/playwright-report/**"]
-    }
-  }
+  };
 });

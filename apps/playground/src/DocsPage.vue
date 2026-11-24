@@ -77,6 +77,10 @@ usePageAnchor(pageElement);
 const entry = computed(() => props.section ? undefined : wlManifest.find((item) => item.name === props.component));
 const categoryLabel = computed(() => documentationCategories.find((category) => category.key === entry.value?.category)?.label);
 const pageIntroduction = computed(() => {
+  if (props.section === "components") {
+    const title = t("shell.seo.section.components");
+    return { title, description: t("shell.catalog.description"), breadcrumbs: [{ label: t("documentation.strings.s0827"), route: { view: "docs" as const } }, { label: title }] };
+  }
   const metadata = qualitySection.value
     ? documentationQualityPage
     : assetSection.value
@@ -140,6 +144,15 @@ const qualityHref = computed(() => {
 function guideHref(section: DocumentationSection): string {
   const target = createPlaygroundUrl(new URL(typeof window === "undefined" ? "http://localhost/" : window.location.href), { view: "docs", section });
   return target.pathname + target.search + target.hash;
+}
+function componentHref(component: string): string {
+  const target = createPlaygroundUrl(new URL(window.location.href), { view: "docs", component });
+  return target.pathname + target.search;
+}
+function followComponent(event: MouseEvent, name: string): void {
+  if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+  event.preventDefault();
+  navigateComponent(name);
 }
 function navigateGuide(event: MouseEvent, section: DocumentationSection): void {
   if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
@@ -315,7 +328,12 @@ onBeforeUnmount(() => {
                 </nav>
               </div>
             </nav>
-            <section class="docs-nav-section wl-stack" data-space="md" :aria-label="t('documentation.strings.s0839')">
+            <section
+              v-if="section !== 'components'"
+              class="docs-nav-section wl-stack"
+              data-space="md"
+              :aria-label="t('documentation.strings.s0839')"
+            >
               <h2 class="docs-sidebar-heading">
                 <span class="docs-sidebar-mark"><WlIcon class="docs-sidebar-icon" name="box" :size="16" /></span>
                 {{ t('documentation.strings.s0839') }}
@@ -393,6 +411,30 @@ onBeforeUnmount(() => {
           @component="emit('component', $event)"
           @navigate="emit('navigate', $event)"
         />
+        <section v-else-if="section === 'components'" class="component-directory" data-testid="component-catalog">
+          <WlInput
+            id="docs-component-search"
+            v-model="componentQuery"
+            type="search"
+            :aria-label="t('documentation.componentSearch.label')"
+            :placeholder="t('documentation.componentSearch.label')"
+            aria-controls="component-results"
+            @keydown.esc.prevent="clearComponentSearch"
+          >
+            <template #prefix><WlIcon name="search" :size="16" /></template>
+          </WlInput>
+          <div id="component-results">
+            <p v-if="!groups.length" role="status">{{ t('documentation.componentSearch.empty') }}</p>
+            <section v-for="group in groups" :key="group.key">
+              <h2>{{ group.label }} <small>{{ group.entries.length }}</small></h2>
+              <ul><li v-for="item in group.entries" :key="item.name">
+                <a :href="componentHref(item.name)" @click="followComponent($event, item.name)">
+                  <strong>{{ item.name }}</strong><span>{{ item.description }}</span>
+                </a>
+              </li></ul>
+            </section>
+          </div>
+        </section>
         <template v-else-if="entry">
 
           <component
@@ -472,7 +514,9 @@ onBeforeUnmount(() => {
           <section class="docs-overview-section wl-stack" data-space="lg">
             <div class="wl-stack" data-space="sm">
               <p class="docs-eyebrow">{{ t('documentation.strings.s0855') }}</p>
-              <h2 :id="componentsHeading.id" class="wl-text-heading">{{ componentsHeading.title }}</h2>
+              <h2 :id="componentsHeading.id" class="wl-text-heading">
+                <a :href="guideHref('components')" @click="navigateGuide($event, 'components')">{{ componentsHeading.title }}</a>
+              </h2>
               <p class="wl-text-body wl-text-muted">
                 {{ t('documentation.strings.s0856') }} {{ wlManifest.length }} {{ t('documentation.strings.s0857') }}
               </p>
@@ -554,6 +598,19 @@ onBeforeUnmount(() => {
 </template>
 
 <style>
+.component-directory > .wl-input { max-width: 32rem; }
+.component-directory h2 { font-size: 1.3rem; margin: 2rem 0 .8rem; }
+.component-directory small { color: var(--wl-text-muted); font-weight: 400; font-size: .85rem; }
+.component-directory ul {
+  list-style: none; padding: 0; display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .7rem;
+}
+.component-directory li a {
+  display: grid; align-content: start; height: 100%; gap: .4rem; padding: 1rem;
+  border: 1px solid var(--wl-border); border-radius: var(--wl-radius-md); color: var(--wl-text); text-decoration: none;
+}
+.component-directory li a:hover, .component-directory li a:focus-visible { border-color: var(--wl-accent); }
+.component-directory li span { color: var(--wl-text-muted); font-size: .9rem; }
 .docs-page {
   width: 100%;
   max-width: var(--wl-layout-page-max);

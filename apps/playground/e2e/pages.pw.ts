@@ -1,17 +1,12 @@
 import { expect, type Page, test } from "@playwright/test";
-import { readFileSync } from "node:fs";
-import { fileURLToPath, URL as NodeURL } from "node:url";
 import { resolveWlToken, wlDesignThemes } from "../../../packages/ui-kit/src/design-system";
 import { normalizeWlHex } from "../../../packages/ui-kit/src/utils/color";
 import { expectLegatoFontDownload } from "./font-download-helpers";
 import { russianPlaygroundUrl } from "./playground-url";
-import { publishedName, publishedVersion } from "./project-version";
 import { chooseDropdownOption, chooseShowcaseTheme, copyCodePanel, expectMainViewCurrent, navigateDocumentationComponent, navigateMainView, openDocumentationMenu } from "./select-helpers";
 
-const packageMetadata = JSON.parse(readFileSync(fileURLToPath(new NodeURL("../../../packages/ui-kit/package.json", import.meta.url)), "utf8")) as { name: string; version: string };
-const packageUrl = "https://www.npmjs.com/package/" + publishedName;
-
 const pagesPath = "/legato-ui/";
+const publicUrl = process.env.LEGATO_PAGES_NOINDEX === "true" ? "https://legato-ui.ru/" : "https://whitewolf06.github.io" + pagesPath;
 const projectTitle = "Changelog";
 const repositoryDocs = "https://github.com/whitewolf06/legato-ui/blob/main/";
 
@@ -96,7 +91,8 @@ test("canonical EN/RU pages retain their language, public links and static docum
     await expect(page.locator('[data-guide="theming"]')).toBeVisible();
     expect(new URL(page.url()).pathname).toBe(path);
     const canonical = page.locator('link[rel="canonical"]');
-    await expect(canonical).toHaveAttribute("href", "https://whitewolf06.github.io" + path);
+    await expect(canonical).toHaveAttribute("href", publicUrl + path.slice(pagesPath.length));
+    await expect(page).not.toHaveTitle(/shell\.seo\./);
     await page.reload();
     await expect(page.locator("html")).toHaveAttribute("lang", language);
     expect(new URL(page.url()).pathname).toBe(path);
@@ -115,10 +111,11 @@ test("the former gallery component query redirects to its canonical Russian page
   await expect(page.locator("#docs-wltabs-props")).toBeInViewport();
 });
 
-test("Home metadata and the old project query survive refresh with production assets under the Pages prefix", async ({ page }) => {
+test("The mirror opens its own catalog and preserves the old project query", async ({ page }) => {
   await page.goto(russianPlaygroundUrl(pagesPath));
-  await expect(page.getByTestId("home-page").getByRole("heading", { level: 1 })).toHaveText("Legato UI");
-  expectPagesLocation(page);
+  const catalog = page.getByTestId("component-catalog");
+  await expect(catalog).toBeVisible();
+  expectPagesLocation(page, "docs", undefined, "components");
   // Detect a named theme overridden by a later :root fallback stylesheet.
   await expect(page.locator("html")).toHaveAttribute("data-wl-theme", "legato");
   await expect.poll(async () => {
@@ -128,26 +125,14 @@ test("Home metadata and the old project query survive refresh with production as
     });
     return colors.map(normalizeWlHex);
   }).toEqual([resolveWlToken("--wl-accent", "legato"), resolveWlToken("--wl-bg", "legato")].map(normalizeWlHex));
-  const heroArt = page.locator(".home-hero-art");
-  await expect(heroArt).toHaveAttribute("alt", "");
-  await expect.poll(() => heroArt.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
-  await expect(heroArt).toHaveAttribute("src", /^\/legato-ui\/assets\/duetto-arch/);
-  await expect(page.getByTestId("project-version")).toHaveText(packageMetadata.version);
-  await expect(page.locator(".pg-kit-version")).toHaveText(`v${packageMetadata.version}`);
-  const packageStatus = page.getByTestId("project-npm-status");
-  await expect(packageStatus).toContainText("доступен в npm");
-  await expect(packageStatus.getByRole("link", { name: `${publishedName}@${publishedVersion}`, exact: true })).toHaveAttribute("href", packageUrl);
-  await expect(packageStatus.locator("code")).toHaveText(`pnpm add ${publishedName}`);
-
-  const logo = page.locator(".pg-logo");
-  await expect(logo).toBeVisible();
-  await expect(logo).toHaveClass(/legato-wordmark/);
-  await expect(logo).toHaveCSS("mask-image", /\/legato-ui\/assets\/.*\.svg/);
-  const imagePath = await logo.evaluate((element) => {
-    const match = /url\(["']?(.*?)["']?\)/.exec(getComputedStyle(element).maskImage);
-    return match ? new URL(match[1]!, window.location.href).pathname : "";
-  });
-  expect(imagePath).toMatch(/^\/legato-ui\/assets\//);
+  const card = catalog.getByRole("link").filter({ has: page.getByText("WlTable", { exact: true }) });
+  await expect(card).toHaveAttribute("href", /^\/legato-ui\/ru\/docs\/components\/WlTable\//);
+  await expect(page.locator(".legato-head-brand")).toHaveAttribute("href", pagesPath);
+  await expect(page.locator(".legato-head-nav a[aria-current=page]")).toHaveText("Компоненты");
+  await catalog.locator('input[type="search"]').fill("WlTable");
+  await card.click();
+  await expect(page.locator("h1")).toHaveText("WlTable");
+  await expectNoPageOverflow(page);
 
   const observed = resources.get(page)!;
   expect(observed.scripts.size).toBeGreaterThan(0);
@@ -184,7 +169,7 @@ test("navigation, Back and Forward preserve the repository subpath", async ({ pa
   await expect(page.getByRole("heading", { name: "Дизайн-система", exact: true })).toBeVisible();
   expectPagesLocation(page, "system");
 
-  await navigateMainView(page, "Документация");
+  await page.locator(".legato-head [data-site-link=docs]").click();
   await expect(page.getByRole("heading", { name: "Документация", exact: true })).toBeVisible();
   expectPagesLocation(page, "docs");
 
@@ -193,13 +178,13 @@ test("navigation, Back and Forward preserve the repository subpath", async ({ pa
   expectPagesLocation(page, "changelog");
 
   await page.goBack();
-  await expectMainViewCurrent(page, "Документация");
+  await expect(page.locator(".legato-head [data-site-link=docs]")).toHaveAttribute("aria-current", "page");
   expectPagesLocation(page, "docs");
   await page.goBack();
   await expect(page.getByRole("heading", { name: "Дизайн-система", exact: true })).toBeVisible();
   expectPagesLocation(page, "system");
   await page.goForward();
-  await expectMainViewCurrent(page, "Документация");
+  await expect(page.locator(".legato-head [data-site-link=docs]")).toHaveAttribute("aria-current", "page");
   expectPagesLocation(page, "docs");
 
   await page.reload();
@@ -427,7 +412,7 @@ test("font presentation preserves theme, faces and anchors under the Pages subpa
   })));
   expectPagesLocation(page, "font");
   await expectNoPageOverflow(page);
-  await navigateMainView(page, "Документация");
+  await page.locator(".legato-head [data-site-link=docs]").click();
   await expect(page.getByTestId("docs-page")).toBeVisible();
   expectPagesLocation(page, "docs");
   expect(new URL(page.url()).searchParams.get("theme")).toBe("graphite");
@@ -472,20 +457,16 @@ test("quality documentation keeps bookmarked anchors and theme links under the P
   await page.reload();
   await expect(environment).toBeInViewport();
   await expectNoPageOverflow(page);
-  await navigateMainView(page, "Главная");
-  const summary = page.getByTestId("home-quality");
-  const homeLink = summary.getByRole("link", { name: "Результаты проверок", exact: true });
-  const homeUrl = new URL((await homeLink.getAttribute("href"))!, page.url());
-  expect(homeUrl.pathname).toBe(pagesPath + "ru/docs/quality/");
-  expect(homeUrl.searchParams.get("theme")).toBe("graphite");
-  await homeLink.click();
+  await page.locator(".legato-head-nav [data-site-link=catalog]").click();
+  await expect(page.getByTestId("component-catalog")).toBeVisible();
+  await footer.click();
   await expect(quality).toBeVisible();
-  await navigateMainView(page, "Документация");
+  await page.locator(".legato-head [data-site-link=docs]").click();
   const docs = await openDocumentationMenu(page);
   await docs.locator(".docs-sidebar").getByRole("link", { name: "Качество и совместимость", exact: true }).click();
   await expect(quality).toBeVisible();
   await expect(docs.locator(".docs-quality-link")).toHaveAttribute("aria-current", "page");
-  await navigateMainView(page, "Главная");
+  await page.locator(".legato-head-nav [data-site-link=catalog]").click();
   await page.locator(".pg-top").getByRole("button", { name: "Поиск", exact: true }).click();
   const search = page.getByRole("combobox", { name: "Командная палитра", exact: true });
   await search.fill("качество");
