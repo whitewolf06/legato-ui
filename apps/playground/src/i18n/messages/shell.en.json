@@ -643,6 +643,8 @@
   "shell.seo.theme-builder.description": "Preview Legato UI colors, check selected contrast pairs and export theme CSS, JSON or agent instructions.",
   "shell.seo.project.title": "Changelog — Legato UI",
   "shell.seo.project.description": "Legato UI releases, fixes, prepared changes and migration notes.",
+  "shell.seo.section.components": "Component catalog",
+  "shell.catalog.description": "Search by name or purpose. Each component page includes a working example, props, events and slots.",
   "shell.seo.section.typography": "Typography",
   "shell.seo.section.layout": "Layout and grid",
   "shell.seo.section.responsive": "Responsive design",

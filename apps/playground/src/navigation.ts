@@ -1,3 +1,5 @@
+import { hostedSite } from "./site/target";
+
 /** Legacy query routes and canonical paths share the same page contract. */
 export type PlaygroundView = "home" | "docs" | "components" | "system" | "project" | "theme-builder" | "font";
 export type DocumentationFoundationSection = "typography" | "layout" | "responsive" | "content";
@@ -5,7 +7,7 @@ export type DocumentationAssetSection = "icons" | "colors";
 export type DocumentationQualitySection = "quality";
 export type DocumentationGuideSection = "why" | "theming" | "recipes" | "accessibility" | "how-it-is-built";
 export type DocumentationSection = DocumentationFoundationSection | DocumentationAssetSection
-  | DocumentationQualitySection | DocumentationGuideSection;
+  | DocumentationQualitySection | DocumentationGuideSection | "components";
 export interface PlaygroundRoute {
   view: PlaygroundView;
   component?: string;
@@ -31,7 +33,7 @@ export function isDocumentationQualitySection(value: unknown): value is Document
 }
 
 export function isDocumentationSection(value: unknown): value is DocumentationSection {
-  return isDocumentationFoundationSection(value) || isDocumentationAssetSection(value)
+  return value === "components" || isDocumentationFoundationSection(value) || isDocumentationAssetSection(value)
     || isDocumentationQualitySection(value) || isDocumentationGuideSection(value);
 }
 
@@ -63,6 +65,7 @@ export function parsePlaygroundRoute(search: string, hash = "", pathname = ""): 
     : candidate === "components"
       ? "docs"
       : candidate === "docs" || candidate === "system" || candidate === "project" || candidate === "theme-builder" || candidate === "font" ? candidate : "home";
+  if (hostedSite && view === "home") return { view: "docs", section: "components" };
   if (view !== "docs") return { view };
   const section = query.get("section");
   if (isDocumentationSection(section)) return { view, section };

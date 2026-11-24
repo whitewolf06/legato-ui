@@ -1,8 +1,10 @@
+import guideMetadata from "./documentation/guide-metadata.json";
 import { getLocalizedManifest } from "./documentation/manifest";
 import { playgroundLocale, translate } from "./i18n";
-import { createPlaygroundPathUrl as createPlaygroundUrl, type PlaygroundRoute } from "./navigation";
+import { createPlaygroundPathUrl as createPlaygroundUrl, isDocumentationGuideSection, type PlaygroundRoute } from "./navigation";
 
-const baseUrl = "https://whitewolf06.github.io/legato-ui/";
+const baseUrl = import.meta.env.VITE_LEGATO_PUBLIC_URL || "https://whitewolf06.github.io/legato-ui/";
+const basePath = new URL(baseUrl).pathname;
 const imageUrl = baseUrl + "legato-social.png";
 function meta(attribute: "name" | "property", key: string, value: string): void {
   let element = document.head.querySelector<HTMLMetaElement>("meta[" + attribute + '="' + key + '"]');
@@ -37,9 +39,16 @@ export function updatePlaygroundSeo(route: PlaygroundRoute): void {
       description = entry.description || description;
     }
   } else if (page === "docs" && route.section) {
-    title = translate("shell.seo.section." + route.section) + " — " + title;
+    if (isDocumentationGuideSection(route.section)) {
+      const guide = guideMetadata[locale][route.section];
+      title = guide.title + " — " + title;
+      description = guide.description;
+    } else {
+      title = translate("shell.seo.section." + route.section) + " — " + title;
+      if (route.section === "components") description = translate("shell.catalog.description");
+    }
   }
-  const url = createPlaygroundUrl(new URL(baseUrl + "?lang=" + locale), route, { base: "/legato-ui/" });
+  const url = createPlaygroundUrl(new URL(baseUrl + "?lang=" + locale), route, { base: basePath });
   document.documentElement.lang = locale;
   document.title = title;
   meta("name", "description", description);
@@ -60,7 +69,7 @@ export function updatePlaygroundSeo(route: PlaygroundRoute): void {
   meta("name", "twitter:image", imageUrl);
   link("canonical", url.href);
   for (const language of ["en", "ru", "x-default"]) {
-    const alternate = createPlaygroundUrl(new URL(baseUrl + "?lang=" + (language === "ru" ? "ru" : "en")), route, { base: "/legato-ui/" });
+    const alternate = createPlaygroundUrl(new URL(baseUrl + "?lang=" + (language === "ru" ? "ru" : "en")), route, { base: basePath });
     link("alternate", alternate.href, language);
   }
   let schema = document.head.querySelector<HTMLScriptElement>("#gavia-structured-data");

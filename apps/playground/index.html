@@ -2,6 +2,7 @@
 <html lang="en" data-wl-theme="legato">
   <head>
     <meta charset="UTF-8" />
+    <!-- site-index-policy -->
     <script>
       // Run before styles/first paint. Keep resolution in sync with themes.ts and i18n/locale.ts.
       (() => {
@@ -11,7 +12,7 @@
         let savedLocale = null;
         let appliedTheme = null;
         try {
-          savedTheme = localStorage.getItem("legato-ui.theme");
+          savedTheme = localStorage.getItem("legato-ui.theme") || localStorage.getItem("legato-site-theme");
           savedLocale = localStorage.getItem("legato-ui.locale");
           appliedTheme = JSON.parse(localStorage.getItem("legato-ui.applied-theme.v1") || "null");
         } catch { /* Preferences still work without storage. */ }
@@ -98,8 +99,8 @@
     <meta property="og:site_name" content="Legato UI" />
     <meta property="og:title" content="Legato UI — components and design system for the web" />
     <meta property="og:description" content="Vue 3 components, TypeScript, shared design tokens, seven themes and interactive documentation. Open-source UI library by Dmitry Gorbach." />
-    <meta property="og:url" content="https://whitewolf06.github.io/legato-ui/?lang=en" />
-    <meta property="og:image" content="https://whitewolf06.github.io/legato-ui/legato-social.png" />
+    <meta property="og:url" content="__LEGATO_PUBLIC_URL__?lang=en" />
+    <meta property="og:image" content="__LEGATO_PUBLIC_URL__legato-social.png" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="640" />
     <meta property="og:image:alt" content="Legato UI" />
@@ -108,13 +109,13 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Legato UI — components and design system for the web" />
     <meta name="twitter:description" content="Vue 3 components, TypeScript, design tokens, seven themes and interactive examples." />
-    <meta name="twitter:image" content="https://whitewolf06.github.io/legato-ui/legato-social.png" />
-    <link rel="canonical" href="https://whitewolf06.github.io/legato-ui/?lang=en" />
-    <link rel="alternate" hreflang="en" href="https://whitewolf06.github.io/legato-ui/?lang=en" />
-    <link rel="alternate" hreflang="ru" href="https://whitewolf06.github.io/legato-ui/?lang=ru" />
-    <link rel="alternate" hreflang="x-default" href="https://whitewolf06.github.io/legato-ui/?lang=en" />
+    <meta name="twitter:image" content="__LEGATO_PUBLIC_URL__legato-social.png" />
+    <link rel="canonical" href="__LEGATO_PUBLIC_URL__?lang=en" />
+    <link rel="alternate" hreflang="en" href="__LEGATO_PUBLIC_URL__?lang=en" />
+    <link rel="alternate" hreflang="ru" href="__LEGATO_PUBLIC_URL__?lang=ru" />
+    <link rel="alternate" hreflang="x-default" href="__LEGATO_PUBLIC_URL__?lang=en" />
     <link rel="icon" type="image/svg+xml" sizes="any" href="./src/assets/brand/duetto/legato-favicon.svg?no-inline" />
-    <script id="gavia-structured-data" type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Legato UI","description":"An open-source Vue 3 component library and design system.","url":"https://whitewolf06.github.io/legato-ui/","codeRepository":"https://github.com/whitewolf06/legato-ui","programmingLanguage":["TypeScript","Vue","CSS"],"license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Dmitry Gorbach","url":"https://gorbach-dev.ru/"},"inLanguage":"en"}</script>
+    <script id="gavia-structured-data" type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"Legato UI","description":"An open-source Vue 3 component library and design system.","url":"__LEGATO_PUBLIC_URL__","codeRepository":"https://github.com/whitewolf06/legato-ui","programmingLanguage":["TypeScript","Vue","CSS"],"license":"https://opensource.org/license/mit","author":{"@type":"Person","name":"Dmitry Gorbach","url":"https://gorbach-dev.ru/"},"inLanguage":"en"}</script>
   </head>
   <body>
     <div id="app">

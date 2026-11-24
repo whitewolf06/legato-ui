@@ -1,0 +1,46 @@
+{
+  "en": {
+    "why": {
+      "title": "Why Legato UI",
+      "description": "An independent Vue foundation with explicit styles, app-scoped services and editable tokens."
+    },
+    "theming": {
+      "title": "Themes and customization",
+      "description": "Start with a built-in theme, add your brand palette and customize individual components through their public API."
+    },
+    "recipes": {
+      "title": "Recipes",
+      "description": "Working compositions with validation, cancellation, retry and application-owned operations."
+    },
+    "accessibility": {
+      "title": "Accessibility",
+      "description": "Keyboard contracts, accessible names and a separate protocol for real screen-reader acceptance."
+    },
+    "how-it-is-built": {
+      "title": "How it is built",
+      "description": "The repository keeps tokens, behavior, DOM and application concerns in separate modules."
+    }
+  },
+  "ru": {
+    "why": {
+      "title": "Зачем Legato UI",
+      "description": "Независимая основа для Vue: явные стили, сервисы в границах приложения и редактируемые токены."
+    },
+    "theming": {
+      "title": "Темы и кастомизация",
+      "description": "Возьмите готовую тему за основу, добавьте палитру бренда и настройте компоненты через их публичный API."
+    },
+    "recipes": {
+      "title": "Рецепты",
+      "description": "Рабочие сценарии с валидацией, отменой, повтором и операциями на стороне приложения."
+    },
+    "accessibility": {
+      "title": "Доступность",
+      "description": "Клавиатурные контракты, доступные имена и отдельная ручная приёмка со скринридером."
+    },
+    "how-it-is-built": {
+      "title": "Как это устроено",
+      "description": "Токены, поведение, разметка и задачи приложения живут в отдельных модулях."
+    }
+  }
+}

@@ -1,0 +1,97 @@
+name: Legato website
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      landing_sha:
+        description: Expected landing main commit (optional for manual releases)
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  publish:
+    if: >-
+      github.repository_id == '1305645644' && vars.LEGATO_LANDING_REPO != '' &&
+      ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    concurrency:
+      group: legato-jino-production
+      cancel-in-progress: false
+    environment:
+      name: jino-production
+      url: https://legato-ui.ru/
+    env:
+      LEGATO_LANDING_REPO: ${{ vars.LEGATO_LANDING_REPO }}
+      LEGATO_RELEASE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - name: Resolve verified source revisions
+        id: sources
+        run: node .github/scripts/site-sources.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LANDING_TOKEN: ${{ secrets.LEGATO_LANDING_READ_TOKEN }}
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: ${{ vars.LEGATO_LANDING_REPO }}
+          ref: ${{ steps.sources.outputs.landing }}
+          path: .tmp/landing
+          token: ${{ secrets.LEGATO_LANDING_READ_TOKEN || github.token }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+        with:
+          node-version: '24'
+          build: 'true'
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          name: legato-ui-quality
+          path: .tmp/quality-report
+          run-id: ${{ steps.sources.outputs.ci_run }}
+          github-token: ${{ github.token }}
+      - name: Restore metrics from the verified CI run
+        run: GITHUB_SHA="$LIBRARY" pnpm quality:restore .tmp/quality-report
+        env:
+          LIBRARY: ${{ steps.sources.outputs.library }}
+      - uses: ./.github/actions/playwright
+        with:
+          browser: chromium
+      - name: Assemble and verify the static release
+        env:
+          LEGATO_LIBRARY_SHA: ${{ steps.sources.outputs.library }}
+          LEGATO_LANDING_SHA: ${{ steps.sources.outputs.landing }}
+        run: bash scripts/site/check.sh
+      - name: Pack verified files
+        id: pack
+        run: |
+          tar -czf .tmp/site.tar.gz -C .tmp/public .
+          echo "release=$LEGATO_RELEASE_ID" >> "$GITHUB_OUTPUT"
+          echo "checksum=$(sha256sum .tmp/site.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+      - name: Check both main branches again before switching
+        run: node .github/scripts/site-sources.mjs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LANDING_TOKEN: ${{ secrets.LEGATO_LANDING_READ_TOKEN }}
+          LEGATO_LANDING_REPO: ${{ vars.LEGATO_LANDING_REPO }}
+          EXPECTED_LANDING: ${{ steps.sources.outputs.landing }}
+      - name: Upload static files, switch release and verify public HTTPS
+        run: bash .github/scripts/jino-deploy.sh
+        env:
+          RELEASE: ${{ steps.pack.outputs.release }}
+          CHECKSUM: ${{ steps.pack.outputs.checksum }}
+          JINO_HOST: ${{ vars.JINO_HOST }}
+          JINO_USER: ${{ vars.JINO_USER }}
+          JINO_DEPLOY_KEY: ${{ secrets.JINO_DEPLOY_KEY }}
+          JINO_KNOWN_HOSTS: ${{ secrets.JINO_KNOWN_HOSTS }}

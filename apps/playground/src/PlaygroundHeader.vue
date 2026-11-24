@@ -14,6 +14,7 @@ import LegatoWordmark from "./LegatoWordmark.vue";
 import { isPlaygroundThemePreference, type PlaygroundThemePreference, withPlaygroundTheme } from "./themes";
 
 const props = defineProps<{
+  secondary?: boolean;
   activeView: PlaygroundView;
   route?: PlaygroundRoute;
   theme: WlThemeName;
@@ -31,14 +32,15 @@ const emit = defineEmits<{
 const { t, locale } = usePlaygroundI18n();
 const currentThemeLabel = computed(() => props.appliedThemeName
   || (props.themePreference === "system" ? t("shell.theme.system") : props.theme));
-const sections = computed(() => [
+const allSections = () => [
   { view: "home", label: t("shell.PlaygroundHeader.text122"), icon: "home" },
   { view: "docs", label: t("shell.PlaygroundHeader.text123"), icon: "book" },
   { view: "font", label: t("shell.PlaygroundHeader.text124"), icon: "book" },
   { view: "system", label: t("shell.PlaygroundHeader.text125"), icon: "grid" },
   { view: "theme-builder", label: t("shell.PlaygroundHeader.text126"), icon: "sliders-h" },
   { view: "project", label: "Changelog", icon: "history" }
-] as const satisfies ReadonlyArray<{ view: PlaygroundView; label: string; icon: WlIconName }>);
+] as const satisfies ReadonlyArray<{ view: PlaygroundView; label: string; icon: WlIconName }>;
+const sections = computed(() => allSections().filter(({ view }) => !props.secondary || (view !== "home" && view !== "docs")));
 const languageOptions = [{ label: "EN", value: "en" }, { label: "RU", value: "ru" }];
 const headerElement = ref<HTMLElement | null>(null);
 const desktopNavigation = ref<HTMLElement | null>(null);
@@ -209,8 +211,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="headerElement" class="pg-header-inner wl-container">
+  <div ref="headerElement" class="pg-header-inner wl-container" :class="{ 'pg-secondary': secondary }">
     <a
+      v-if="!secondary"
       class="pg-brand"
       :href="withPlaygroundTheme('?', themePreference)"
       :aria-label="t('shell.PlaygroundHeader.text127')"
@@ -366,6 +369,9 @@ onBeforeUnmount(() => {
   gap: var(--wl-space-md);
   padding-block: var(--wl-space-md);
 }
+.pg-header-inner.pg-secondary { grid-template-columns: minmax(0, 1fr) auto; min-height: 42px; padding-block: 4px; }
+.pg-secondary .pg-views { justify-content: flex-start; }
+@media (max-width: 760px) { .pg-secondary .pg-actions { justify-self: start; } }
 .pg-brand {
   color: var(--wl-text);
   text-decoration: none;

@@ -13,6 +13,7 @@ import { WlPageHeader } from "legato-ui";
 import { computed, inject } from "vue";
 import { createPlaygroundNavigationUrl as createPlaygroundUrl, parsePlaygroundRoute, type PlaygroundRoute } from "./navigation";
 import { playgroundNavigationKey } from "./playground-navigation";
+import { hostedSite } from "./site/target";
 
 const navigation = inject(playgroundNavigationKey, undefined);
 const items = computed<WlBreadcrumbItem[]>(() => {
@@ -22,6 +23,7 @@ const items = computed<WlBreadcrumbItem[]>(() => {
   const routes = [{ label: t("shell.PlaygroundPageHeader.text140"), route: { view: "home" } as PlaygroundRoute }, ...props.breadcrumbs];
   return routes.map(({ label, route }, index) => {
     if (index === routes.length - 1 || !route) return { label };
+    if (hostedSite && route.view === "home") return { label, href: import.meta.env.BASE_URL };
     const target = createPlaygroundUrl(current, route);
     return { label, href: target.pathname + target.search };
   });
@@ -32,7 +34,7 @@ function followBreadcrumb(event: MouseEvent): void {
   const target = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>("a[href]") : null;
   if (!target) return;
   const url = new URL(target.href);
-  if (url.origin !== window.location.origin) return;
+  if (url.origin !== window.location.origin || (hostedSite && url.pathname === import.meta.env.BASE_URL)) return;
   event.preventDefault();
   void navigation.navigate(parsePlaygroundRoute(url.search, url.hash, url.pathname));
 }

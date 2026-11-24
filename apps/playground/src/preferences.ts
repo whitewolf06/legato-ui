@@ -7,7 +7,8 @@ export const playgroundPreferenceKeys = {
 
 export function readPlaygroundPreference(key: keyof typeof playgroundPreferenceKeys): string | null {
   try {
-    return typeof window === "undefined" ? null : window.localStorage.getItem(playgroundPreferenceKeys[key]);
+    if (typeof window === "undefined") return null;
+    return window.localStorage.getItem(playgroundPreferenceKeys[key]) ?? (key === "theme" ? window.localStorage.getItem("legato-site-theme") : null);
   } catch {
     return null;
   }

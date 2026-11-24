@@ -16,6 +16,8 @@ import PlaygroundHeader from "./PlaygroundHeader.vue";
 import { savePlaygroundPreference } from "./preferences";
 import FontDownloadLink from "./project/FontDownloadLink.vue";
 import { gaviaProjectInfo as project } from "./project/project-info";
+import SiteHeader from "./site/SiteHeader.vue";
+import { hostedSite } from "./site/target";
 import { appliedTheme, applyThemeToRoot, clearAppliedTheme, setAppliedTheme, type ThemeApplication } from "./theme-builder/application";
 import { createPlaygroundThemeTransition } from "./theme-transition";
 import { createPlaygroundThemeUrl, getPlaygroundThemeToggleTarget, initialPlaygroundLightTheme, isPlaygroundTheme, isPlaygroundThemePreference, parsePlaygroundThemePreference, playgroundDefaultTheme, playgroundThemeOptions, playgroundThemePair, playgroundThemePreference, type PlaygroundThemePreference, rememberPlaygroundLightTheme, resolvePlaygroundTheme } from "./themes";
@@ -182,7 +184,7 @@ function qualityRouteHref(): string {
   return target.pathname + target.search + target.hash;
 }
 function openDocsCatalog(): Promise<void> {
-  return navigate({ view: "docs" }, "docs-components");
+  return hostedSite ? openDocsSection("components") : navigate({ view: "docs" }, "docs-components");
 }
 function openDocsOverview(anchor: string): Promise<void> {
   return navigate({ view: "docs" }, anchor);
@@ -507,7 +509,16 @@ watch([theme, appliedTheme], ([value]) => {
 
 <template>
   <header ref="headerElement" class="pg-top">
+    <SiteHeader
+      v-if="hostedSite"
+      :route="activeRoute"
+      :language="locale"
+      :dark="['legato-dark', 'gavia-dark', 'graphite'].includes(theme)"
+      @navigate="navigate"
+      @toggle-theme="toggleThemeVariant"
+    />
     <PlaygroundHeader
+      :secondary="hostedSite"
       :active-view="activeView"
       :route="activeRoute"
       :theme="theme"

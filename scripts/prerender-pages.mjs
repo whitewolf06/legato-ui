@@ -96,13 +96,16 @@ export async function prerenderPages(workspace) {
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       try {
-        const response = await page.goto(origin + manifest.base + route, { waitUntil: "networkidle" });
+        const address = new URL(manifest.base + route, origin);
+        if (!route && manifest.home === "catalog") address.searchParams.set("lang", "en");
+        const response = await page.goto(address.href, { waitUntil: "networkidle" });
         if (!response?.ok()) throw new Error(`Route failed: ${route}`);
         await page.waitForSelector("#app[data-v-app] main");
         const component = /\/components\/(Wl\w+)\/$/.exec(route)?.[1];
         if (component === "WlButton") await page.waitForSelector(".docs-button");
         else if (component) await page.waitForSelector(`[data-docs-component="${component}"] [data-testid="ds-example-preview"] [data-wl]`);
         else if (/docs\/(?:why|theming|recipes|accessibility|how-it-is-built)\/$/.test(route)) await page.waitForSelector("[data-guide]");
+        else if (/docs\/components\/$/.test(route) || (manifest.home === "catalog" && (route === "" || route === "ru/"))) await page.waitForSelector('[data-testid="component-catalog"] a');
         await page.evaluate(() => document.fonts.ready);
         if (errors.length) throw new Error(`${route}: ${errors.join("; ")}`);
         const html = await page.evaluate(serializePrerenderHtml, { origin });
