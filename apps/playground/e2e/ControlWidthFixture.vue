@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { WlAccordion, WlAutocomplete, WlField, WlInput, WlMultiSelect, WlNumberInput, WlSelect, WlSlider, WlTextarea } from "legato-ui";
+import { WlAccordion, WlAutocomplete, WlBadge, WlCalendar, WlCheckbox, WlColorPicker, WlField, WlInput, WlMultiSelect, WlNumberInput, WlProgress, WlSelect, WlSlider, WlSteps, WlTextarea } from "legato-ui";
 import "legato-ui/styles/primitives.css";
 
 const options = ["Alpha", "Beta"];
@@ -14,7 +14,7 @@ const marks = [{ value: 0, label: "0" }, { value: 100, label: "100" }];
       :class="{ 'wl-fluid': fluid }"
       :data-fluid="fluid"
     >
-      <WlField v-slot="field" label="Input"><WlInput :id="field.id" /></WlField>
+      <WlField v-slot="field" label="Input" hint="Enter a value"><WlInput :id="field.id" /></WlField>
       <WlSelect :options="options" aria-label="Select" />
       <WlMultiSelect :options="options" aria-label="Multiple" />
       <WlAutocomplete :suggestions="options" aria-label="Autocomplete" />
@@ -29,6 +29,13 @@ const marks = [{ value: 0, label: "0" }, { value: 100, label: "100" }];
         aria-label="Range slider"
       />
       <WlNumberInput aria-label="Number" />
+      <WlCheckbox>Choice</WlCheckbox>
+      <WlCalendar month="2026-11" />
+      <WlProgress :value="60" aria-label="Progress" />
+      <WlSteps :items="[{ label: 'First step' }, { label: 'Review' }]" />
+      <WlColorPicker />
+      <WlBadge value="42" />
+      <WlBadge dot />
     </div>
   </section>
 </template>

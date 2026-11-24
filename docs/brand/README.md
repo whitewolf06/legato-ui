@@ -46,8 +46,8 @@ previews use the Legato image listed above.
 ## README component preview
 
 `readme-preview.webp` is a real Chromium capture of PageHeader, Field, Input,
-Switch and Button in Gavia and Gavia Dark, using the English ProfileForm recipe
-and the shipped Gavia Sans. It is not a generated mockup. The capture frames
+Switch and Button in Legato and Legato Dark, using the English ProfileForm recipe
+and the shipped Legato Sans. It is not a generated mockup. The capture frames
 cloned rendered components without changing the application or recipe.
 
 Start an explicitly requested production preview, then run:
@@ -58,7 +58,7 @@ node scripts/capture-readme.mjs --base-url http://127.0.0.1:4174/
 
 The command does not build or start a server. It writes the WebP (maximum 200 kB)
 and local provenance in `.tmp/readme-preview/evidence.json`. Review the result
-before including it. The 2026-10-18 capture is 848 × 454 and 31,762 bytes.
+before including it.
 
 <a id="фон-первого-экрана"></a>
 

@@ -16,7 +16,7 @@ available as [gavia-ui@1.1.0](https://www.npmjs.com/package/gavia-ui/v/1.1.0).
 The [migration guide](docs/migration.md#migration-1-2) includes an alias for existing imports.
 When upgrading from 0.x, start with the [1.0 migration](docs/migration.md#migration-1-0).
 
-[![Real Legato UI fields, inputs, switch and button in Gavia and Gavia Dark](docs/brand/readme-preview.webp)](https://whitewolf06.github.io/legato-ui/)
+[![Real Legato UI fields, inputs, switch and button in Legato and Legato Dark](docs/brand/readme-preview.webp)](https://whitewolf06.github.io/legato-ui/)
 
 [Documentation](https://whitewolf06.github.io/legato-ui/docs/) ·
 [Playground](https://whitewolf06.github.io/legato-ui/) ·

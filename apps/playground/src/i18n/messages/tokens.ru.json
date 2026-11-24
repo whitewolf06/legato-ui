@@ -584,5 +584,17 @@
   "tokens.token.--wl-accordion-title-padding-block.description": "--wl-accordion-title-padding-block: локальная настройка текстовой роли или отступа. Без wl-type-scale сохраняет значение 1.0.",
   "tokens.token.--wl-accordion-padding-inline.description": "--wl-accordion-padding-inline: локальная настройка текстовой роли или отступа. Без wl-type-scale сохраняет значение 1.0.",
   "tokens.token.--wl-accordion-body-padding-block-end.description": "--wl-accordion-body-padding-block-end: локальная настройка текстовой роли или отступа. Без wl-type-scale сохраняет значение 1.0.",
-  "tokens.token.--wl-segmented-item-min-height.description": "Минимальная высота Segmented в семантической шкале; без профиля сохраняется прежний каскад."
+  "tokens.token.--wl-segmented-item-min-height.description": "Минимальная высота Segmented в семантической шкале; без профиля сохраняется прежний каскад.",
+  "tokens.token.--wl-font-control-lg-size.description": "Базовый размер текста в больших полях выбора.",
+  "tokens.token.--wl-metric-control-lg-size.description": "Размер текста крупного поля в стандартной шкале.",
+  "tokens.token.--wl-metric-chip-font-size.description": "Размер текста чипа в стандартной шкале.",
+  "tokens.token.--wl-select-font-size.description": "Текст в Select и MultiSelect размера md. По умолчанию берёт размер из --wl-input-font-size у поля.",
+  "tokens.token.--wl-select-sm-font-size.description": "Размер плейсхолдера и выбранного текста в Select и MultiSelect размера sm.",
+  "tokens.token.--wl-select-lg-font-size.description": "Размер плейсхолдера и выбранного текста в Select и MultiSelect размера lg.",
+  "tokens.token.--wl-select-option-font-size.description": "Размер текста пунктов в раскрытом списке Select и MultiSelect.",
+  "tokens.token.--wl-select-message-font-size.description": "Размер сообщений о загрузке и пустом списке в Select и MultiSelect.",
+  "tokens.token.--wl-multiselect-chip-font-size.description": "Размер текста выбранного значения в чипе MultiSelect.",
+  "tokens.token.--wl-display-flex.description": "Располагает элементы группы с помощью flex.",
+  "tokens.token.--wl-layout-chip-list-display.description": "Позволяет переносить чипы на следующую строку, когда в поле мало места.",
+  "tokens.token.--wl-multiselect-chips-display.description": "Расположение выбранных чипов в MultiSelect. При включённой шкале чипы могут занимать несколько строк."
 }

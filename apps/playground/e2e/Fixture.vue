@@ -5,12 +5,14 @@ import {
   type WlPopoverExpose, WlSelect, WlTable, WlTabs, WlTimePicker, WlToast } from "legato-ui";
 import { computed, ref } from "vue";
 import ControlWidthFixture from "./ControlWidthFixture.vue";
+import SelectTypographyFixture from "./SelectTypographyFixture.vue";
 import SliderGeometryFixture from "./SliderGeometryFixture.vue";
 
 const choices = [{ label: "Альфа", value: "a" }, { label: "Бета", value: "b" }];
 const select = ref<string | null>(null);
 const reviewListbox = new URLSearchParams(window.location.search).has("review-listbox");
 const reviewControlWidth = new URLSearchParams(window.location.search).has("review-control-width");
+const reviewSelectTypography = new URLSearchParams(window.location.search).has("select-typography");
 const reviewSliderGeometry = new URLSearchParams(window.location.search).has("review-slider-geometry");
 const reviewTimePicker = new URLSearchParams(window.location.search).has("review-time-picker");
 const reviewTabsOrder = new URLSearchParams(window.location.search).has("review-tabs-order");
@@ -62,6 +64,7 @@ function ask(): void {
 
 <template>
   <ControlWidthFixture v-if="reviewControlWidth" />
+  <SelectTypographyFixture v-if="reviewSelectTypography" />
   <SliderGeometryFixture v-if="reviewSliderGeometry" />
   <main class="fixture">
     <h1>Legato UI regression</h1>

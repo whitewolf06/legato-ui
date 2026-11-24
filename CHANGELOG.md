@@ -7,6 +7,13 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 
 ## Unreleased
 
+## 1.3.0 — prepared
+
+### Added
+
+- Connect text sizes in `WlSelect` and `WlMultiSelect` to the opt-in `wl-type-scale`. Medium fields and options use the control role. Chips and list messages use the small role.
+- Scale component text with semantic roles and adjust component spacing and width limits. The `wl-fluid` class also removes the width caps on checkboxes, progress bars, calendars and color swatches.
+
 ## 1.2.1 — 2026-11-23
 
 ### Fixed

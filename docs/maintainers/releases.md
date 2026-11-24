@@ -30,6 +30,19 @@ For future delivery, use the procedure below, the
 [manual accessibility protocol](manual-accessibility.md) and
 [unsent communication drafts](release-announcements.md).
 
+## Starter acceptance for 1.2.1
+
+On 2026-11-23 the three [starter projects](../../examples/README.md) were copied
+outside the workspace and installed independently from the public npm registry
+with pnpm 10.34.5 and Node 24.15.0 on Windows. Each installed
+`legato-ui@1.2.1` and Vue 3.5.46 and produced a production build.
+
+| Starter | Chromium acceptance |
+| --- | --- |
+| Vite | Saved a project name, checked the status text and reset the form. |
+| Nuxt | Verified the field hint in the server HTML. After hydration, Clear emptied the edited field. |
+| Custom theme | Regenerated and checked the theme CSS, selected the Details tab and toggled notifications. |
+
 ## Prepare source
 
 For the 1.2.0 rename follow the [Pages cutover](hosting.md#github-rename-and-the-old-playground-address)

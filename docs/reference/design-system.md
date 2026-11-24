@@ -139,6 +139,38 @@ override takes precedence. Reapply the class at a nested theme/scale boundary.
 | `--wl-alert-title-*` | inherited | subheading |
 | `--wl-segmented-*` | 13 px | control size; label line height, weight and family |
 
+Select and MultiSelect share the following font sizes. Field sizes apply to both
+the placeholder and the selected text, including comma-separated values.
+
+| Component token | Default | With `wl-type-scale` |
+| --- | --- | --- |
+| `--wl-select-font-size` | Local `--wl-input-font-size` (13.5 px by default) | `--wl-type-control-size` |
+| `--wl-select-sm-font-size` | 12.5 px | Same token |
+| `--wl-select-lg-font-size` | 14.5 px | Same token |
+| `--wl-select-option-font-size` | 13.5 px | `--wl-type-control-size` |
+| `--wl-select-message-font-size` (empty or loading) | 13 px | `--wl-type-small-size` |
+| `--wl-multiselect-chip-font-size` | 12 px | `--wl-type-small-size` |
+
+With the scale enabled, selected chips wrap when they run out of space. A long
+chip label leaves room for its remove button and the open list shows the full text.
+
+A scale on `html` reaches the field and its open list. A local section and its
+teleported list have different DOM parents. Put the same class and role values
+on the section and on `pt.overlay`. Both components accept this setting.
+
+```vue
+<script setup>
+const scale = { "--wl-type-control-size": "18px", "--wl-type-small-size": "14px" };
+const panel = { overlay: { class: "wl-type-scale", style: scale } };
+</script>
+
+<template>
+  <section class="wl-type-scale" :style="scale">
+    <WlSelect :options="['Draft', 'Published']" aria-label="Status" :pt="panel" />
+  </section>
+</template>
+```
+
 Small Segmented keeps its existing small-size role and exposes
 `--wl-segmented-sm-font-size` / `--wl-segmented-sm-line-height`. Without an explicit
 component size, it resolves `--wl-type-small-size` at the item so local semantic
@@ -159,6 +191,42 @@ own spacing-scale contract.
 `wl-text-muted` / `--wl-text-muted` is for readable explanations.
 `--wl-text-3` remains for decorative details and should not carry essential
 instructions. Actual contrast depends on the surface behind the text.
+
+### Component text, spacing and width
+
+Import `legato-ui/styles/primitives.css` and put `wl-type-scale` on the theme
+root or on the section whose text should scale. Set the role on that same
+element. A value in `rem` follows the reader's root font size. A nested theme
+restores its own defaults. Apply the class and values to a teleported panel
+through its documented pass-through section when scoping a theme locally.
+
+| Role | Examples |
+| --- | --- |
+| `--wl-type-control-size` | Tabs, menu options, date choices and pagination buttons |
+| `--wl-type-label-size` | Field labels, checkboxes and table headers |
+| `--wl-type-small-size` | Hints, counts, navigation metadata and validation messages |
+| `--wl-type-body-size` | Table cells, dialog content and page descriptions |
+| `--wl-type-subheading-size`, `--wl-type-heading-size`, `--wl-type-title-size` | Dialog titles, statistics and page headers |
+
+Standard insets and gaps use the spacing scale. Intermediate distances such as
+a 10 px menu inset use `--wl-space-unit`, which defaults to 1 px. For example:
+
+```css
+.preferences.wl-type-scale {
+  --wl-type-control-size: 1.125rem;
+  --wl-type-small-size: .875rem;
+  --wl-space-md: 1rem;
+  --wl-space-unit: .0625rem;
+}
+```
+
+`wl-fluid` also removes the caps on checkboxes and radio labels, progress bars,
+calendars and swatch grids. Steps fill the container by default and accept a local
+`--wl-steps-max-width` for narrower navigation. A local `--wl-calendar-max-width` can set a
+specific limit. Text measures such as `--wl-page-header-description-max-width`
+accept lengths such as `60ch`. A tooltip always fits the viewport. Avatar
+initials fit the selected avatar diameter. Borders, focus outlines, icon gutters,
+slider travel and one-pixel alignment offsets keep their geometric dimensions.
 
 ## Spacing, grid and surfaces
 

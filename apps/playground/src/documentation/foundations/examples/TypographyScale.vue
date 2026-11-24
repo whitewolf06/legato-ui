@@ -1,20 +1,26 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../../i18n";
 const { t } = usePlaygroundI18n();
-import { WlAccordion, WlAlert, WlCard, WlCheckbox, WlSegmented, wlTypography } from "legato-ui";
+import { WlAccordion, WlAlert, WlCard, WlCheckbox, WlField, WlInput, WlMultiSelect, WlSegmented, WlSelect, wlTypography } from "legato-ui";
 import { computed, ref } from "vue";
 const semantic = ref(false);
 const choice = ref<"draft" | "published" | null>("draft");
+const status = ref<"draft" | "published" | null>(null);
+const statuses = ref<("draft" | "published")[]>(["draft"]);
 const scale = {
-  "--wl-type-body-size": "18px", "--wl-type-body-line-height": "28px",
+  "--wl-type-body-size": "1.125rem", "--wl-type-body-line-height": "28px",
   "--wl-type-subheading-size": "22px", "--wl-type-subheading-line-height": "30px",
-  "--wl-type-control-size": "18px", "--wl-type-small-size": "14px",
+  "--wl-type-control-size": "1.125rem", "--wl-type-small-size": ".875rem",
   "--wl-type-small-line-height": "22px", "--wl-type-label-line-height": "26px"
 };
+const selectPanel = computed(() => semantic.value ? { overlay: { class: "wl-type-scale", style: scale } } : undefined);
 const mappings = [
-  ["card-title", "14px", "subheading"], ["card-subtitle", "12.5px", "small"], ["card-content", "13.5px", "body"],
-  ["accordion-title", "13.5px", "control / label"], ["accordion-body", "13px", "body"],
-  ["alert", "13px", "body"], ["alert-title", "inherit", "subheading"], ["segmented", "13px", "control / label"]
+  ["card-title-*", "14px", "subheading"], ["card-subtitle-*", "12.5px", "small"], ["card-content-*", "13.5px", "body"],
+  ["accordion-title-*", "13.5px", "control / label"], ["accordion-body-*", "13px", "body"],
+  ["alert-*", "13px", "body"], ["alert-title-*", "inherit", "subheading"], ["segmented-*", "13px", "control / label"],
+  ["select-font-size", "13.5px", "control"], ["select-option-font-size", "13.5px", "control"],
+  ["select-sm-font-size", "12.5px", "12.5px"], ["select-lg-font-size", "14.5px", "14.5px"],
+  ["select-message-font-size", "13px", "small"], ["multiselect-chip-font-size", "12px", "small"]
 ];
 const items = computed(() => [{
   key: "one", title: t("examples.team_guide_0016"), content: t("examples.team_structure_roles_and_agreements_0024")
@@ -55,8 +61,8 @@ const roleText = {
         <th scope="col">{{ t("examples.componentTypeDefault") }}</th>
         <th scope="col">wl-type-scale</th>
       </tr></thead>
-      <tbody><tr v-for="[prefix, size, role] in mappings" :key="prefix">
-        <th scope="row"><code>--wl-{{ prefix }}-*</code></th>
+      <tbody><tr v-for="[token, size, role] in mappings" :key="token">
+        <th scope="row"><code>--wl-{{ token }}</code></th>
         <td>{{ size }}</td><td><code>{{ role }}</code></td>
       </tr></tbody>
     </table>
@@ -67,6 +73,9 @@ const roleText = {
       data-space="md"
       data-testid="semantic-component-example"
     >
+      <WlField v-slot="field" :label="t('examples.selectScaleStatus')" :hint="t('examples.componentSizeRoles')">
+        <WlInput :id="field.id" :aria-describedby="field.ariaDescribedby" />
+      </WlField>
       <WlCard>
         <template #title>{{ t("examples.team_guide_0016") }}</template>
         <template #subtitle>{{ t("examples.updated_october_1_0023") }}</template>
@@ -74,6 +83,25 @@ const roleText = {
       </WlCard>
       <WlAccordion :items="items" :default-open-keys="['one']" />
       <WlAlert :title="t('examples.team_guide_0016')">{{ t("examples.team_structure_roles_and_agreements_0024") }}</WlAlert>
+      <p class="wl-text-small">{{ t("examples.selectPanelScale") }}</p>
+      <WlSelect
+        v-model="status"
+        :options="options"
+        option-label="label"
+        option-value="value"
+        :placeholder="t('examples.selectScaleStatus')"
+        :aria-label="t('examples.selectScaleStatus')"
+        :pt="selectPanel"
+      />
+      <WlMultiSelect
+        v-model="statuses"
+        :options="options"
+        option-label="label"
+        option-value="value"
+        display="chip"
+        :aria-label="t('examples.selectScaleStatuses')"
+        :pt="selectPanel"
+      />
       <WlSegmented
         v-for="size in (['sm', 'md', 'lg'] as const)"
         :key="size"

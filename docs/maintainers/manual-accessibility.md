@@ -4,6 +4,10 @@ Status: **manual execution pending; unverified accessibility accepted as a stabl
 Prepared on 2026-10-17 for review task T9.6. No NVDA, VoiceOver, Safari or mobile
 device pass is claimed by this document.
 
+On 2026-11-24 the owner deferred the manual screen-reader checks for the 1.3.0
+work on `a22b426`. A01–A10 remain **Pending** for NVDA with Firefox on Windows
+and VoiceOver with Safari on macOS and on a physical iPhone or iPad.
+
 On 2026-10-22 the owner reported being unable to perform the manual checks now.
 At that time no manual pass or waiver was granted. On 2026-10-24 the owner
 explicitly accepted `1.0.0-rc.1` with unverified manual accessibility as a known
