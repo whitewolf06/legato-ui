@@ -13,6 +13,10 @@ Legato UI 1.2.1 was published to npm `latest` on 2026-11-23.
 The downloaded tarball matched the archive tested in the release job, with
 SHA-256 `702b68c0186d4e1b79b21b4407c6ec8c75a52a7a2ffec77a010d9f88e3ce713b`. [Published package](https://www.npmjs.com/package/legato-ui/v/1.2.1) · [Release job](https://github.com/whitewolf06/legato-ui/actions/runs/45091389536/job/137424168733)
 
+On 2026-11-24 the owner checked the published 1.2.1 and 1.3.0 releases in
+their production workflow and accepted both. Manual NVDA and VoiceOver scenarios
+A01–A10 remain pending in the [accessibility protocol](manual-accessibility.md).
+
 The first stable release under the Legato name was published to npm `latest`
 on 2026-11-21 as [legato-ui@1.2.0](https://www.npmjs.com/package/legato-ui/v/1.2.0).
 The downloaded tarball matched the SHA512 recorded by the
