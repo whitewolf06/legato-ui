@@ -16,19 +16,20 @@ permissions:
   actions: read
 
 jobs:
-  build:
+  publish:
     if: >-
       github.repository_id == '1305645644' && vars.LEGATO_LANDING_REPO != '' &&
       ((github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
        (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
         github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    outputs:
-      library: ${{ steps.sources.outputs.library }}
-      landing: ${{ steps.sources.outputs.landing }}
-      release: ${{ steps.pack.outputs.release }}
-      checksum: ${{ steps.pack.outputs.checksum }}
+    timeout-minutes: 35
+    concurrency:
+      group: legato-jino-production
+      cancel-in-progress: false
+    environment:
+      name: jino-production
+      url: https://legato-ui.ru/
     env:
       LEGATO_LANDING_REPO: ${{ vars.LEGATO_LANDING_REPO }}
       LEGATO_RELEASE_ID: ${{ github.run_id }}-${{ github.run_attempt }}
@@ -75,46 +76,21 @@ jobs:
       - name: Pack verified files
         id: pack
         run: |
-          tar -czf "$RUNNER_TEMP/site.tar.gz" -C .tmp/public .
+          tar -czf .tmp/site.tar.gz -C .tmp/public .
           echo "release=$LEGATO_RELEASE_ID" >> "$GITHUB_OUTPUT"
-          echo "checksum=$(sha256sum "$RUNNER_TEMP/site.tar.gz" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: legato-static-${{ steps.pack.outputs.release }}
-          path: ${{ runner.temp }}/site.tar.gz
-          if-no-files-found: error
-          retention-days: 14
-  deploy:
-    needs: build
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    concurrency:
-      group: legato-jino-production
-      cancel-in-progress: false
-    environment:
-      name: jino-production
-      url: https://legato-ui.ru/
-    steps:
-      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: ${{ needs.build.outputs.library }}
-          persist-credentials: false
-      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: legato-static-${{ needs.build.outputs.release }}
-          path: .tmp
+          echo "checksum=$(sha256sum .tmp/site.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
       - name: Check both main branches again before switching
         run: node .github/scripts/site-sources.mjs
         env:
           GH_TOKEN: ${{ github.token }}
           LANDING_TOKEN: ${{ secrets.LEGATO_LANDING_READ_TOKEN }}
           LEGATO_LANDING_REPO: ${{ vars.LEGATO_LANDING_REPO }}
-          EXPECTED_LANDING: ${{ needs.build.outputs.landing }}
+          EXPECTED_LANDING: ${{ steps.sources.outputs.landing }}
       - name: Upload static files, switch release and verify public HTTPS
         run: bash .github/scripts/jino-deploy.sh
         env:
-          RELEASE: ${{ needs.build.outputs.release }}
-          CHECKSUM: ${{ needs.build.outputs.checksum }}
+          RELEASE: ${{ steps.pack.outputs.release }}
+          CHECKSUM: ${{ steps.pack.outputs.checksum }}
           JINO_HOST: ${{ vars.JINO_HOST }}
           JINO_USER: ${{ vars.JINO_USER }}
           JINO_DEPLOY_KEY: ${{ secrets.JINO_DEPLOY_KEY }}

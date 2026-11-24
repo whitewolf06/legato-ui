@@ -16,7 +16,7 @@ The primary site serves the Russian landing at `/`. The Pages root under `/legat
 
 With both checkouts side by side, run `pnpm dev:site` in the library. The Vite server serves the HTML landing at its root and the Vue pages at their public paths. Set `LEGATO_LANDING_DIR` to use a different landing checkout. To refresh the standalone landing header after editing the library, run `node scripts/site/landing.mjs ../legato-ui-site` with Node 24.
 
-A landing pull request builds a private review artifact. It uses the library branch of the same name when one exists, otherwise library `main`, and records both resolved commit IDs. It runs the same prerender, static HTML checks and browser interactions as production.
+A landing pull request builds the complete static site in the private repository. It uses the library branch of the same name when one exists, otherwise library `main`, and records both resolved commit IDs. It runs the same prerender, static HTML checks and browser interactions as production. Its Actions summary records the route count, archive size and SHA-256 digest. Set the landing repository variable `LEGATO_REVIEW_ARTIFACTS=true` to retain a downloadable archive when Actions storage is available.
 
 ## Connect GitHub and Jino
 
@@ -37,4 +37,4 @@ If public HTTPS checks fail, the workflow switches back and fails the deployment
 ssh "$JINO_USER@$JINO_HOST" "python3 - rollback $RELEASE" < scripts/site/switch.py
 ```
 
-Backups are kept outside the public directory. Their names identify the release that displaced them. Review disk use before removing old backups. A new run gets a fresh release ID. The GitHub **Legato website** run contains the static artifact and verification logs.
+Backups are kept outside the public directory. Their names identify the release that displaced them. Review disk use before removing old backups. A new run gets a fresh release ID. The GitHub **Legato website** run transfers the verified archive directly from its runner and records the checksum and verification logs.
