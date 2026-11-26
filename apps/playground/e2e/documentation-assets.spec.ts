@@ -112,7 +112,9 @@ test("colors resolve shipped themes, preserve alpha, copy exact CSS values and e
     await expect(assets.getByTestId("docs-color-setup").locator("pre code")).toContainText('import "legato-ui/themes/' + theme.name + '.css";');
   }
   await clipboardCapture(page);
-  await assets.locator('[data-color-group="surfaces"]').getByRole("button", { name: "Все токены раздела" }).click();
+  const surfaces = assets.locator('[data-color-group="surfaces"] details');
+  await surfaces.locator("summary").click();
+  await expect(surfaces).toHaveJSProperty("open", true);
   await background.getByRole("button", { name: "Копировать переменную --wl-bg", exact: true }).click();
   await expect(background.getByRole("status")).toHaveText("Скопировано: var(--wl-bg)");
   await expect(page.locator("html")).toHaveAttribute("data-asset-copied", "var(--wl-bg)");

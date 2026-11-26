@@ -172,7 +172,7 @@ test("navigation, Back and Forward preserve the repository subpath", async ({ pa
   await expect(page.getByRole("heading", { name: "Дизайн-система", exact: true })).toBeVisible();
   expectPagesLocation(page, "system");
 
-  await page.locator(".legato-head [data-site-link=docs]").click();
+  await navigateMainView(page, "Документация");
   await expect(page.getByRole("heading", { name: "Документация", exact: true })).toBeVisible();
   expectPagesLocation(page, "docs");
 
@@ -418,7 +418,7 @@ test("font presentation preserves theme, faces and anchors under the Pages subpa
   })));
   expectPagesLocation(page, "font");
   await expectNoPageOverflow(page);
-  await page.locator(".legato-head [data-site-link=docs]").click();
+  await navigateMainView(page, "Документация");
   await expect(page.getByTestId("docs-page")).toBeVisible();
   expectPagesLocation(page, "docs");
   expect(new URL(page.url()).searchParams.get("theme")).toBe("graphite");
@@ -463,16 +463,16 @@ test("quality documentation keeps bookmarked anchors and theme links under the P
   await page.reload();
   await expect(environment).toBeInViewport();
   await expectNoPageOverflow(page);
-  await page.locator(".legato-head-nav [data-site-link=catalog]").click();
+  await navigateMainView(page, "Компоненты");
   await expect(page.getByTestId("component-catalog")).toBeVisible();
   await footer.click();
   await expect(quality).toBeVisible();
-  await page.locator(".legato-head [data-site-link=docs]").click();
+  await navigateMainView(page, "Документация");
   const docs = await openDocumentationMenu(page);
   await docs.locator(".docs-sidebar").getByRole("link", { name: "Качество и совместимость", exact: true }).click();
   await expect(quality).toBeVisible();
   await expect(docs.locator(".docs-quality-link")).toHaveAttribute("aria-current", "page");
-  await page.locator(".legato-head-nav [data-site-link=catalog]").click();
+  await navigateMainView(page, "Компоненты");
   await page.locator(".pg-top").getByRole("button", { name: "Поиск", exact: true }).click();
   const search = page.getByRole("combobox", { name: "Командная палитра", exact: true });
   await search.fill("качество");

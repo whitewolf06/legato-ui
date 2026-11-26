@@ -67,12 +67,24 @@ async function openNavigationOverlay(trigger: Locator, overlay: Locator): Promis
   await expect(overlay).toBeVisible();
 }
 
+async function sharedNavigationLink(page: Page, label: string): Promise<{ link: Locator; trigger?: Locator } | undefined> {
+  const link = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
+  const trigger = page.locator(".legato-head-menu-toggle");
+  if (!await trigger.isVisible()) return await link.isVisible() ? { link } : undefined;
+  await expect(page.locator("#app")).toHaveAttribute("data-v-app", "");
+  if (await trigger.getAttribute("aria-expanded") !== "true") await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(link).toBeVisible();
+  return { link, trigger };
+}
+
 /** Navigate through a visible desktop destination, its overflow menu, or the mobile drawer. */
 export async function navigateMainView(page: Page, label: string): Promise<void> {
   await expect(page.locator(".pg-header-inner")).toBeVisible();
-  const sharedLink = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
-  if (await sharedLink.isVisible()) {
-    await sharedLink.click();
+  const shared = await sharedNavigationLink(page, label);
+  if (shared) {
+    await shared.link.click();
+    if (shared.trigger) await expect(shared.trigger).toHaveAttribute("aria-expanded", "false");
     return;
   }
   await page.evaluate(() => document.fonts.ready);
@@ -117,9 +129,14 @@ export async function expectMainViewCurrent(page: Page, label: string): Promise<
   // Wait for the actual destination before reopening More to inspect its state.
   await expect(page.locator(marker)).toBeVisible();
   await expect(page.locator(".pg-header-inner")).toBeVisible();
-  const sharedLink = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
-  if (await sharedLink.isVisible()) {
-    await expect(sharedLink).toHaveAttribute("aria-current", "page");
+  const shared = await sharedNavigationLink(page, label);
+  if (shared) {
+    await expect(shared.link).toHaveAttribute("aria-current", "page");
+    if (shared.trigger) {
+      await page.keyboard.press("Escape");
+      await expect(shared.trigger).toHaveAttribute("aria-expanded", "false");
+      await expect(shared.trigger).toBeFocused();
+    }
     return;
   }
   const navigation = page.locator(".pg-views");
