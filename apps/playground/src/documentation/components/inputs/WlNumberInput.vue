@@ -11,7 +11,7 @@ const price = ref(12.5);
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlNumberInput">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_and_a_bounded_range_0772") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_and_a_bounded_range_0772") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"
@@ -46,7 +46,7 @@ const price = ref(12.5);
       <p class="wl-text-small wl-text-muted">{{ t("examples.buttons_and_apply_step_manual_input_commits_on_enter_or_blur_a_0780") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.decimal_input_and_states_0781") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.decimal_input_and_states_0781") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField id="docs-number-price" v-slot="{ id }" :label="t('examples.price_step_0_5_0782')"><WlNumberInput
           :id="id"

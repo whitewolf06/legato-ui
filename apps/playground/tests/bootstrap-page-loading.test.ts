@@ -25,7 +25,7 @@ vi.mock("legato-ui", () => ({
 vi.mock("../src/App.vue", () => ({ default: {} }));
 vi.mock("../src/page-loaders", () => ({
   preloadPlaygroundPage: startup.preload,
-  componentGuideLoaders: { standard: startup.guide }
+  componentGuideLoaders: { button: startup.guide, standard: startup.guide }
 }));
 vi.mock("../src/i18n", () => ({ playgroundI18n: {}, playgroundLocale: { value: "ru" }, preparePlaygroundPage: startup.messages, ensurePlaygroundMessages: async () => {} }));
 vi.mock("../src/router", () => ({ createPlaygroundRouter: () => startup.router }));
@@ -57,7 +57,11 @@ afterEach(() => {
 });
 
 describe("initial page preparation", () => {
-  it("keeps prerendered route content outside the startup screen until mounting", async () => {
+  it.each([
+    ["/ru/docs/components/WlSelect/", "WlSelect"],
+    ["/ru/docs/components/", "WlButton"]
+  ])("keeps the prerendered guide at %s on screen until mounting", async (path, component) => {
+    window.history.replaceState(null, "", path);
     const page = deferred<unknown>();
     const messages = deferred<boolean>();
     const guide = deferred<unknown>();
@@ -65,10 +69,10 @@ describe("initial page preparation", () => {
     startup.preload.mockReturnValue(page.promise);
     startup.messages.mockReturnValue(messages.promise);
     document.documentElement.setAttribute("data-playground-prerendered", "");
-    document.getElementById("app")!.innerHTML = "<main><h1>WlSelect</h1></main>";
+    document.getElementById("app")!.innerHTML = `<main data-docs-component="${component}"><h1>${component}</h1></main>`;
     await import("../src/bootstrap");
     expect(document.documentElement.dataset.wlBoot).toBeUndefined();
-    expect(document.querySelector("h1")?.textContent).toBe("WlSelect");
+    expect(document.querySelector("h1")?.textContent).toBe(component);
     expect(startup.app.mount).not.toHaveBeenCalled();
     page.resolve({ default: {} });
     messages.resolve(true);

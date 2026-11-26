@@ -10,7 +10,7 @@ const touched = ref(false);
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlPasswordInput">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_and_password_visibility_0794") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_and_password_visibility_0794") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"
@@ -36,7 +36,7 @@ const touched = ref(false);
       <p class="wl-text-small wl-text-muted">{{ t("examples.the_show_password_button_changes_only_visibility_the_model_val_0797") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.application_validation_and_disabled_0798") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.application_validation_and_disabled_0798") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-password-validation"

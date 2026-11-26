@@ -14,13 +14,13 @@ const helpId = `tags-example-${useWlId()}`;
   <div class="wl-stack" data-space="md" data-review-example="WlTagsInput">
     <WlTagsInput
       v-model="tags"
-      v-bind="preview"
       :aria-label="t('documentation.strings.generatedWlTagsInputLabel')"
       :aria-describedby="helpId"
       :placeholder="t('documentation.strings.generatedWlTagsInputPlaceholder')"
       :max="3"
       :validator="(value) => value.length >= 2"
       :invalid="!!rejected"
+      v-bind="preview"
       @reject="(value) => rejected = value"
       @add="rejected = ''"
     />

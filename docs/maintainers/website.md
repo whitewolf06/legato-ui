@@ -16,6 +16,14 @@ The primary site serves the Russian landing at `/`. The Pages root under `/legat
 
 With both checkouts side by side, run `pnpm dev:site` in the library. The Vite server serves the HTML landing at its root and the Vue pages at their public paths. Set `LEGATO_LANDING_DIR` to use a different landing checkout. To refresh the standalone landing header after editing the library, run `node scripts/site/landing.mjs ../legato-ui-site` with Node 24.
 
+The Playground build also emits the interactive entry at `examples/index.html`.
+Each project lives under `apps/playground/src/application-examples/modules` and
+loads on demand. The `app` query selects a project and `view` selects a dashboard
+page. The landing sync copies the gallery stylesheet and screenshots into the
+landing's assets. The project titles and links are part of the indexed pages.
+The interactive entry is excluded
+from the sitemap.
+
 A landing pull request builds the complete static site in the private repository. It uses the library branch of the same name when one exists, otherwise library `main`, and records both resolved commit IDs. It runs the same prerender, static HTML checks and browser interactions as production. Its Actions summary records the route count, archive size and SHA-256 digest. Set the landing repository variable `LEGATO_REVIEW_ARTIFACTS=true` to retain a downloadable archive when Actions storage is available.
 
 ## Connect GitHub and Jino

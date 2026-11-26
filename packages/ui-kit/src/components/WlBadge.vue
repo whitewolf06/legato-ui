@@ -73,6 +73,8 @@ const hidden = computed(() => props.dot && !named.value ? true : rootAttrs.value
     :role="role"
     :aria-hidden="hidden"
   >
-    <slot v-if="!dot" :value="value" :display-value="displayValue">{{ displayValue }}</slot>
+    <slot v-if="!dot" :value="value" :display-value="displayValue">
+      <span class="wl-badge__value">{{ displayValue }}</span>
+    </slot>
   </span>
 </template>

@@ -1,116 +1,49 @@
 <script setup lang="ts">
+import { WlButton, WlCheckbox, type WlComponentManifest, WlSelect } from "legato-ui";
+import { computed, nextTick, ref, watch } from "vue";
 import { usePlaygroundI18n } from "../i18n";
-const props = withDefaults(defineProps<{ entry: WlComponentManifest; layout?: "compact" | "documentation"; headingPrefix?: string }>(), { layout: "compact" });
-const { t } = usePlaygroundI18n();
-import type { WlComponentManifest } from "legato-ui";
-import { WlButton, WlCheckbox, WlInput, WlNumberInput, WlSelect } from "legato-ui";
-import { type Component, computed, defineAsyncComponent, nextTick, ref, watch } from "vue";
-import PlaygroundPageLoading from "../PlaygroundPageLoading.vue";
 import { consumerSource } from "./code";
 import CodePanel from "./CodePanel.vue";
-import { acceptsDocumentationValue, documentationComplexProps, type DocumentationControl, documentationDefaults, documentationPresets } from "./documentation-controls";
+import { documentationDefaults } from "./documentation-controls";
+import { playgroundExample } from "./example-component";
 import { useLazySource } from "./lazy-source";
-import { documentationControls, stateCases, stateControls } from "./states";
-const documentationLayout = computed(() => props.layout === "documentation");
-const headingPrefix = computed(() => props.headingPrefix ?? "docs-" + props.entry.name.toLowerCase());
-const modules = import.meta.glob<{ default: Component }>("./examples/*.vue");
-const sources = import.meta.glob<string>("./examples/*.vue", { query: "?raw", import: "default" });
-const examples = Object.fromEntries(Object.entries(modules).map(([path, loader]) => [
-  path, defineAsyncComponent({ loader, loadingComponent: PlaygroundPageLoading, errorComponent: PlaygroundPageLoading, delay: 0 })
-]));
-const example = computed(() => examples[`./examples/${props.entry.name}.vue`]);
-const { source: canonicalSource, loading: sourceLoading, error: sourceError, reload: reloadSource }
-  = useLazySource(() => sources[`./examples/${props.entry.name}.vue`]);
-const controls = computed<DocumentationControl[]>(() => documentationLayout.value
-  ? documentationControls(props.entry, canonicalSource.value)
-  : stateControls(props.entry).map((control) => ({ ...control, editor: control.type === "boolean" ? "checkbox" : "select" })));
-const canonicalDefaults = computed(() => documentationDefaults(props.entry, canonicalSource.value));
-const complexProps = computed(() => documentationComplexProps(props.entry, controls.value));
-const presets = computed(() => documentationLayout.value ? documentationPresets(props.entry) : []);
-const presetId = ref("default");
+import { stateCases, stateControls } from "./states";
+
+const props = defineProps<{ entry: WlComponentManifest }>();
+const { t } = usePlaygroundI18n();
+const example = computed(() => playgroundExample(props.entry.name));
+const { source: raw, loading, error, reload } = useLazySource(() => example.value.loadSource);
+const controls = computed(() => stateControls(props.entry));
+const defaults = computed(() => documentationDefaults(props.entry, raw.value));
 const cases = computed(() => stateCases(props.entry));
 const overrides = ref<Record<string, unknown>>({});
+const source = computed(() => consumerSource(raw.value, overrides.value));
 const revision = ref(0);
 const preview = ref<HTMLElement | null>(null);
 const focused = ref(false);
 const hovered = ref(false);
 const missingFocusTarget = ref(false);
+
 function controlValue(name: string, fallback?: unknown): unknown {
-  return Object.prototype.hasOwnProperty.call(overrides.value, name)
-    ? overrides.value[name]
-    : canonicalDefaults.value[name] ?? fallback;
+  return Object.prototype.hasOwnProperty.call(overrides.value, name) ? overrides.value[name] : defaults.value[name] ?? fallback;
 }
-function textValue(control: DocumentationControl): string {
-  const value = controlValue(control.name, control.default);
-  return typeof value === "string" ? value : "";
-}
-function selectValue(control: DocumentationControl, icon = false): string | number | undefined {
-  const fallback = icon ? control.default : control.default ?? control.values?.[0];
-  const value = controlValue(control.name, fallback);
-  if (typeof value !== "string" && typeof value !== "number") return undefined;
-  return (icon && value === "") || control.values?.some((option) => Object.is(option, value)) ? value : undefined;
-}
-function numericValue(control: DocumentationControl): number | undefined {
-  const value = controlValue(control.name, control.default);
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
-}
-function numberBounds(control: DocumentationControl): { min: number; max: number } {
-  const min = control.name === "max" ? controlValue("min") : undefined;
-  const max = control.name === "min" ? controlValue("max") : undefined;
-  return {
-    min: typeof min === "number" ? min : control.numberMin ?? -1e12,
-    max: typeof max === "number" ? max : control.numberMax ?? 1e12
-  };
-}
-function setValue(control: DocumentationControl, value: unknown): void {
-  if (!acceptsDocumentationValue(control, value)) return;
-  if (control.editor === "number") {
-    const bounds = numberBounds(control);
-    if (typeof value !== "number" || value < bounds.min || value > bounds.max) return;
-  }
-  overrides.value = { ...overrides.value, [control.name]: value };
-}
-function initializeNumber(control: DocumentationControl): void {
-  const bounds = numberBounds(control);
-  setValue(control, Math.max(bounds.min, Math.min(bounds.max, 0)));
-}
-function clearOverride(name: string): void {
-  const next = { ...overrides.value };
-  delete next[name];
-  // Restoring one bound must not leave the other override outside the canonical range.
-  const restored = canonicalDefaults.value[name];
-  if (name === "min" && typeof restored === "number" && typeof next.max === "number" && next.max < restored) delete next.max;
-  if (name === "max" && typeof restored === "number" && typeof next.min === "number" && next.min > restored) delete next.min;
-  overrides.value = next;
-}
-function iconOptions(control: DocumentationControl): { label: string; value: string | number }[] {
-  return [{ label: t("shell.design_system.ComponentExplorer.text374"), value: "" }, ...(control.values ?? []).map((value) => ({ label: String(value), value }))];
-}
-function choosePreset(value: unknown): void {
-  if (typeof value !== "string" || (value !== "default" && !presets.value.some((preset) => preset.id === value))) return;
-  const next = { ...overrides.value };
-  for (const preset of presets.value) for (const key of Object.keys(preset.props)) delete next[key];
-  const preset = presets.value.find((item) => item.id === value);
-  overrides.value = { ...next, ...(preset?.props ?? {}) };
-  presetId.value = value;
+function selectValue(name: string, choices: readonly (string | number)[], fallback: unknown) {
+  return choices.find((value) => Object.is(value, controlValue(name, fallback ?? choices[0])));
 }
 function focusOut(event: FocusEvent): void {
   focused.value = event.relatedTarget instanceof Node && Boolean(preview.value?.contains(event.relatedTarget));
 }
-const source = computed(() => consumerSource(canonicalSource.value, overrides.value));
-function reset(): void {
-  overrides.value = {};
-  presetId.value = "default";
+function chooseCase(value: Record<string, unknown>): void {
+  overrides.value = { ...value };
   revision.value++;
+}
+function reset(): void {
+  chooseCase({});
   focused.value = false;
   hovered.value = false;
   missingFocusTarget.value = false;
 }
 watch(() => props.entry.name, reset);
-function chooseCase(value: Record<string, unknown>): void {
-  overrides.value = { ...value };
-  revision.value++;
-}
 async function focusPreview(): Promise<void> {
   await nextTick();
   const candidates = preview.value?.querySelectorAll<HTMLElement>('button:not(:disabled), input:not(:disabled):not([type="hidden"]), textarea:not(:disabled), select:not(:disabled), [tabindex="0"]:not([aria-disabled="true"]), a[href]');
@@ -122,30 +55,20 @@ async function focusPreview(): Promise<void> {
 
 <template>
   <div
-    class="ds-explorer"
-    :class="documentationLayout ? 'docs-explorer-workspace' : 'wl-stack'"
+    class="ds-explorer wl-stack"
     data-space="lg"
     data-testid="ds-explorer"
     :data-component="entry.name"
   >
-    <section
-      class="ds-explorer-settings wl-stack"
-      :class="{ 'docs-explorer-settings': documentationLayout }"
-      data-space="lg"
-      :aria-labelledby="documentationLayout ? headingPrefix + '-controls' : undefined"
-    >
-      <div class="wl-inline" :data-space="documentationLayout ? 'sm' : 'md'">
-        <h2 v-if="documentationLayout" :id="headingPrefix + '-controls'" class="wl-text-subheading">
-          {{ t('shell.design_system.ComponentExplorer.text375') }}
-        </h2>
-        <h4 v-else class="wl-text-subheading">{{ t('shell.design_system.ComponentExplorer.text376') }}</h4>
+    <section class="ds-explorer-settings wl-stack" data-space="lg">
+      <div class="wl-inline" data-space="md">
+        <h4 class="wl-text-subheading">{{ t('shell.design_system.ComponentExplorer.text376') }}</h4>
         <WlButton
           size="sm"
           variant="ghost"
           :aria-label="t('shell.design_system.ComponentExplorer.text377')"
           @click="reset"
-        >{{ documentationLayout ? t('shell.design_system.ComponentExplorer.text378')
-          : t('shell.design_system.ComponentExplorer.text379') }}</WlButton>
+        >{{ t('shell.design_system.ComponentExplorer.text379') }}</WlButton>
       </div>
       <div v-if="controls.length" class="ds-explorer-controls">
         <div
@@ -155,119 +78,24 @@ async function focusPreview(): Promise<void> {
           data-space="xs"
         >
           <WlCheckbox
-            v-if="control.editor === 'checkbox'"
+            v-if="control.type === 'boolean'"
             :model-value="Boolean(controlValue(control.name, control.default))"
-            :aria-describedby="documentationLayout && control.description ? headingPrefix + '-control-' + control.name : undefined"
-            @update:model-value="setValue(control, $event)"
+            @update:model-value="overrides[control.name] = $event"
           >{{ control.name }}</WlCheckbox>
           <template v-else>
             <span class="wl-text-small">{{ control.name }}</span>
-            <WlInput
-              v-if="control.editor === 'text'"
-              :model-value="textValue(control)"
-              :type="control.inputType ?? 'text'"
-              :aria-label="t('shell.design_system.ComponentExplorer.text380') + control.name"
-              :placeholder="controlValue(control.name, control.default) === undefined
-                ? t('shell.design_system.ComponentExplorer.text381') : undefined"
-              :aria-describedby="control.description ? headingPrefix + '-control-' + control.name : undefined"
-              @update:model-value="setValue(control, $event)"
-            />
-            <template v-else-if="control.editor === 'number'">
-              <WlNumberInput
-                v-if="numericValue(control) !== undefined"
-                :model-value="numericValue(control)!"
-                :min="numberBounds(control).min"
-                :max="numberBounds(control).max"
-                :step="control.numberStep ?? 1"
-                :aria-label="t('shell.design_system.ComponentExplorer.text382') + control.name"
-                :aria-describedby="control.description ? headingPrefix + '-control-' + control.name : undefined"
-                @update:model-value="setValue(control, $event)"
-              />
-              <div v-else class="wl-inline" data-space="sm">
-                <span class="wl-text-small wl-text-muted">{{ t('shell.design_system.ComponentExplorer.text383') }}</span>
-                <WlButton
-                  size="sm"
-                  variant="secondary"
-                  :aria-label="t('shell.design_system.ComponentExplorer.text384') + control.name"
-                  @click="initializeNumber(control)"
-                >{{ t('shell.design_system.ComponentExplorer.text385') }}</WlButton></div>
-            </template>
             <WlSelect
-              v-else-if="control.editor === 'icon'"
-              :model-value="selectValue(control, true)"
-              :aria-label="t('shell.design_system.ComponentExplorer.text386') + control.name"
-              :placeholder="t('shell.design_system.ComponentExplorer.text387')"
-              :aria-describedby="control.description ? headingPrefix + '-control-' + control.name : undefined"
-              :options="iconOptions(control)"
-              option-label="label"
-              option-value="value"
-              @update:model-value="setValue(control, $event)"
-            />
-            <WlSelect
-              v-else
-              :model-value="selectValue(control)"
+              :model-value="selectValue(control.name, control.values ?? [], control.default)"
               :aria-label="t('shell.design_system.ComponentExplorer.text388') + control.name"
-              :aria-describedby="documentationLayout && control.description ? headingPrefix + '-control-' + control.name : undefined"
               :options="[...(control.values ?? [])]"
-              @update:model-value="setValue(control, $event)"
+              @update:model-value="control.values?.includes($event as string | number) && (overrides[control.name] = $event)"
             />
           </template>
-          <WlButton
-            v-if="documentationLayout && Object.prototype.hasOwnProperty.call(overrides, control.name)"
-            size="sm"
-            variant="ghost"
-            :aria-label="t('shell.design_system.ComponentExplorer.text389') + control.name"
-            @click="clearOverride(control.name)"
-          >{{ t('shell.design_system.ComponentExplorer.text390') }}</WlButton>
-          <p
-            v-if="documentationLayout && control.description"
-            :id="headingPrefix + '-control-' + control.name"
-            class="wl-text-small wl-text-muted"
-          >{{ control.description }}</p>
         </div>
       </div>
-      <p v-else-if="documentationLayout" class="wl-text-small wl-text-muted">
-        {{ entry.name === 'WlToast' || entry.name === 'WlConfirmDialog'
-          ? t('shell.design_system.ComponentExplorer.text391') : t('shell.design_system.ComponentExplorer.text392') }}
-      </p>
-      <div v-if="presets.length" class="wl-stack" data-space="xs">
-        <span class="wl-text-small">{{ t('shell.design_system.ComponentExplorer.text393') }}</span>
-        <WlSelect
-          :model-value="presetId"
-          :aria-label="t('shell.design_system.ComponentExplorer.text394')"
-          :options="[
-            { label: t('shell.design_system.ComponentExplorer.text395'), value: 'default' },
-            ...presets.map((preset) => ({ label: preset.label, value: preset.id }))
-          ]"
-          option-label="label"
-          option-value="value"
-          @update:model-value="choosePreset"
-        />
-        <p class="wl-text-small wl-text-muted">{{ t('shell.design_system.ComponentExplorer.text396') }}</p>
-      </div>
-      <p v-if="documentationLayout && complexProps.length" class="wl-text-small wl-text-muted">
-        {{ t('shell.design_system.ComponentExplorer.text397') }}
-        <code>{{ complexProps.join(', ') }}</code>{{ t('shell.design_system.ComponentExplorer.text398') }}
-        <a :href="'#' + headingPrefix + '-props'">API</a>{{ t('shell.design_system.ComponentExplorer.text399') }}
-      </p>
-      <p
-        v-if="documentationLayout && (entry.name === 'WlMenu' || entry.name === 'WlAutocomplete')"
-        class="wl-text-small wl-text-muted"
-      >
-        {{ entry.name === 'WlMenu' ? t('shell.design_system.ComponentExplorer.text400')
-          : t('shell.design_system.ComponentExplorer.text401') }} {{ t('shell.design_system.ComponentExplorer.text402') }}
-        <a :href="'#' + headingPrefix + '-examples'">{{ t('shell.design_system.ComponentExplorer.text403') }}</a>.
-      </p>
     </section>
     <div class="ds-explorer-output wl-stack" data-space="lg">
-      <section
-        class="wl-stack"
-        :data-space="documentationLayout ? 'md' : 'lg'"
-        :aria-labelledby="documentationLayout ? headingPrefix + '-preview' : undefined"
-      >
-        <h2 v-if="documentationLayout" :id="headingPrefix + '-preview'" class="wl-text-subheading">
-          {{ t('shell.design_system.ComponentExplorer.text404') }}
-        </h2>
+      <section class="wl-stack" data-space="lg">
         <!-- This boundary only observes the existing demo's hover/focus state. -->
         <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
         <div
@@ -280,8 +108,8 @@ async function focusPreview(): Promise<void> {
           @mouseleave="hovered = false"
         >
           <component
-            :is="example"
-            v-if="example"
+            :is="example.component"
+            v-if="example.component"
             :key="entry.name + '-' + revision"
             :preview="overrides"
           />
@@ -301,30 +129,10 @@ async function focusPreview(): Promise<void> {
         </div>
         <p class="wl-text-small wl-text-muted">
           {{ t('shell.design_system.ComponentExplorer.text414') }}
-          {{ documentationLayout ? t('shell.design_system.ComponentExplorer.text415')
-            : t('shell.design_system.ComponentExplorer.text416') }} {{ t('shell.design_system.ComponentExplorer.text417') }}
+          {{ t('shell.design_system.ComponentExplorer.text416') }} {{ t('shell.design_system.ComponentExplorer.text417') }}
         </p>
       </section>
-      <section
-        v-if="documentationLayout"
-        class="wl-stack"
-        data-space="md"
-        :aria-labelledby="headingPrefix + '-source'"
-        data-testid="ds-example-source"
-      >
-        <h2 v-if="documentationLayout" :id="headingPrefix + '-source'" class="wl-text-subheading">
-          {{ t('shell.design_system.ComponentExplorer.text418') }}
-        </h2>
-        <CodePanel
-          :source="source"
-          :loading="sourceLoading"
-          :load-error="Boolean(sourceError)"
-          :expanded="documentationLayout"
-          :title="documentationLayout ? t('shell.design_system.ComponentExplorer.text419') : undefined"
-          @retry="reloadSource"
-        />
-      </section>
-      <details v-if="!documentationLayout" class="ds-state-matrix">
+      <details class="ds-state-matrix">
         <summary>{{ t('shell.design_system.ComponentExplorer.text420') }} {{ cases.length }}</summary>
         <div class="wl-inline" data-space="sm"><WlButton
           v-for="item in cases"
@@ -339,11 +147,10 @@ async function focusPreview(): Promise<void> {
         {{ t('shell.design_system.ComponentExplorer.text421') }}
       </p>
       <CodePanel
-        v-if="!documentationLayout"
         :source="source"
-        :loading="sourceLoading"
-        :load-error="Boolean(sourceError)"
-        @retry="reloadSource"
+        :loading="loading"
+        :load-error="Boolean(error)"
+        @retry="reload"
       />
     </div>
   </div>
@@ -368,24 +175,4 @@ async function focusPreview(): Promise<void> {
 .ds-state-matrix summary { cursor: pointer; padding-block: var(--wl-space-sm); color: var(--wl-text-muted); }
 .ds-state-matrix > div { padding-top: var(--wl-space-sm); }
 .ds-explorer-control, .ds-explorer-settings, .ds-explorer-output { min-width: 0; }
-.docs-explorer-workspace {
-  display: grid;
-  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-  gap: var(--wl-space-xl);
-  align-items: start;
-  min-width: 0;
-}
-.docs-explorer-settings {
-  padding: var(--wl-space-lg);
-  border: 1px solid var(--wl-border);
-  border-radius: var(--wl-corner-surface);
-  background: var(--wl-bg-soft);
-}
-.docs-explorer-settings .ds-explorer-controls { grid-template-columns: minmax(0, 1fr); align-items: start; gap: var(--wl-space-lg); }
-.docs-explorer-settings .wl-select, .docs-explorer-settings .wl-input-wrap, .docs-explorer-settings .wl-stepper {
-  width: 100%;
-  min-width: 0;
-}
-.docs-explorer-settings code { overflow-wrap: anywhere; }
-@media (max-width: 860px) { .docs-explorer-workspace { grid-template-columns: minmax(0, 1fr); } }
 </style>

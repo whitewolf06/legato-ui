@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../../i18n";
 const { t } = usePlaygroundI18n();
-import { WlIcon, WlIconButton, type WlIconButtonVariant } from "legato-ui";
+import { WlIcon, WlIconButton, type WlIconButtonVariant, type WlTone } from "legato-ui";
 import { ref } from "vue";
 const variants = ["ghost", "secondary", "soft"] as const satisfies readonly WlIconButtonVariant[];
+const tones = ["neutral", "accent", "info", "success", "warning", "danger"] as const satisfies readonly WlTone[];
 const active = ref(false);
 const message = ref(t("examples.click_an_icon_button_0472"));
 </script>
@@ -18,6 +19,22 @@ const message = ref(t("examples.click_an_icon_button_0472"));
       :aria-label="t('examples.search_0473') + variant"
       @click="message = t('examples.search_selected_0474') + variant"
     /></div>
+    <div class="wl-inline" data-space="md">
+      <div
+        v-for="tone in tones"
+        :key="tone"
+        class="wl-inline"
+        data-space="xs"
+      >
+        <WlIconButton
+          icon="search"
+          variant="soft"
+          :tone="tone"
+          :aria-label="t('examples.search_0473') + tone"
+        />
+        <span class="wl-text-small">{{ tone }}</span>
+      </div>
+    </div>
     <div class="wl-inline" data-space="md">
       <WlIconButton
         icon="bell"

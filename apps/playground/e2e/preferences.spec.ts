@@ -160,12 +160,12 @@ test("all four home metric links open their section and preserve preferences and
 });
 
 test("sidebar components are alphabetical, searchable, clearable, and keep the chosen page on desktop and mobile", async ({ page }) => {
-  await page.goto("/?view=docs&lang=ru&theme=system");
+  await page.goto("/?view=docs&section=components&lang=ru&theme=system");
   const docs = await openDocumentationMenu(page);
   const menu = docs.locator(".docs-menu");
   const compact = await menu.locator("summary").isVisible();
   const catalog = docs.locator("#docs-component-catalog");
-  await expect(catalog.getByRole("button")).toHaveCount(wlManifest.length);
+  await expect(catalog.getByRole("link")).toHaveCount(wlManifest.length);
   for (const group of await catalog.locator(".docs-catalog-group").all()) {
     const names = await group.locator(".docs-component-name").allTextContents();
     expect(names).toEqual([...names].sort((left, right) => left.localeCompare(right, "en")));
@@ -174,13 +174,13 @@ test("sidebar components are alphabetical, searchable, clearable, and keep the c
   await search.fill("FiLe");
   await expect(catalog.locator(".docs-component-name")).toHaveText(["WlFilePicker", "WlFileUpload"]);
   await expect(catalog.locator(".docs-catalog-group")).toHaveCount(1);
-  await catalog.getByRole("button", { name: "WlFilePicker", exact: true }).click();
+  await catalog.getByRole("link", { name: "WlFilePicker", exact: true }).click();
   await expect(docs.getByRole("heading", { name: "WlFilePicker", level: 1, exact: true })).toBeVisible();
   await expect(menu).toHaveJSProperty("open", !compact);
   await openDocumentationMenu(page);
   await expect(search).toHaveValue("FiLe");
   // Selecting the current component must also close compact navigation.
-  await catalog.getByRole("button", { name: "WlFilePicker", exact: true }).click();
+  await catalog.getByRole("link", { name: "WlFilePicker", exact: true }).click();
   await expect(menu).toHaveJSProperty("open", !compact);
   await openDocumentationMenu(page);
   await search.fill("zzzx-no-component");
@@ -189,15 +189,24 @@ test("sidebar components are alphabetical, searchable, clearable, and keep the c
   await docs.getByRole("button", { name: "Очистить поиск", exact: true }).click();
   await expect(search).toHaveValue("");
   await expect(search).toBeFocused();
-  await expect(catalog.getByRole("button")).toHaveCount(wlManifest.length);
+  await expect(catalog.getByRole("link")).toHaveCount(wlManifest.length);
   await search.fill("button");
   await search.press("Escape");
   await expect(search).toHaveValue("");
   await expect(search).toBeFocused();
-  await expect(catalog.getByRole("button")).toHaveCount(wlManifest.length);
+  const outlineFits = await search.evaluate((input, compact) => {
+    const scrollport = input.closest<HTMLElement>(compact ? ".docs-menu-content" : ".docs-sidebar")!;
+    const { left, right } = input.getBoundingClientRect();
+    const clipLeft = scrollport.getBoundingClientRect().left + scrollport.clientLeft;
+    const style = getComputedStyle(input);
+    const extent = parseFloat(style.outlineWidth) + parseFloat(style.outlineOffset);
+    return extent > 0 && left - extent >= clipLeft && right + extent <= clipLeft + scrollport.clientWidth;
+  }, compact);
+  expect(outlineFits, "The catalog scrollport has room for the focused search outline").toBe(true);
+  await expect(catalog.getByRole("link")).toHaveCount(wlManifest.length);
   await expect(docs.getByText("Ничего не найдено", { exact: true })).toHaveCount(0);
   await expect(docs.getByRole("heading", { name: "WlFilePicker", level: 1, exact: true })).toBeVisible();
-  await expect(catalog.getByRole("button", { name: "WlFilePicker", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(catalog.getByRole("link", { name: "WlFilePicker", exact: true })).toHaveAttribute("aria-current", "page");
 });
 
 test("blocked local storage still permits automatic detection and manual preference changes", async ({ page }) => {

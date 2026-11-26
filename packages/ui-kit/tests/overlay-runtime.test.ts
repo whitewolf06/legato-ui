@@ -26,7 +26,7 @@ function anchoredHarness(onOpen = vi.fn(), onClose = vi.fn(), panelStyle?: strin
       overlay = useAnchoredOverlay({ onOpen, onClose });
       return () => h("div", [
         h("button", { onClick: overlay.show }, "Open"),
-        overlay.visible.value && h("section", { ref: overlay.panel, style: panelStyle }, "Panel")
+        overlay.visible.value && h("section", { ref: overlay.panel, style: [panelStyle, overlay.style.value] }, "Panel")
       ]);
     }
   });
@@ -160,10 +160,12 @@ describe("overlay listener and positioning lifecycle", () => {
   });
 
   it("reads the rendered panel layer before opening after a settled mount and reopening", async () => {
-    const openings: { connected: boolean; layer: string | undefined }[] = [];
+    const openings: { connected: boolean; layer: string | undefined; position: string | undefined; visibility: string | undefined }[] = [];
     const onOpen = vi.fn(() => openings.push({
       connected: state.overlay.panel.value?.isConnected ?? false,
-      layer: state.overlay.style.value.zIndex
+      layer: state.overlay.style.value.zIndex,
+      position: state.overlay.panel.value?.style.position,
+      visibility: state.overlay.panel.value?.style.visibility
     }));
     const state = anchoredHarness(onOpen, vi.fn(), "position:absolute;z-index:80");
     await flushPromises();
@@ -171,7 +173,7 @@ describe("overlay listener and positioning lifecycle", () => {
     for (let cycle = 0; cycle < 2; cycle += 1) {
       state.anchor.element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       await flushPromises();
-      expect(openings[cycle]).toEqual({ connected: true, layer: "80" });
+      expect(openings[cycle]).toEqual({ connected: true, layer: "80", position: "fixed", visibility: "" });
       expect(state.overlay.style.value.position).toBe("fixed");
       state.overlay.hide();
       await flushPromises();

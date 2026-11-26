@@ -63,7 +63,12 @@ watch(() => props.image, () => {
           :alt="name ?? label ?? ''"
           @error="imageFailed = true"
         />
-        <span v-else v-bind="section('label')" :aria-label="name">{{ initials }}</span>
+        <span
+          v-else
+          v-bind="section('label')"
+          class="wl-avatar__initials"
+          :aria-label="name"
+        >{{ initials }}</span>
       </slot>
     </span>
     <span

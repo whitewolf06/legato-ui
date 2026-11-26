@@ -97,6 +97,7 @@
   --wl-danger-soft: var(--wl-palette-danger-soft);
   --wl-danger-soft-hover: var(--wl-palette-danger-soft-hover);
   --wl-danger-border: var(--wl-palette-danger-border);
+  --wl-info-soft: var(--wl-palette-info-soft);
   --wl-info-text: var(--wl-palette-info-text);
   --wl-ok-text: var(--wl-palette-ok-text);
   --wl-warn-text: var(--wl-palette-warn-text);
@@ -204,6 +205,7 @@
   --wl-palette-danger-soft: #f7eeed;
   --wl-palette-danger-soft-hover: #f3e5e4;
   --wl-palette-danger-border: #e5c6c5;
+  --wl-palette-info-soft: #edf3fd;
   --wl-palette-info-text: var(--wl-blue-700);
   --wl-palette-ok-text: var(--wl-green-700);
   --wl-palette-warn-text: var(--wl-amber-700);
@@ -283,6 +285,8 @@
   --wl-dimension-filter-z: 90;
   --wl-layer-toast: var(--wl-dimension-toast-z);
   --wl-dimension-toast-z: 100;
+  --wl-palette-toast-accent: #76b7cb;
+  --wl-status-accent-icon: var(--wl-palette-toast-accent);
   --wl-status-info-icon: var(--wl-blue-300);
   --wl-status-success-icon: var(--wl-green-400);
   --wl-status-warning-icon: var(--wl-amber-400);
@@ -416,6 +420,8 @@
   --wl-action-primary-bg: var(--wl-palette-action-primary-bg);
   --wl-action-primary-hover: var(--wl-palette-action-primary-hover);
   --wl-action-primary-text: var(--wl-palette-action-primary-text);
+  --wl-action-warning-bg: var(--wl-warn-text);
+  --wl-action-warning-text: var(--wl-bg);
   --wl-action-danger-bg: var(--wl-palette-danger);
   --wl-action-danger-hover: var(--wl-palette-danger-hover);
   --wl-action-danger-text: var(--wl-on-accent);

@@ -67,9 +67,26 @@ async function openNavigationOverlay(trigger: Locator, overlay: Locator): Promis
   await expect(overlay).toBeVisible();
 }
 
+async function sharedNavigationLink(page: Page, label: string): Promise<{ link: Locator; trigger?: Locator } | undefined> {
+  const link = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
+  const trigger = page.locator(".legato-head-menu-toggle");
+  if (!await trigger.isVisible()) return await link.isVisible() ? { link } : undefined;
+  await expect(page.locator("#app")).toHaveAttribute("data-v-app", "");
+  if (await trigger.getAttribute("aria-expanded") !== "true") await trigger.click();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(link).toBeVisible();
+  return { link, trigger };
+}
+
 /** Navigate through a visible desktop destination, its overflow menu, or the mobile drawer. */
 export async function navigateMainView(page: Page, label: string): Promise<void> {
   await expect(page.locator(".pg-header-inner")).toBeVisible();
+  const shared = await sharedNavigationLink(page, label);
+  if (shared) {
+    await shared.link.click();
+    if (shared.trigger) await expect(shared.trigger).toHaveAttribute("aria-expanded", "false");
+    return;
+  }
   await page.evaluate(() => document.fonts.ready);
   const mobileTrigger = page.locator(".pg-menu-trigger");
   if (await mobileTrigger.isVisible()) {
@@ -112,6 +129,16 @@ export async function expectMainViewCurrent(page: Page, label: string): Promise<
   // Wait for the actual destination before reopening More to inspect its state.
   await expect(page.locator(marker)).toBeVisible();
   await expect(page.locator(".pg-header-inner")).toBeVisible();
+  const shared = await sharedNavigationLink(page, label);
+  if (shared) {
+    await expect(shared.link).toHaveAttribute("aria-current", "page");
+    if (shared.trigger) {
+      await page.keyboard.press("Escape");
+      await expect(shared.trigger).toHaveAttribute("aria-expanded", "false");
+      await expect(shared.trigger).toBeFocused();
+    }
+    return;
+  }
   const navigation = page.locator(".pg-views");
   const mobileTrigger = page.locator(".pg-menu-trigger");
   // The desktop nav can appear after a lazy route finishes mounting. Only use
@@ -141,22 +168,29 @@ export async function expectMainViewCurrent(page: Page, label: string): Promise<
   }
 }
 
-/** Open the compact Docs catalog without toggling an already open menu. */
+/** Reveal the current sidebar on compact screens before interacting with its links. */
 export async function openDocumentationMenu(page: Page): Promise<Locator> {
   const docs = page.getByTestId("docs-page");
   await expect(docs).toBeVisible();
+  await expect(page.locator("#app")).toHaveAttribute("data-v-app", "");
   const menu = docs.locator(".docs-menu");
   const summary = menu.locator(".docs-menu-summary");
   if (await summary.isVisible() && await menu.getAttribute("open") === null) await summary.click();
-  await expect(docs.getByRole("navigation", { name: "Каталог компонентов", exact: true })).toBeVisible();
+  await expect(menu.locator(".docs-menu-content")).toBeVisible();
   return docs;
 }
 
 /** Select a real Docs catalog destination through desktop or compact navigation. */
 export async function navigateDocumentationComponent(page: Page, name: string): Promise<Locator> {
   const docs = await openDocumentationMenu(page);
+  const catalogLink = docs.locator(".docs-catalog-entry");
+  if (await catalogLink.isVisible()) {
+    await catalogLink.click();
+    await expect(docs.getByTestId("component-catalog")).toBeVisible();
+    await openDocumentationMenu(page);
+  }
   const item = docs.getByRole("navigation", { name: "Каталог компонентов", exact: true, includeHidden: true })
-    .getByRole("button", { name, exact: true, includeHidden: true });
+    .getByRole("link", { name, exact: true, includeHidden: true });
   await item.click();
   await expect(item).toHaveAttribute("aria-current", "page");
   await expect(docs.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();

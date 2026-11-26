@@ -1,5 +1,9 @@
 {
   "en": {
+    "installation": {
+      "title": "Installation",
+      "description": "Install Legato UI in a Vue 3 project, load the Legato theme and render your first component."
+    },
     "why": {
       "title": "Why Legato UI",
       "description": "An independent Vue foundation with explicit styles, app-scoped services and editable tokens."
@@ -10,7 +14,7 @@
     },
     "recipes": {
       "title": "Recipes",
-      "description": "Working compositions with validation, cancellation, retry and application-owned operations."
+      "description": "Six independent projects and small examples of forms, tables and file uploads."
     },
     "accessibility": {
       "title": "Accessibility",
@@ -22,6 +26,10 @@
     }
   },
   "ru": {
+    "installation": {
+      "title": "Установка",
+      "description": "Подключите Legato UI к проекту на Vue 3, выберите тему и добавьте первый компонент."
+    },
     "why": {
       "title": "Зачем Legato UI",
       "description": "Независимая основа для Vue: явные стили, сервисы в границах приложения и редактируемые токены."
@@ -32,7 +40,7 @@
     },
     "recipes": {
       "title": "Рецепты",
-      "description": "Рабочие сценарии с валидацией, отменой, повтором и операциями на стороне приложения."
+      "description": "Шесть самостоятельных проектов и небольшие примеры форм, таблиц и загрузки файлов."
     },
     "accessibility": {
       "title": "Доступность",

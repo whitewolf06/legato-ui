@@ -1,0 +1,87 @@
+.monitor-app { min-height: 100dvh; background: color-mix(in srgb, var(--wl-bg) 74%, var(--wl-bg-soft)); }
+.monitor-header > div, .monitor-content { width: min(100% - 2 * clamp(14px, 4vw, 50px), 1160px); }
+.monitor-mark {
+  display: grid;
+  inline-size: 34px;
+  block-size: 34px;
+  place-items: center;
+  border-radius: var(--wl-corner-control);
+  background: var(--wl-accent-soft);
+  color: var(--wl-text-accent);
+}
+.monitor-content { display: grid; gap: 17px; padding-block: clamp(19px, 3.4vw, 46px); }
+.monitor-heading h1 { margin-block: 3px 5px; }
+.monitor-workspace { color: var(--wl-text-accent); font-size: .86rem; font-weight: 650; }
+.monitor-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px 15px;
+  align-items: center;
+  padding: clamp(11px, 2vw, 20px);
+  border: 1px solid var(--wl-success-border);
+  border-radius: var(--wl-corner-surface);
+  color: var(--wl-ok-text);
+  background: var(--wl-success-soft);
+}
+.monitor-summary[data-alert="true"] { border-color: var(--wl-warn-border); color: var(--wl-warn-text); background: var(--wl-warn-soft); }
+.monitor-summary strong { display: block; margin-bottom: 3px; }
+.monitor-summary p { font-size: .88rem; }
+.monitor-feedback { color: var(--wl-ok-text); }
+.monitor-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .82fr); align-items: start; gap: 16px; padding-top: 14px; }
+.monitor-table {
+  min-width: 0;
+  border: 1px solid var(--wl-border);
+  border-radius: var(--wl-corner-surface);
+  background: var(--wl-bg-raised);
+}
+.monitor-list-header { padding: 11px 14px; }
+.monitor-table ul { margin: 0; padding: 0; list-style: none; }
+.monitor-row {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  min-height: 60px;
+  align-items: center;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 0;
+  border-top: 1px solid var(--wl-border);
+  background: transparent;
+  color: var(--wl-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.monitor-row:hover, .monitor-row[aria-current] { background: var(--wl-accent-soft); }
+.monitor-row:focus-visible { outline-offset: -2px; }
+.monitor-row-name { display: grid; min-width: 0; gap: 2px; }
+.monitor-row-name small, .monitor-detail-target { color: var(--wl-text-2); overflow-wrap: anywhere; }
+.monitor-row-name small { font-size: .75rem; }
+.monitor-detail { align-self: stretch; }
+.monitor-detail-target { margin-block: 5px 9px; }
+.monitor-cadence { display: flex; align-items: center; gap: 7px; color: var(--wl-text-2); font-size: .84rem; }
+.monitor-checks { margin-top: 18px; }
+.monitor-checks h3 { margin: 0; font-size: .93rem; }
+.monitor-checks b { color: var(--wl-text-accent); }
+.monitor-samples { display: grid; align-items: end; height: 76px; gap: clamp(2px, .34vw, 4px); margin-block: 7px 5px; padding: 5px; border-radius: var(--wl-corner-control); background: var(--wl-bg-soft); }
+.monitor-samples span { border-radius: 2px; background: var(--wl-success); }
+.monitor-samples span[data-failed="true"] { background: var(--wl-danger); }
+.monitor-axis { color: var(--wl-text-2); font-size: .75rem; }
+.monitor-last { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 6px; margin: 13px 0 0; padding-top: 10px; border-top: 1px solid var(--wl-border); }
+.monitor-last dd { margin: 0; font-weight: 650; }
+.monitor-no-checks { padding: 14px; color: var(--wl-text-2); }
+.monitor-incident-list { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .82fr); gap: 16px; padding-top: 14px; }
+.monitor-incident { display: grid; align-content: start; justify-items: start; gap: 11px; }
+.monitor-incident header { width: 100%; }
+.monitor-timeline { display: grid; gap: 7px; margin: 0 0 6px; padding-inline-start: 1.1em; }
+.monitor-timeline time { margin-inline-end: 9px; color: var(--wl-text-accent); font-weight: 610; white-space: nowrap; }
+.monitor-plan { display: grid; gap: 19px; margin-top: 14px; }
+@media (max-width: 690px) {
+  .monitor-split, .monitor-incident-list { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .monitor-summary { grid-template-columns: auto minmax(0, 1fr); }
+  .monitor-summary .wl-btn { grid-column: 2; justify-self: start; }
+  .monitor-row { padding-inline: 9px; }
+}

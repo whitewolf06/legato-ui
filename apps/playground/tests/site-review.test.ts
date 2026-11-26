@@ -3,7 +3,7 @@ import { wlManifest } from "legato-ui";
 import { expect, it } from "vitest";
 import { documentationRoutes, gaviaSeoAssets } from "../build/seo-assets";
 import { stackBlitzFields } from "../src/design-system/stackblitz";
-import { documentationGuide, documentationGuideSections } from "../src/documentation/guides";
+import { documentationGuide, documentationGuideHeadingId, documentationGuideSections } from "../src/documentation/guides";
 import { loadDocumentationSearch, searchDocumentation } from "../src/documentation/search";
 
 it("provides substantive English and Russian guides for every new documentation path", () => {
@@ -15,12 +15,17 @@ it("provides substantive English and Russian guides for every new documentation 
     expect(new Set(guide.sections.map((entry) => entry.title)).size).toBe(guide.sections.length);
     expect(guide.title).not.toBe(documentationGuide(section, language === "en" ? "ru" : "en").title);
   }
+  const anchors = (locale: string) => documentationGuide("installation", locale).sections
+    .map((section, index) => documentationGuideHeadingId("installation", section, index));
+  expect(anchors("ru")).toEqual(anchors("en"));
+  expect(new Set(anchors("ru")).size).toBe(anchors("ru").length);
 });
 
 it("finds API details and full guide prose in search rather than just component names", async () => {
   const entries = await loadDocumentationSearch("en");
   expect(searchDocumentation(entries, "rowKey").some((entry) => entry.component === "WlTable")).toBe(true);
   expect(searchDocumentation(entries, "screen reader").some((entry) => entry.section === "accessibility")).toBe(true);
+  expect(searchDocumentation(entries, "Install the package").some((entry) => entry.section === "installation")).toBe(true);
   expect(searchDocumentation(entries, "random-unknown-phrase-97129")).toEqual([]);
   expect(searchDocumentation(entries, "")).toEqual([]);
 });
@@ -38,6 +43,8 @@ it("builds an editable public consumer from the exact copied SFC", () => {
   const legacy = stackBlitzFields(source, "1.1.0", "gavia-ui");
   expect(JSON.parse(legacy["project[files][package.json]"]!).dependencies["legato-ui"]).toBe("npm:gavia-ui@1.1.0");
   expect(legacy["project[files][src/main.ts]"]).toContain('import "legato-ui/themes/gavia.css"');
+  const feedback = stackBlitzFields("const toast = useWlToast(); const confirm = useWlConfirm();", "1.3.0");
+  expect(feedback["project[files][src/main.ts]"]).toContain("h(App), h(WlToast), h(WlConfirmDialog)");
 });
 
 it("emits canonical multilingual sitemap, prerender input and complete machine-readable API prose", () => {
@@ -52,9 +59,11 @@ it("emits canonical multilingual sitemap, prerender input and complete machine-r
   const context = { emitFile: (asset: { fileName: string; source: string }) => files.set(asset.fileName, asset.source) };
   generate.call(context as never, {} as never, {} as never, false);
   expect(files.get("sitemap.xml")).toContain("/ru/docs/components/WlButton/");
+  expect(files.get("sitemap.xml")).toContain("/ru/docs/installation/");
   expect(files.get("llms.txt")).toContain("docs/theming/");
   expect(files.get("llms-full.txt")).toContain("rowKey");
   const paths = JSON.parse(files.get("route-manifest.json")!).routes;
+  expect(paths).toEqual(expect.arrayContaining(["docs/installation/", "ru/docs/installation/"]));
   for (const entry of wlManifest) expect(paths).toContain(`docs/components/${entry.name}/`);
   const tooltip = wlManifest.find((entry) => entry.name === "WlTooltip")!;
   expect(tooltip.props.some((prop) => prop.name === "content")).toBe(true);

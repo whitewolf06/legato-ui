@@ -211,7 +211,8 @@ export function useAnchoredOverlay(options: WlAnchoredOverlayOptions = {}): Anch
       ? document.activeElement
       : anchor.value;
     if (!visible.value) {
-      style.value = {};
+      // Keep the portal out of the document flow even before Vue applies its measured position.
+      style.value = anchor.value ? { position: "fixed", top: "0", left: "0" } : {};
       visible.value = true;
     } else {
       refreshRequest.value += 1;
@@ -240,7 +241,7 @@ export function useAnchoredOverlay(options: WlAnchoredOverlayOptions = {}): Anch
       && event.key === "Escape" && valueOf(options.closeOnEscape, true) !== false) {
       event.preventDefault();
       hide(event);
-      if (previouslyFocused?.isConnected) previouslyFocused.focus();
+      if (previouslyFocused?.isConnected) previouslyFocused.focus({ preventScroll: true });
     }
   }
 

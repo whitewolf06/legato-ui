@@ -11,10 +11,13 @@ describe("WlRadioGroup", () => {
       expect(wrapper.attributes("role")).toBe("radiogroup");
       expect(wrapper.attributes("aria-orientation")).toBe("vertical");
       expect(inputs.map((input) => input.attributes("tabindex"))).toEqual(["0", "-1", "-1"]);
+      expect(wrapper.findAll(".wl-radio__box").map((box) => box.classes("is-checked"))).toEqual([true, false, false]);
       await inputs[0]!.trigger("keydown", { key: "ArrowDown" });
       await nextTick();
       expect(document.activeElement).toBe(inputs[2]!.element);
       expect(wrapper.emitted("update:modelValue")).toEqual([["c"]]);
+      await wrapper.setProps({ modelValue: "c" });
+      expect(wrapper.findAll(".wl-radio__box").map((box) => box.classes("is-checked"))).toEqual([false, false, true]);
       await inputs[2]!.trigger("keydown", { key: "Home" });
       expect(document.activeElement).toBe(inputs[0]!.element);
       await inputs[0]!.trigger("keydown", { key: "End" });

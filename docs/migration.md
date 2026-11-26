@@ -4,6 +4,8 @@ Choose the section for the version or contract you are changing. Historical
 sections describe that release; they do not report current validation or a new
 publication. Stable public namespaces remain `Wl*`, `wl-*` and `--wl-*`.
 
+For semantic colors, selection and chip alignment in 1.3.1, see [Upgrading from 1.3.0](migration-1.3.1.md).
+
 For component text, spacing and width changes in 1.3.0, see [Upgrading from 1.2.1](migration-1.3.0.md).
 
 For the 1.2.1 patch, see [Upgrading from 1.2.0](migration-1.2.1.md).

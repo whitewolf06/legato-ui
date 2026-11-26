@@ -156,7 +156,7 @@ function choose(index: number): void {
   if (isDisabled(option)) return;
   model.value = valueOf(option);
   hide();
-  nextTick(() => root.value?.focus());
+  nextTick(() => root.value?.focus({ preventScroll: true }));
 }
 const { active, optionId, activeDescendant, onKeydown: navigate } = useWlListbox({
   listId: () => String(listAttrs.value.id), count: () => filtered.value.length,
@@ -168,14 +168,14 @@ function clear(): void {
   if (props.disabled) return;
   model.value = null;
   hide();
-  nextTick(() => root.value?.focus());
+  nextTick(() => root.value?.focus({ preventScroll: true }));
 }
 function open(_event?: Event): void {
   if (props.disabled) return;
   active.value = Math.max(0, filtered.value.findIndex((option) => Object.is(valueOf(option), model.value)));
   anchor.value = root.value;
   show();
-  if (props.filter) nextTick(() => filterInput.value?.focus());
+  if (props.filter) nextTick(() => filterInput.value?.focus({ preventScroll: true }));
 }
 defineExpose<WlSelectionExpose>({ open, close: hide, focus: () => root.value?.focus() });
 useWlResultsAnnouncement({

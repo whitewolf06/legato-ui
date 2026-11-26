@@ -375,7 +375,8 @@ export const wlDesignTokens = [
     "description": "Базовое значение amber-400.",
     "value": "#e0a93e",
     "themes": {
-      "gavia-dark": "#d0b58c"
+      "gavia-dark": "#d0b58c",
+      "legato": "#ffb64d"
     }
   },
   {
@@ -972,6 +973,14 @@ export const wlDesignTokens = [
     "category": "color",
     "description": "Цвет роли danger-border.",
     "value": "var(--wl-palette-danger-border)"
+  },
+  {
+    "name": "--wl-info-soft",
+    "layer": "semantic",
+    "type": "color",
+    "category": "color",
+    "description": "Мягкий фон для информационного статуса.",
+    "value": "var(--wl-palette-info-soft)"
   },
   {
     "name": "--wl-info-text",
@@ -1963,7 +1972,8 @@ export const wlDesignTokens = [
       "graphite": "var(--wl-amber-400)",
       "newspaper": "#9b6b26",
       "gavia-dark": "var(--wl-amber-400)",
-      "legato-dark": "#ffd465"
+      "legato": "#99500d",
+      "legato-dark": "#f39b50"
     }
   },
   {
@@ -1978,8 +1988,8 @@ export const wlDesignTokens = [
       "graphite": "#2b2413",
       "newspaper": "#f8f0df",
       "gavia-dark": "#3a3224",
-      "legato": "#fff3cf",
-      "legato-dark": "#2f281b"
+      "legato": "#fff2df",
+      "legato-dark": "#35261d"
     }
   },
   {
@@ -1994,8 +2004,8 @@ export const wlDesignTokens = [
       "graphite": "#4a3d1c",
       "newspaper": "#ead9b7",
       "gavia-dark": "#725f41",
-      "legato": "#ffd465",
-      "legato-dark": "#8c7138"
+      "legato": "#e3b279",
+      "legato-dark": "#996940"
     }
   },
   {
@@ -2011,7 +2021,8 @@ export const wlDesignTokens = [
       "newspaper": "#b33a35",
       "gavia": "#ab4448",
       "gavia-dark": "var(--wl-red-400)",
-      "legato-dark": "#ff969c"
+      "legato": "#b32149",
+      "legato-dark": "#f7819e"
     }
   },
   {
@@ -2027,7 +2038,8 @@ export const wlDesignTokens = [
       "newspaper": "#942e2a",
       "gavia": "#963c3f",
       "gavia-dark": "#e6a0a2",
-      "legato-dark": "#ffb0b3"
+      "legato": "#93193e",
+      "legato-dark": "#ffa1ba"
     }
   },
   {
@@ -2043,7 +2055,8 @@ export const wlDesignTokens = [
       "newspaper": "#f9e9e5",
       "gavia": "#f7eeed",
       "gavia-dark": "#3b262e",
-      "legato-dark": "#331f26"
+      "legato": "#fcecf2",
+      "legato-dark": "#341d2b"
     }
   },
   {
@@ -2059,7 +2072,8 @@ export const wlDesignTokens = [
       "newspaper": "#f3ded9",
       "gavia": "#f3e5e4",
       "gavia-dark": "#483039",
-      "legato-dark": "#40262e"
+      "legato": "#f7dce6",
+      "legato-dark": "#462535"
     }
   },
   {
@@ -2075,7 +2089,22 @@ export const wlDesignTokens = [
       "newspaper": "#e7c5bd",
       "gavia": "#e5c6c5",
       "gavia-dark": "#81515b",
-      "legato-dark": "#995865"
+      "legato": "#dca3b6",
+      "legato-dark": "#97556c"
+    }
+  },
+  {
+    "name": "--wl-palette-info-soft",
+    "layer": "foundation",
+    "type": "color",
+    "category": "color",
+    "description": "Базовый фон информационного статуса.",
+    "value": "#edf3fd",
+    "themes": {
+      "graphite": "#202e44",
+      "gavia-dark": "#26313e",
+      "legato": "#eaf2ff",
+      "legato-dark": "#212e47"
     }
   },
   {
@@ -2090,8 +2119,8 @@ export const wlDesignTokens = [
       "graphite": "#a9c6f8",
       "newspaper": "#385d7a",
       "gavia-dark": "#c0d0e1",
-      "legato": "#343289",
-      "legato-dark": "#d3cfff"
+      "legato": "#2160bd",
+      "legato-dark": "#82b4ff"
     }
   },
   {
@@ -2122,7 +2151,8 @@ export const wlDesignTokens = [
       "graphite": "#f2c14e",
       "newspaper": "#76501b",
       "gavia-dark": "#e1c598",
-      "legato-dark": "var(--wl-palette-warn)"
+      "legato": "#884506",
+      "legato-dark": "#ffc283"
     }
   },
   {
@@ -2138,8 +2168,8 @@ export const wlDesignTokens = [
       "newspaper": "#8b2d29",
       "gavia": "#ab4448",
       "gavia-dark": "#f0b5b3",
-      "legato": "#b12929",
-      "legato-dark": "#ffb3b7"
+      "legato": "#9e1d46",
+      "legato-dark": "#ff9fbb"
     }
   },
   {
@@ -2779,6 +2809,30 @@ export const wlDesignTokens = [
     "description": "Роль toast-z."
   },
   {
+    "name": "--wl-palette-toast-accent",
+    "layer": "foundation",
+    "type": "color",
+    "category": "color",
+    "description": "Акцент для иконки уведомления.",
+    "value": "#6699fb",
+    "themes": {
+      "gavia": "#76b7cb",
+      "graphite": "#244aaf",
+      "newspaper": "#c3b39f",
+      "gavia-dark": "#1b6163",
+      "legato": "#b9b4ff",
+      "legato-dark": "#343289"
+    }
+  },
+  {
+    "name": "--wl-status-accent-icon",
+    "layer": "semantic",
+    "type": "color",
+    "category": "color",
+    "description": "Акцентная иконка на фоне уведомления.",
+    "value": "var(--wl-palette-toast-accent)"
+  },
+  {
     "name": "--wl-status-info-icon",
     "value": "var(--wl-blue-300)",
     "layer": "semantic",
@@ -2786,7 +2840,7 @@ export const wlDesignTokens = [
     "category": "component",
     "description": "Роль toast-icon-info.",
     "themes": {
-      "legato-dark": "var(--wl-palette-accent)"
+      "legato-dark": "var(--wl-info-text)"
     }
   },
   {
@@ -3870,6 +3924,29 @@ export const wlDesignTokens = [
     }
   },
   {
+    "name": "--wl-action-warning-bg",
+    "value": "var(--wl-warn-text)",
+    "layer": "semantic",
+    "type": "color",
+    "category": "color",
+    "description": "Заливка кнопки с предупреждением.",
+    "themes": {
+      "legato": "var(--wl-amber-400)",
+      "legato-dark": "var(--wl-warn)"
+    }
+  },
+  {
+    "name": "--wl-action-warning-text",
+    "value": "var(--wl-bg)",
+    "layer": "semantic",
+    "type": "color",
+    "category": "color",
+    "description": "Цвет текста на заливке кнопки с предупреждением.",
+    "themes": {
+      "legato": "var(--wl-text)"
+    }
+  },
+  {
     "name": "--wl-action-danger-bg",
     "value": "var(--wl-danger-hover)",
     "layer": "semantic",
@@ -3881,6 +3958,7 @@ export const wlDesignTokens = [
       "newspaper": "var(--wl-danger)",
       "gavia": "var(--wl-palette-danger)",
       "gavia-dark": "var(--wl-red-500)",
+      "legato": "var(--wl-danger)",
       "legato-dark": "var(--wl-danger)"
     }
   },
@@ -3896,6 +3974,7 @@ export const wlDesignTokens = [
       "newspaper": "var(--wl-danger-hover)",
       "gavia": "var(--wl-palette-danger-hover)",
       "gavia-dark": "var(--wl-red-600)",
+      "legato": "var(--wl-danger-hover)",
       "legato-dark": "var(--wl-danger-hover)"
     }
   },
@@ -5452,6 +5531,13 @@ export const wlContrastPairs = [
     "minimum": 4.5
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -5476,7 +5562,7 @@ export const wlContrastPairs = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5
   },
   {
@@ -5569,6 +5655,41 @@ export const wlContrastPairs = [
     "foreground": "--wl-text-accent-hover",
     "background": "--wl-accent-soft-hover",
     "minimum": 4.5
+  },
+  {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3
   }
 ] as const satisfies readonly WlContrastPair[];
 export const wlContrastReport = [
@@ -5627,6 +5748,15 @@ export const wlContrastReport = [
     "ratio": 6.73
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "gavia",
+    "ratio": 5.97
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -5657,10 +5787,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "gavia",
-    "ratio": 7.8
+    "ratio": 8.71
   },
   {
     "name": "success",
@@ -5780,6 +5910,51 @@ export const wlContrastReport = [
     "ratio": 4.95
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia",
+    "ratio": 9.22
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia",
+    "ratio": 6.15
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia",
+    "ratio": 5.97
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia",
+    "ratio": 5.46
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "gavia",
+    "ratio": 7.89
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -5834,6 +6009,15 @@ export const wlContrastReport = [
     "ratio": 6.81
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "white",
+    "ratio": 6.29
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -5864,10 +6048,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "white",
-    "ratio": 8.73
+    "ratio": 8.71
   },
   {
     "name": "success",
@@ -5987,6 +6171,51 @@ export const wlContrastReport = [
     "ratio": 5.68
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "white",
+    "ratio": 9.71
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "white",
+    "ratio": 6.47
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "white",
+    "ratio": 6.29
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "white",
+    "ratio": 8
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "white",
+    "ratio": 5.22
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -6041,6 +6270,15 @@ export const wlContrastReport = [
     "ratio": 6.61
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "graphite",
+    "ratio": 10.57
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -6071,10 +6309,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "graphite",
-    "ratio": 8.03
+    "ratio": 7.89
   },
   {
     "name": "success",
@@ -6194,6 +6432,51 @@ export const wlContrastReport = [
     "ratio": 4.73
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "graphite",
+    "ratio": 10.24
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "graphite",
+    "ratio": 10.18
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "graphite",
+    "ratio": 10.57
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "graphite",
+    "ratio": 7.38
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "graphite",
+    "ratio": 6.52
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -6248,6 +6531,15 @@ export const wlContrastReport = [
     "ratio": 12.28
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "newspaper",
+    "ratio": 7.1
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -6278,10 +6570,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "newspaper",
-    "ratio": 6.28
+    "ratio": 6.25
   },
   {
     "name": "success",
@@ -6401,6 +6693,51 @@ export const wlContrastReport = [
     "ratio": 10.22
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "newspaper",
+    "ratio": 6.91
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "newspaper",
+    "ratio": 7.55
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "newspaper",
+    "ratio": 7.1
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "newspaper",
+    "ratio": 8.31
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "newspaper",
+    "ratio": 9.08
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -6455,6 +6792,15 @@ export const wlContrastReport = [
     "ratio": 4.93
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "gavia-dark",
+    "ratio": 10.59
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
@@ -6485,10 +6831,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "gavia-dark",
-    "ratio": 7.37
+    "ratio": 8.39
   },
   {
     "name": "success",
@@ -6608,6 +6954,51 @@ export const wlContrastReport = [
     "ratio": 5.27
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia-dark",
+    "ratio": 11.18
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia-dark",
+    "ratio": 11.29
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia-dark",
+    "ratio": 10.59
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "gavia-dark",
+    "ratio": 10.02
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "gavia-dark",
+    "ratio": 5.73
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -6662,13 +7053,22 @@ export const wlContrastReport = [
     "ratio": 14.65
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "legato",
+    "ratio": 9.31
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
     "background": "--wl-action-danger-bg",
     "minimum": 4.5,
     "theme": "legato",
-    "ratio": 5.36
+    "ratio": 6.5
   },
   {
     "name": "danger-hover",
@@ -6677,7 +7077,7 @@ export const wlContrastReport = [
     "background": "--wl-action-danger-hover",
     "minimum": 4.5,
     "theme": "legato",
-    "ratio": 8
+    "ratio": 8.57
   },
   {
     "name": "tooltip",
@@ -6692,10 +7092,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "legato",
-    "ratio": 9.42
+    "ratio": 5.37
   },
   {
     "name": "success",
@@ -6713,7 +7113,7 @@ export const wlContrastReport = [
     "background": "--wl-warn-soft",
     "minimum": 4.5,
     "theme": "legato",
-    "ratio": 5.68
+    "ratio": 6.56
   },
   {
     "name": "error",
@@ -6722,7 +7122,7 @@ export const wlContrastReport = [
     "background": "--wl-danger-soft",
     "minimum": 4.5,
     "theme": "legato",
-    "ratio": 5.79
+    "ratio": 6.78
   },
   {
     "name": "focus",
@@ -6815,6 +7215,51 @@ export const wlContrastReport = [
     "ratio": 8.95
   },
   {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato",
+    "ratio": 6.05
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato",
+    "ratio": 7.44
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato",
+    "ratio": 7.24
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato",
+    "ratio": 7.73
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "legato",
+    "ratio": 8.52
+  },
+  {
     "name": "text",
     "label": "Основной текст",
     "foreground": "--wl-text",
@@ -6869,13 +7314,22 @@ export const wlContrastReport = [
     "ratio": 6.39
   },
   {
+    "name": "warning-action",
+    "label": "Кнопка с предупреждением",
+    "foreground": "--wl-action-warning-text",
+    "background": "--wl-action-warning-bg",
+    "minimum": 4.5,
+    "theme": "legato-dark",
+    "ratio": 8.39
+  },
+  {
     "name": "danger",
     "label": "Опасное действие",
     "foreground": "--wl-action-danger-text",
     "background": "--wl-action-danger-bg",
     "minimum": 4.5,
     "theme": "legato-dark",
-    "ratio": 7.62
+    "ratio": 6.48
   },
   {
     "name": "danger-hover",
@@ -6884,7 +7338,7 @@ export const wlContrastReport = [
     "background": "--wl-action-danger-hover",
     "minimum": 4.5,
     "theme": "legato-dark",
-    "ratio": 9.15
+    "ratio": 8.35
   },
   {
     "name": "tooltip",
@@ -6899,10 +7353,10 @@ export const wlContrastReport = [
     "name": "info",
     "label": "Информационное сообщение",
     "foreground": "--wl-info-text",
-    "background": "--wl-accent-soft",
+    "background": "--wl-info-soft",
     "minimum": 4.5,
     "theme": "legato-dark",
-    "ratio": 10.07
+    "ratio": 6.42
   },
   {
     "name": "success",
@@ -6920,7 +7374,7 @@ export const wlContrastReport = [
     "background": "--wl-warn-soft",
     "minimum": 4.5,
     "theme": "legato-dark",
-    "ratio": 10.32
+    "ratio": 9.19
   },
   {
     "name": "error",
@@ -6929,7 +7383,7 @@ export const wlContrastReport = [
     "background": "--wl-danger-soft",
     "minimum": 4.5,
     "theme": "legato-dark",
-    "ratio": 9.07
+    "ratio": 8.06
   },
   {
     "name": "focus",
@@ -7020,5 +7474,50 @@ export const wlContrastReport = [
     "minimum": 4.5,
     "theme": "legato-dark",
     "ratio": 8.41
+  },
+  {
+    "name": "info-text",
+    "label": "Информационный текст на основной поверхности",
+    "foreground": "--wl-info-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato-dark",
+    "ratio": 8.65
+  },
+  {
+    "name": "success-ink",
+    "label": "Текст успешного действия на основной поверхности",
+    "foreground": "--wl-ok-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato-dark",
+    "ratio": 12.54
+  },
+  {
+    "name": "warning-ink",
+    "label": "Текст предупреждения на основной поверхности",
+    "foreground": "--wl-warn-text",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato-dark",
+    "ratio": 11.6
+  },
+  {
+    "name": "danger-ink",
+    "label": "Текст ошибки на основной поверхности",
+    "foreground": "--wl-text-danger",
+    "background": "--wl-bg",
+    "minimum": 4.5,
+    "theme": "legato-dark",
+    "ratio": 9.53
+  },
+  {
+    "name": "toast-accent-icon",
+    "label": "Акцентная иконка уведомления",
+    "foreground": "--wl-status-accent-icon",
+    "background": "--wl-tooltip-bg",
+    "minimum": 3,
+    "theme": "legato-dark",
+    "ratio": 8.88
   }
 ] as const;

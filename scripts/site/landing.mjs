@@ -1,4 +1,4 @@
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +20,14 @@ export async function syncLandingHeader(directory) {
   const css = readFileSync(new URL("site/header.css", source), "utf8");
   writeFileSync(resolve(directory, "assets/site-header.css"), css.replace("../assets/brand/duetto/legato-wordmark.svg?no-inline", "./brand/legato-wordmark.svg"));
   copyFileSync(new URL("assets/brand/duetto/legato-wordmark.svg", source), resolve(directory, "assets/brand/legato-wordmark.svg"));
+  if (html.includes("data-project-gallery")) {
+    const previews = new URL("../../apps/playground/public/project-previews/", import.meta.url);
+    const target = resolve(directory, "assets/project-previews");
+    mkdirSync(target, { recursive: true });
+    for (const asset of readdirSync(previews).filter((name) => /^(?:gallery\.css|[a-z-]+\.webp)$/.test(name))) {
+      copyFileSync(new URL(asset, previews), resolve(target, asset));
+    }
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

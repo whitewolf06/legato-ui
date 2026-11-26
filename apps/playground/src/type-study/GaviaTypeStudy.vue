@@ -15,6 +15,7 @@ import type { GaviaFontStyle, GaviaFontWeight } from "./font";
 import type { SpecimenLanguage } from "./samples";
 import PlaygroundPageHeader from "../PlaygroundPageHeader.vue";
 import FontDownloadLink from "../project/FontDownloadLink.vue";
+import { hostedSite } from "../site/target";
 import { playgroundThemePreference, withPlaygroundTheme } from "../themes";
 import { usePageAnchor } from "../usePageAnchor";
 import { gaviaRelease, gaviaWeights, legatoFontFamily } from "./font";
@@ -149,7 +150,7 @@ function saveProject(): void {
     :style="{ '--wl-type-sample-style': fontStyle }"
     data-wl="gavia-type-study"
   >
-    <main class="wl-type-shell wl-container">
+    <main class="wl-type-shell" :class="hostedSite ? 'legato-site-container' : 'wl-container'">
       <PlaygroundPageHeader
         title="Legato Sans"
         :description="t('shell.type_study.GaviaTypeStudy.text565')"

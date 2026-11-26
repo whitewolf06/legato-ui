@@ -13,7 +13,7 @@ const examples = { ...inputDocumentationExamples, ...showcaseDocumentationExampl
 const accessibility = { ...inputDocumentationAccessibility, ...showcaseDocumentationAccessibility };
 
 describe("every component has copyable documentation and individual accessibility rules", () => {
-  it("covers the entire public manifest with the existing Button guide and 52 additional guides", () => {
+  it("covers every entry in the manifest alongside the dedicated Button guide", () => {
     const names = wlManifest.map((entry) => entry.name).filter((name) => name !== "WlButton").sort();
     expect(Object.keys(examples).sort()).toEqual(names);
     expect(Object.keys(accessibility).sort()).toEqual(names);

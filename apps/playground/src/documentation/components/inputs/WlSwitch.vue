@@ -11,13 +11,13 @@ const protectedMode = ref(false);
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlSwitch">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.two_sizes_and_a_slot_label_0842") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.two_sizes_and_a_slot_label_0842") }}</h3>
       <WlSwitch v-model="notifications" size="md">{{ t("examples.notifications_md_0843") }}</WlSwitch>
       <WlSwitch v-model="compactNotifications" size="sm">{{ t("examples.brief_notifications_sm_0844") }}</WlSwitch>
       <p class="wl-text-small wl-text-muted">{{ t("examples.space_toggles_the_focused_switch_the_label_names_the_setting_a_0845") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.error_and_unavailable_setting_0846") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.error_and_unavailable_setting_0846") }}</h3>
       <WlField
         id="docs-switch-protected"
         v-slot="{ id, ariaDescribedby, invalid }"

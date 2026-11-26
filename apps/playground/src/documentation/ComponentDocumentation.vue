@@ -4,22 +4,25 @@ const props = defineProps<{ entry: WlComponentManifest }>();
 const { t } = usePlaygroundI18n();
 import type { WlComponentManifest } from "legato-ui";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import { consumerSource } from "../design-system/code";
 import CodePanel from "../design-system/CodePanel.vue";
-import ComponentExplorer from "../design-system/ComponentExplorer.vue";
-import { useLazySource } from "../design-system/lazy-source";
+import { playgroundExample } from "../design-system/example-component";
+import ComponentExampleCard from "./ComponentExampleCard.vue";
 import { documentationPtSections } from "./components/pt-sections";
 import { componentDocumentationAccessibility, documentationExample } from "./components/registry";
+import { componentExampleTopics } from "./components/topics";
 import DocumentationContract from "./DocumentationContract.vue";
 import DocumentationTabs, { type DocumentationTab } from "./DocumentationTabs.vue";
 import KeyboardContract from "./KeyboardContract.vue";
 const selectedTab = ref<DocumentationTab>("examples");
 const prefix = computed(() => "docs-" + props.entry.name.toLowerCase());
 const anchors = computed(() => Object.fromEntries(["props", "events", "slots", "pt"].map((key) => [key, prefix.value + "-" + key])));
+const primary = computed(() => playgroundExample(props.entry.name));
+const topics = computed(() => componentExampleTopics(props.entry.name));
 const extra = computed(() => documentationExample(props.entry.name));
-const { source: rawExtraSource, loading: sourceLoading, error: sourceError, reload: reloadSource }
-  = useLazySource(() => extra.value?.loadSource);
-const extraSource = computed(() => consumerSource(rawExtraSource.value));
+const centered = computed(() => [
+  "WlAvatar", "WlBadge", "WlButtonGroup", "WlChip", "WlIcon", "WlIconButton",
+  "WlLink", "WlPill", "WlSpinner", "WlSwitch", "WlTag"
+].includes(props.entry.name));
 const accessibility = computed(() => componentDocumentationAccessibility[props.entry.name] ?? []);
 const ptSections = computed(() => documentationPtSections[props.entry.name]);
 const service = computed(() => props.entry.name === "WlToast" ? "WlToastService" : props.entry.name === "WlConfirmDialog" ? "WlConfirmationService" : undefined);
@@ -71,26 +74,30 @@ defineExpose({ showHeading });
       class="wl-stack"
       data-space="2xl"
     >
-      <p class="wl-text-body wl-text-muted">{{ t('documentation.strings.s0208') }}</p>
-      <ComponentExplorer :entry="entry" layout="documentation" :heading-prefix="prefix" />
-      <section
+      <ComponentExampleCard
+        v-for="(topic, index) in topics"
+        :id="prefix + '-' + topic.id"
+        :key="topic.id"
+        :prefix="prefix"
+        :entry="entry"
+        :title="t(topic.title)"
+        :component="primary.component"
+        :load-source="primary.loadSource"
+        :topic="topic"
+        :primary="index === 0"
+        :centered="centered"
+      />
+      <ComponentExampleCard
         v-if="extra?.component"
-        class="wl-stack"
-        data-space="lg"
-        :aria-labelledby="prefix + '-examples'"
-        :data-docs-component-extra="entry.name"
-      >
-        <h2 :id="prefix + '-examples'" class="wl-text-heading">{{ extra.title }}</h2>
-        <p class="wl-text-body wl-text-muted">{{ extra.description }}</p>
-        <div class="docs-component-extra-preview" data-testid="docs-component-extra-preview"><component :is="extra.component" /></div>
-        <div data-testid="docs-component-extra-source"><CodePanel
-          :source="extraSource"
-          :loading="sourceLoading"
-          :load-error="Boolean(sourceError)"
-          :title="t('documentation.strings.s0209')"
-          @retry="reloadSource"
-        /></div>
-      </section>
+        :id="prefix + '-examples'"
+        :prefix="prefix"
+        :entry="entry"
+        :title="extra.title"
+        :description="extra.description"
+        :component="extra.component"
+        :load-source="extra.loadSource"
+        additional
+      />
       <p v-else class="docs-notice" role="alert">{{ t('documentation.strings.s0210') }}</p>
       <section v-if="service" class="wl-stack" data-space="lg">
         <h2 :id="prefix + '-service'" class="wl-text-heading">{{ t('documentation.strings.s0211') }}</h2>
@@ -132,14 +139,6 @@ defineExpose({ showHeading });
 
 <style>
 .docs-component-guide { min-width: 0; }
-.docs-component-extra-preview {
-  min-width: 0;
-  padding: var(--wl-space-lg);
-  border: 1px solid var(--wl-border);
-  border-radius: var(--wl-corner-surface);
-  background: var(--wl-bg);
-  overflow-wrap: anywhere;
-}
 .docs-component-rules {
   display: grid;
   gap: var(--wl-space-md);

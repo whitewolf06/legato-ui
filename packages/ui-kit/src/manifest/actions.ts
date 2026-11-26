@@ -40,6 +40,7 @@ export const actionsManifest = /* @__PURE__ */ defineComponentManifest([
         type: "boolean",
         default: false
       },
+      { name: "tone", type: "enum", values: WL_TONES, description: "Semantic color role." },
       {
         name: "pt",
         type: "object"
@@ -116,6 +117,7 @@ export const actionsManifest = /* @__PURE__ */ defineComponentManifest([
         description: "Визуальный вариант."
       },
       { name: "size", type: "enum", default: "md", values: ["md", "sm"], description: "Размер кнопки." },
+      { name: "tone", type: "enum", values: WL_TONES, description: "Semantic color, independent of the visual treatment." },
       { name: "icon", type: "icon", values: WL_ICON_NAMES, description: "Иконка (если не задан слот)." },
       { name: "active", type: "boolean", default: false, description: "Подсветить как активную." },
       { name: "disabled", type: "boolean", default: false, description: "Отключает кнопку." },

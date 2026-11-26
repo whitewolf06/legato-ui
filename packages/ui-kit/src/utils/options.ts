@@ -87,11 +87,17 @@ export function useWlListbox(options: {
   watch([active, options.count, options.list, options.listId], async () => {
     if (!options.list.value) typeahead.reset();
     await nextTick();
-    if (!activeDescendant.value || !options.list.value) return;
+    const list = options.list.value;
+    const id = activeDescendant.value;
+    if (!id || !list || list.scrollHeight <= list.clientHeight) return;
     // Find within the list without interpolating consumer IDs into a CSS selector.
-    const element = [...options.list.value.querySelectorAll<HTMLElement>('[role="option"]')]
-      .find((option) => option.id === activeDescendant.value);
-    if (typeof element?.scrollIntoView === "function") element.scrollIntoView({ block: "nearest" });
+    const element = [...list.querySelectorAll<HTMLElement>('[role="option"]')].find((option) => option.id === id);
+    if (!element) return;
+    const { top, bottom } = element.getBoundingClientRect();
+    const viewportTop = list.getBoundingClientRect().top + list.clientTop;
+    const viewportBottom = viewportTop + list.clientHeight;
+    if (top < viewportTop) list.scrollTop += top - viewportTop;
+    else if (bottom > viewportBottom) list.scrollTop += bottom - viewportBottom;
   }, { flush: "post" });
 
   function onKeydown(event: KeyboardEvent): void {

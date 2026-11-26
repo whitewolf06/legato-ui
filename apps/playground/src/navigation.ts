@@ -5,7 +5,7 @@ export type PlaygroundView = "home" | "docs" | "components" | "system" | "projec
 export type DocumentationFoundationSection = "typography" | "layout" | "responsive" | "content";
 export type DocumentationAssetSection = "icons" | "colors";
 export type DocumentationQualitySection = "quality";
-export type DocumentationGuideSection = "why" | "theming" | "recipes" | "accessibility" | "how-it-is-built";
+export type DocumentationGuideSection = "installation" | "why" | "theming" | "recipes" | "accessibility" | "how-it-is-built";
 export type DocumentationSection = DocumentationFoundationSection | DocumentationAssetSection
   | DocumentationQualitySection | DocumentationGuideSection | "components";
 export interface PlaygroundRoute {
@@ -38,7 +38,7 @@ export function isDocumentationSection(value: unknown): value is DocumentationSe
 }
 
 export function isDocumentationGuideSection(value: unknown): value is DocumentationGuideSection {
-  return value === "why" || value === "theming" || value === "recipes" || value === "accessibility" || value === "how-it-is-built";
+  return value === "installation" || value === "why" || value === "theming" || value === "recipes" || value === "accessibility" || value === "how-it-is-built";
 }
 
 /** The former gallery URL stays usable after its examples move into Docs. */
@@ -55,6 +55,7 @@ export function parsePlaygroundRoute(search: string, hash = "", pathname = ""): 
         detail = decodeURIComponent(detail);
       } catch { return { view }; }
       if (isDocumentationSection(detail)) return { view, section: detail };
+      if (match[1] === "components" && !detail) return { view, section: "components" };
       const component = /^(?:components\/)?(Wl[A-Za-z0-9]+)$/.exec(detail)?.[1];
       return component ? { view, component: canonicalComponentName(component) } : { view };
     }
@@ -72,6 +73,7 @@ export function parsePlaygroundRoute(search: string, hash = "", pathname = ""): 
   const component = query.get("component") || undefined;
   if (component) return { view, component: canonicalComponentName(component) };
   if (candidate === "components") {
+    if (!hash) return { view, section: "components" };
     let fragment = "";
     try {
       fragment = decodeURIComponent(hash.replace(/^#/, ""));
@@ -101,9 +103,10 @@ export function createPlaygroundPathUrl(
   const target = createPlaygroundUrl(current, route);
   const view = route.view === "components" ? "docs" : route.view;
   const segment = view === "home" ? "" : view === "project" ? "changelog" : view;
+  const section = target.searchParams.get("section");
   const detail = view === "docs"
-    ? isDocumentationSection(route.section)
-      ? `/${route.section}`
+    ? isDocumentationSection(section)
+      ? `/${section}`
       : route.component ? `/components/${encodeURIComponent(canonicalComponentName(route.component))}` : ""
     : "";
   const language = current.searchParams.get("lang") ?? (/\/ru(?:\/|$)/.test(current.pathname) ? "ru" : "en");
@@ -132,6 +135,7 @@ export function createPlaygroundUrl(current: URL, route: PlaygroundRoute): URL {
   if (view === "docs") {
     if (isDocumentationSection(route.section)) target.searchParams.set("section", route.section);
     else if (route.component) target.searchParams.set("component", canonicalComponentName(route.component));
+    else if (route.view === "components") target.searchParams.set("section", "components");
   }
   target.hash = "";
   return target;

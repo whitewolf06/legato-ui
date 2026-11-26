@@ -127,6 +127,13 @@ for (const { name: theme } of wlDesignThemes) {
     await chipsControl.press("Escape");
     await expect(chipsField.locator(".wl-multiselect__chip")).toHaveCount(2);
     expect((await chipsField.boundingBox())!.height).toBe(oneChipHeight);
+    const removeButtons = chipsField.locator(".wl-multiselect__chip-remove");
+    await expect(removeButtons).toHaveCount(2);
+    expect(await removeButtons.evaluateAll((buttons) => buttons.every((button) => {
+      const row = button.closest(".wl-multiselect__chips")!.getBoundingClientRect();
+      const bounds = button.getBoundingClientRect();
+      return bounds.left >= row.left && bounds.right <= row.right;
+    }))).toBe(true);
   });
 
   test(`${theme}: selection typography follows the global scale in fields, panels and chips`, async ({ page }) => {

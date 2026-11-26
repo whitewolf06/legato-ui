@@ -48,7 +48,7 @@ describe("Home navigation URLs", () => {
     expect(wrapper.get(".home-sections + p a").attributes("href"))
       .toBe("/legato-ui/ru/theme-builder/?theme=graphite");
     expect(wrapper.findAll(".home-action")[1]!.attributes("href"))
-      .toBe("/legato-ui/ru/docs/?theme=graphite#docs-components");
+      .toBe("/legato-ui/ru/docs/components/?theme=graphite");
   });
 
   it("keeps portable destinations on the archive entry with the current language, theme and anchor", () => {
@@ -70,6 +70,7 @@ describe("Home navigation URLs", () => {
     expect(catalog.searchParams.get("view")).toBe("docs");
     expect(catalog.searchParams.get("theme")).toBe("graphite");
     expect(catalog.searchParams.get("lang")).toBe("ru");
-    expect(catalog.hash).toBe("#docs-components");
+    expect(catalog.searchParams.get("section")).toBe("components");
+    expect(catalog.hash).toBe("");
   });
 });

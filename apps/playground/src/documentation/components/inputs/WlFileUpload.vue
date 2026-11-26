@@ -43,7 +43,7 @@ function clear() {
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlFileUpload">
     <section class="wl-stack" data-space="md" aria-labelledby="docs-upload-documents">
-      <h3 id="docs-upload-documents" class="wl-text-title">{{ t("examples.documents_type_size_and_count_0731") }}</h3>
+      <h3 id="docs-upload-documents" class="wl-text-subheading">{{ t("examples.documents_type_size_and_count_0731") }}</h3>
       <p class="wl-text-small">{{ t("examples.pdf_or_txt_up_to_two_files_each_no_larger_than_1_mib_new_files_0732") }}</p>
       <WlFileUpload
         :key="`documents-${revision}`"
@@ -56,7 +56,7 @@ function clear() {
       <p v-if="lastRejection" class="wl-text-small docs-upload-message">{{ t("examples.last_reject_event_0733") }} {{ lastRejection }}</p>
     </section>
     <section class="wl-stack" data-space="md" aria-labelledby="docs-upload-image">
-      <h3 id="docs-upload-image" class="wl-text-title">{{ t("examples.one_file_replaces_the_previous_file_0734") }}</h3>
+      <h3 id="docs-upload-image" class="wl-text-subheading">{{ t("examples.one_file_replaces_the_previous_file_0734") }}</h3>
       <p class="wl-text-small">{{ t("examples.an_image_up_to_512_kib_with_multiple_false_the_next_valid_sele_0735") }}</p>
       <WlFileUpload
         :key="`image-${revision}`"
@@ -109,7 +109,7 @@ function clear() {
       </div>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.disabled_dropzone_and_clearing_0736") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.disabled_dropzone_and_clearing_0736") }}</h3>
       <WlFileUpload :model-value="[]" disabled />
       <WlButton size="sm" @click="clear">{{ t("examples.clear_lists_and_errors_0737") }}</WlButton>
       <p class="wl-text-small wl-text-muted">{{ t("examples.enter_space_on_the_dropzone_opens_the_file_picker_cancelling_p_0738") }}</p>

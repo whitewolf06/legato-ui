@@ -10,7 +10,7 @@ const comment = ref("");
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlTextarea">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.fixed_rows_and_content_height_0859") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.fixed_rows_and_content_height_0859") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField id="docs-textarea-fixed" v-slot="{ id }" :label="t('examples.description_4_rows_0860')">
           <WlTextarea :id="id" v-model="text" :rows="4" />
@@ -30,7 +30,7 @@ const comment = ref("");
       </div>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.error_and_unavailable_field_0863") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.error_and_unavailable_field_0863") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-textarea-comment"

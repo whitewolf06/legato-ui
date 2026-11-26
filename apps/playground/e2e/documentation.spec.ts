@@ -1,24 +1,9 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
-import { readFileSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import { wlManifest } from "../../../packages/ui-kit/src/manifest";
 import { playgroundBasePath, playgroundRouteParams, russianPlaygroundUrl } from "./playground-url";
 import { publishedName } from "./project-version";
 import { chooseDropdownOption, copyCodePanel, navigateMainView, openDocumentationMenu } from "./select-helpers";
-
-const russianDocumentation = JSON.parse(readFileSync(new URL("../src/i18n/messages/documentation.ru.json", import.meta.url), "utf8")) as { strings: Record<string, string> };
-
-// Node-side expectations use the same RU catalog without mutating the application locale.
-function russianDocumentationTitle(key: string): string {
-  const title = russianDocumentation.strings[key.slice("documentation.strings.".length)];
-  if (typeof title !== "string") throw new Error("Missing Russian documentation title: " + key);
-  return title;
-}
-const documentationOverviewHeadings = [
-  ["docs-install", "s0120"], ["docs-foundations", "s0121"],
-  ["docs-components", "s0122"], ["docs-tokens", "s0123"],
-  ["docs-icons", "s0016"], ["docs-migration", "s0124"]
-].map(([id, key]) => ({ id: id!, title: russianDocumentationTitle("documentation.strings." + key) }));
 
 const defaultStand = "http://127.0.0.1:4173/";
 const pageErrors = new WeakMap<Page, string[]>();
@@ -60,26 +45,22 @@ async function enterCompactDocumentation(page: Page): Promise<void> {
 }
 
 const buttonExampleLinks = [
-  "Пример", "Все варианты", "Размеры и плотность", "Disabled и loading",
-  "Иконки и содержимое слотов", "Ширина кнопки и отправка формы", "Когда использовать"
+  "Вариант и тон", "Размер и плотность", "Загрузка и блокировка",
+  "Положение иконки", "Кнопка в форме", "Когда использовать"
 ] as const;
 
-function documentationSidebarToc(docs: Locator): Locator {
-  return docs.getByRole("complementary", { name: "Навигация документации", exact: true })
-    .getByRole("navigation", { name: "На этой странице", exact: true });
+function documentationOutline(docs: Locator): Locator {
+  return docs.locator(".docs-on-page nav");
 }
 
-async function expectMatchingDocumentationOutlines(docs: Locator): Promise<void> {
-  const sidebar = documentationSidebarToc(docs);
-  const outline = docs.locator(".docs-on-page nav");
-  await expect(sidebar).toHaveCount(1);
-  await expect(outline).toHaveCount(1);
-  const links = await sidebar.locator("a").evaluateAll((items: HTMLAnchorElement[]) => items.map((item) => ({ hash: item.hash, text: item.textContent?.trim() })));
-  expect(links.length).toBeGreaterThan(0);
-  await expect.poll(() => outline.locator("a").evaluateAll((items: HTMLAnchorElement[]) => items.map((item) => ({ hash: item.hash, text: item.textContent?.trim() })))).toEqual(links);
-  await expect.poll(() => sidebar.locator("a").evaluateAll((items: HTMLAnchorElement[]) => items.every((item) =>
-    [...document.querySelectorAll("[id]")].filter((target) => target.id === item.hash.slice(1)).length === 1
-  )), "Both equivalent outlines target unique content IDs").toBe(true);
+async function expectSinglePageOutline(docs: Locator): Promise<void> {
+  const outline = documentationOutline(docs);
+  await expect(outline).toBeVisible();
+  await expect(docs.locator('.docs-sidebar a[href^="#"]')).toHaveCount(0);
+  await expect.poll(() => outline.getByRole("link").evaluateAll((links: HTMLAnchorElement[]) => {
+    const targets = [...document.querySelectorAll("[id]")];
+    return links.length > 0 && links.every((link) => targets.filter((target) => target.id === link.hash.slice(1)).length === 1);
+  }), "Outline links target unique content IDs").toBe(true);
 }
 
 async function expectComponentOutline(workspace: Locator, labels: readonly string[]): Promise<void> {
@@ -103,6 +84,24 @@ async function expectComponentOutline(workspace: Locator, labels: readonly strin
         && getComputedStyle(link).backgroundColor === "rgba(0, 0, 0, 0)";
     })
   ), "Every plain anchor targets an actual heading in the selected tab").toBe(true);
+}
+
+async function expectButtonOutline(workspace: Locator, labels: readonly string[]): Promise<void> {
+  const desktop = workspace.page().locator(".docs-on-page nav");
+  const compact = workspace.locator(".button-compact-outline");
+  const wide = await workspace.page().evaluate(() => matchMedia("(min-width: 1201px)").matches);
+  await expect(wide ? desktop : compact).toBeVisible();
+  if (!wide && !(await compact.evaluate((details: HTMLDetailsElement) => details.open))) {
+    await compact.locator("summary").click();
+  }
+  const links = (wide ? desktop : compact).getByRole("link");
+  await expect(links).toHaveText([...labels]);
+  await expect.poll(() => links.evaluateAll((items: HTMLAnchorElement[]) =>
+    items.every((item) => {
+      const target = document.getElementById(item.hash.slice(1));
+      return target?.tagName === "H2" && !!target.getClientRects().length && target.textContent === item.textContent;
+    })
+  )).toBe(true);
 }
 
 async function buttonFillRatio(button: Locator): Promise<number> {
@@ -151,19 +150,28 @@ test("home opens WlButton documentation and controls update the live button, con
   const docs = page.getByTestId("docs-page");
   await expect(docs).toBeVisible();
   await openDocumentationMenu(page);
-  const sidebar = docs.getByRole("complementary", { name: "Навигация документации", exact: true });
+  const sidebar = docs.locator(".docs-sidebar");
   const catalog = sidebar.getByRole("navigation", { name: "Каталог компонентов", exact: true, includeHidden: true });
   await expect(sidebar.getByRole("heading", { name: "Начало работы", exact: true })).toBeVisible();
   await expect(sidebar.getByRole("button", { name: "Введение", exact: true })).toHaveCount(0);
   const overviewNavigation = sidebar.getByRole("navigation", { name: "Разделы начала работы", exact: true, includeHidden: true });
-  await expect(overviewNavigation.getByRole("link", { includeHidden: true })).toHaveText(documentationOverviewHeadings.map((heading) => heading.title));
-  const majorHeadings = sidebar.locator(".docs-sidebar-heading");
-  await expect(majorHeadings).toHaveText(["Начало работы", "Основы", "Оформление", "Компоненты"]);
-  await expect(majorHeadings.locator("svg[aria-hidden='true']")).toHaveCount(4);
+  await expect(overviewNavigation.getByRole("link", { includeHidden: true })).toHaveText(["Установка"]);
+  const majorHeadings = sidebar.locator("h2.docs-sidebar-heading");
+  await expect(majorHeadings).toHaveText(["Начало работы", "Основы", "Оформление"]);
+  await expect(majorHeadings.locator("svg[aria-hidden='true']")).toHaveCount(3);
   await expect.poll(() => majorHeadings.locator("svg").evaluateAll((icons) =>
     icons.map((icon) => icon.getAttribute("data-icon"))
-  )).toEqual(["book", "grid", "image", "box"]);
-  await expect.poll(() => catalog.getByRole("button").first().evaluate((button) => {
+  )).toEqual(["book", "grid", "image"]);
+  await expect(catalog).toHaveCount(0);
+  await expect(sidebar.getByRole("searchbox")).toHaveCount(0);
+  const catalogEntry = sidebar.getByRole("link", { name: "Компоненты", exact: true });
+  await expect(catalogEntry).toHaveCount(1);
+  await catalogEntry.click();
+  await expectRoute(page, baseURL, "docs", null, "components");
+  await expect(buttonWorkspace(page)).toBeVisible();
+  await openDocumentationMenu(page);
+  await expect(catalog.getByRole("link").first()).toHaveAttribute("aria-current", "page");
+  await expect.poll(() => catalog.getByRole("link").first().evaluate((button) => {
     const style = getComputedStyle(button);
     return Number.parseFloat(style.minHeight) === (matchMedia("(pointer: coarse)").matches ? 36 : 30)
       && Number.parseFloat(style.paddingTop) === 6 && Number.parseFloat(style.paddingBottom) === 6;
@@ -171,18 +179,17 @@ test("home opens WlButton documentation and controls update the live button, con
   await expect(sidebar.locator("#docs-component-search")).toBeVisible();
   await expect(sidebar.locator("#docs-component-search")).toHaveAttribute("type", "search");
   await expect(sidebar.getByText(/Найдено:/)).toHaveCount(0);
-  await expect(catalog.getByRole("button")).toHaveCount(wlManifest.length);
+  await expect(catalog.getByRole("link")).toHaveCount(wlManifest.length);
   await expect(catalog.getByRole("heading", { level: 3 })).toHaveText([
     "Действия", "Ввод данных", "Данные", "Контейнеры", "Составные элементы", "Навигация", "Обратная связь", "Дополнительно"
   ]);
-  await catalog.getByRole("button", { name: "WlButton", exact: true }).click();
+  await catalog.getByRole("link", { name: "WlButton", exact: true }).click();
   await expect(catalog.getByRole("navigation")).toHaveCount(0);
   await expect(sidebar.getByRole("navigation", { name: "На этой странице", exact: true })).toHaveCount(0);
-  await expect(overviewNavigation.getByRole("link", { includeHidden: true })).toHaveCount(6);
-  await expect(overviewNavigation.locator("[aria-current]")).toHaveCount(0);
-  await expect(catalog.getByRole("button", { name: "WlButton", exact: true, includeHidden: true })).toHaveAttribute("aria-current", "page");
+  await expect(overviewNavigation).toHaveCount(0);
+  await expect(catalog.getByRole("link", { name: "WlButton", exact: true, includeHidden: true })).toHaveAttribute("aria-current", "page");
   await expect.poll(() => catalog.getByRole("heading", { name: "Ввод данных", exact: true, includeHidden: true }).evaluate((heading) => {
-    const link = heading.parentElement?.querySelector("button");
+    const link = heading.parentElement?.querySelector("a");
     if (!link) return false;
     const headingStyle = getComputedStyle(heading);
     return Number.parseFloat(headingStyle.fontSize) > Number.parseFloat(getComputedStyle(link).fontSize)
@@ -191,72 +198,85 @@ test("home opens WlButton documentation and controls update the live button, con
   const workspace = buttonWorkspace(page);
   await expect(workspace).toBeVisible();
   await expect(workspace.getByRole("tablist", { name: "Разделы WlButton", exact: true })).toHaveCSS("border-bottom-width", "0px");
-  await expectComponentOutline(workspace, buttonExampleLinks);
+  await expectButtonOutline(workspace, buttonExampleLinks);
   const rulesButton = docs.getByRole("button", { name: "Правила дизайн-системы", exact: true });
   await expect(rulesButton).toHaveAttribute("data-variant", "secondary");
-  await expect.poll(() => rulesButton.evaluate((button) => {
-    // Compare resolved colors; a CSS custom property may retain a hex value.
-    const surface = button.closest(".docs-page")?.querySelector(".docs-controls");
-    return !!surface && getComputedStyle(button).backgroundColor
-      === getComputedStyle(surface).backgroundColor;
-  }), "Design-system rules are a visible muted secondary action").toBe(true);
   await expectRoute(page, baseURL, "docs", "WlButton");
+  const topic = (name: string) => workspace.locator('[data-docs-button-example="' + name + '"]');
+  const variants = topic("variants");
+  const sizes = topic("sizes");
+  const states = topic("states");
+  const form = topic("form");
   const preview = page.getByTestId("docs-button-preview");
   const button = preview.getByRole("button", { name: "Добавить", exact: true });
   const source = page.getByTestId("docs-button-source");
-  await expect(button).toHaveAttribute("data-variant", "secondary");
-  await expect(button).toHaveAttribute("data-size", "md");
-  const block = workspace.getByRole("checkbox", { name: "block", exact: true });
-  await expect(block).not.toBeChecked();
-  await expect.poll(() => buttonFillRatio(button), "block=false preserves intrinsic button width").toBeLessThan(0.9);
-  await block.check();
-  await expect.poll(() => buttonFillRatio(button), "block=true fills its available container").toBeCloseTo(1, 2);
-  await expect(source.locator("pre code")).toContainText('"block":true');
-  await block.uncheck();
-  await expect.poll(() => buttonFillRatio(button)).toBeLessThan(0.9);
-  await expect(source.locator("pre code")).toContainText('"block":false');
-  await chooseDropdownOption(page, workspace.getByRole("combobox", { name: "variant", exact: true }), "primary");
-  await chooseDropdownOption(page, workspace.getByRole("combobox", { name: "size", exact: true }), "lg");
-  await chooseDropdownOption(page, workspace.getByRole("combobox", { name: "density", exact: true }), "compact");
+  const snippet = source.locator("pre code");
+  const sizedButton = sizes.locator(".button-sample-stage button");
+  const stateButton = states.locator(".button-sample-stage button");
+  const formButton = form.locator(".button-sample-stage button");
+  const block = form.getByRole("checkbox", { name: "block", exact: true });
+
   await expect(button).toHaveAttribute("data-variant", "primary");
-  await expect(button).toHaveAttribute("data-size", "lg");
-  await expect(button).toHaveAttribute("data-density", "compact");
+  await expect(snippet).not.toContainText("tone=");
+  await chooseDropdownOption(page, variants.getByRole("combobox", { name: "variant", exact: true }), "soft");
+  await chooseDropdownOption(page, variants.getByRole("combobox", { name: "tone", exact: true }), "danger");
+  await expect(snippet).toContainText('variant="soft" tone="danger"');
+  await expect(button).toHaveAttribute("data-tone", "danger");
   await button.click();
   await expect(preview.getByRole("status")).toHaveText("Нажатий: 1");
-  await workspace.getByRole("checkbox", { name: "disabled", exact: true }).check();
-  await expect(button).toBeDisabled();
-  await expect(source.locator("pre code")).toContainText('"variant":"primary"');
-  await expect(source.locator("pre code")).toContainText('"size":"lg"');
-  await expect(source.locator("pre code")).toContainText('"density":"compact"');
-  await expect(source.locator("pre code")).toContainText('"disabled":true');
-  await workspace.getByRole("checkbox", { name: "disabled", exact: true }).uncheck();
-  await expect(button).toBeEnabled();
-  await workspace.getByRole("checkbox", { name: "loading", exact: true }).check();
-  await expect(button).toBeDisabled();
-  await expect(button).toHaveAttribute("aria-busy", "true");
-  await expect(source.locator("pre code")).toContainText('"loading":true');
-  await workspace.getByRole("checkbox", { name: "loading", exact: true }).uncheck();
-  await expect(button).toBeEnabled();
 
-  const consumerCode = await source.locator("pre code").textContent();
-  expect(consumerCode).not.toBeNull();
-  expect(consumerCode!.length).toBeGreaterThan(0);
-  expect(consumerCode).toContain('from "legato-ui"');
-  expect(consumerCode).not.toContain("packages/ui-kit");
-  // Capture the exact clipboard boundary, as in the existing recipe tests.
-  // This checks copy wiring independently of operating-system permissions.
+  await chooseDropdownOption(page, sizes.getByRole("combobox", { name: "size", exact: true }), "lg");
+  await chooseDropdownOption(page, sizes.getByRole("combobox", { name: "density", exact: true }), "compact");
+  await expect(sizedButton).toHaveAttribute("data-size", "lg");
+  await expect(sizedButton).toHaveAttribute("data-density", "compact");
+  await expect(sizes.locator(".button-sample pre code")).toContainText('size="lg" density="compact"');
+  await expect(button).toHaveAttribute("data-size", "md");
+
+  const disabled = states.getByRole("checkbox", { name: "disabled", exact: true });
+  await disabled.check();
+  await expect(stateButton).toBeDisabled();
+  await expect(states.locator(".button-sample pre code")).toContainText(" disabled");
+  await disabled.uncheck();
+  const loading = states.getByRole("checkbox", { name: "loading", exact: true });
+  await loading.check();
+  await expect(stateButton).toBeDisabled();
+  await expect(stateButton).toHaveAttribute("aria-busy", "true");
+  await expect(states.locator(".button-sample pre code")).toContainText(" loading");
+  await expect(button).toBeEnabled();
+  await loading.uncheck();
+  await expect(stateButton).toBeEnabled();
+  const icons = topic("slots");
+  await chooseDropdownOption(page, icons.getByRole("combobox", { name: "iconPosition", exact: true }), "end");
+  await expect(icons.locator(".button-sample-stage button > :last-child")).toHaveAttribute("data-icon", "arrow-right");
+  await expect(icons.locator(".button-sample pre code")).toContainText('icon-position="end"');
+  await expect(block).not.toBeChecked();
+  await expect.poll(() => buttonFillRatio(formButton)).toBeLessThan(0.9);
+  await block.check();
+  await expect.poll(() => buttonFillRatio(formButton)).toBeCloseTo(1, 2);
+  await formButton.click();
+  await expect(form.locator(".button-sample-stage [role=status]")).toHaveText("Отправок: 1");
+  await chooseDropdownOption(page, form.getByRole("combobox", { name: "type", exact: true }), "reset");
+  await formButton.click();
+  await expect(form.locator(".button-sample-stage [role=status]")).toHaveText("Отправок: 0");
+
   await page.evaluate(() => Object.defineProperty(navigator, "clipboard", {
     configurable: true,
     value: { writeText: async (value: string) => { document.documentElement.dataset.docsCopied = value; } }
   }));
   await copyCodePanel(source);
   await expect(source.getByRole("status")).toHaveText("Код скопирован.");
-  await expect(page.locator("html")).toHaveAttribute("data-docs-copied", consumerCode!);
+  await expect(page.locator("html")).toHaveAttribute("data-docs-copied", (await snippet.textContent())!);
+  await source.locator("summary").click();
+  await expect(snippet).toContainText('from "legato-ui"');
+  await expect(snippet).toContainText('variant="soft" tone="danger"');
+  await expect(snippet).not.toContainText("usePlaygroundI18n");
+  await copyCodePanel(source);
+  await expect(page.locator("html")).toHaveAttribute("data-docs-copied", (await snippet.textContent())!);
 
   const apiTab = workspace.getByRole("tab", { name: "API", exact: true });
   await apiTab.click();
   await expect(apiTab).toHaveAttribute("aria-selected", "true");
-  await expectComponentOutline(workspace, ["Props", "События", "Слоты", "Pass-through: pt"]);
+  await expectButtonOutline(workspace, ["Props", "События", "Слоты", "Pass-through: pt"]);
   const props = workspace.getByRole("region", { name: "Props WlButton", exact: true });
   await expect(props).toBeVisible();
   for (const name of ["variant", "size", "density", "disabled", "loading", "block", "type", "pt"]) {
@@ -267,28 +287,20 @@ test("home opens WlButton documentation and controls update the live button, con
   const accessibilityTab = workspace.getByRole("tab", { name: "Доступность", exact: true });
   await expect(accessibilityTab).toBeFocused();
   await expect(accessibilityTab).toHaveAttribute("aria-selected", "true");
-  await expectComponentOutline(workspace, ["Клавиатура и состояния"]);
+  await expectButtonOutline(workspace, ["Клавиатура и состояния"]);
   await expect(workspace.getByRole("heading", { name: "Клавиатура и состояния", exact: true })).toBeVisible();
   await accessibilityTab.press("Home");
   const examplesTab = workspace.getByRole("tab", { name: "Примеры", exact: true });
   await expect(examplesTab).toBeFocused();
   await expect(examplesTab).toHaveAttribute("aria-selected", "true");
-  await expectComponentOutline(workspace, buttonExampleLinks);
+  await expectButtonOutline(workspace, buttonExampleLinks);
+  await expect(button).toHaveAttribute("data-variant", "soft");
+  await variants.getByRole("button", { name: "Сбросить", exact: true }).click();
   await expect(button).toHaveAttribute("data-variant", "primary");
-  await expect(button).toHaveAttribute("data-size", "lg");
-  await block.check();
-  await expect.poll(() => buttonFillRatio(button)).toBeCloseTo(1, 2);
-  await workspace.getByRole("button", { name: "Сбросить", exact: true }).click();
-  await expect(block).not.toBeChecked();
-  await expect(button).toBeEnabled();
-  await expect(button).toHaveAttribute("data-variant", "secondary");
-  await expect(button).toHaveAttribute("data-size", "md");
-  await expect(button).toHaveAttribute("data-density", "default");
-  await expect.poll(() => buttonFillRatio(button)).toBeLessThan(0.9);
+  await expect(snippet).not.toContainText("tone=");
   await expect(preview.getByRole("status")).toHaveText("Нажатий: 0");
-  await expect(source.locator("pre code")).toContainText('"block":false');
-  await expect(source.locator("pre code")).toContainText('"variant":"secondary"');
-  await expect(source.locator("pre code")).toContainText('"size":"md"');
+  await expect(sizedButton).toHaveAttribute("data-size", "lg");
+  await expect(block).toBeChecked();
   await expectNoHorizontalOverflow(page, docs);
   const homeScreenshotPath = testInfo.outputPath("home-desktop.png");
   await writeFile(homeScreenshotPath, homeScreenshot);
@@ -341,9 +353,8 @@ test("direct WlButton documentation survives reload, Back and Forward beneath th
   expect(new URL(page.url()).hash).toBe("#home-quickstart");
 });
 
-async function expectNativeOverviewLink(page: Page, overview: Locator, baseURL: string | undefined): Promise<void> {
+async function expectNativeInstallationLink(page: Page, installation: Locator, baseURL: string | undefined): Promise<void> {
   const original = page.url();
-  const installation = overview.getByRole("link", { name: "Установка", exact: true });
   await installation.focus();
   await expect(installation).toBeFocused();
   // Exercise the native foreground-tab keyboard shortcut without a mouse click.
@@ -354,37 +365,14 @@ async function expectNativeOverviewLink(page: Page, overview: Locator, baseURL: 
   try {
     await newTab.waitForLoadState("domcontentloaded");
     await expect(newTab.getByTestId("docs-page")).toBeVisible();
-    await expect(newTab.getByTestId("docs-page").locator("#docs-install")).toBeInViewport();
-    await expectRoute(newTab, baseURL, "docs");
-    expect(new URL(newTab.url()).hash).toBe("#docs-install");
+    await expect(newTab.locator('[data-guide="installation"]')).toBeVisible();
+    await expectRoute(newTab, baseURL, "docs", null, "installation");
     expect(page.url()).toBe(original);
-    await expect(buttonWorkspace(page)).toBeVisible();
+    await expect(page.locator('[data-guide="why"]')).toBeVisible();
   } finally {
     await newTab.close();
   }
   await page.bringToFront();
-}
-
-async function enterOverviewSource(
-  page: Page, docs: Locator, destination: { section: string | null; group?: string; label?: string }, index: number
-): Promise<void> {
-  if (index === 2) await enterCompactDocumentation(page);
-  if (!destination.section) return;
-  await openDocumentationMenu(page);
-  await docs.getByRole("navigation", { name: destination.group, exact: true })
-    .getByRole("button", { name: destination.label, exact: true }).click();
-}
-
-async function expectLayoutSourceAnchor(docs: Locator, anchor: string | undefined, visit = false): Promise<void> {
-  if (!anchor) return;
-  if (visit) await documentationSidebarToc(docs).getByRole("link", { name: "Вложенная сетка", exact: true }).click();
-  await expect(docs.locator("#" + anchor)).toBeInViewport();
-}
-
-async function expectCompactOverviewClosed(page: Page, docs: Locator, index: number): Promise<void> {
-  if (index !== 2) return;
-  await expect(docs.locator(".docs-menu")).toHaveJSProperty("open", false);
-  await expectNoHorizontalOverflow(page, docs);
 }
 
 function expectFoundationSource(consumerCode: string | null, name: string): void {
@@ -416,7 +404,9 @@ async function expectLayoutFoundation(page: Page, foundation: Locator, toc: Loca
 }
 
 async function revealDocumentationCode(source: Locator): Promise<void> {
-  if (!await source.locator("pre code").isVisible()) await source.locator(".ds-source-frame summary").click();
+  if (!await source.locator("details").evaluate((details: HTMLDetailsElement) => details.open)) {
+    await source.locator(".ds-source-frame summary").click();
+  }
 }
 
 async function scrollToDocumentationHeading(page: Page, nextHeading: Locator, headerBottom: number): Promise<void> {
@@ -443,76 +433,69 @@ async function expectDesktopStickySidebar(page: Page, docs: Locator, mobile: boo
 }
 
 test("native keyboard documentation links open a foreground tab and preserve the original page", { tag: "@cross-browser" }, async ({ page, baseURL }) => {
-  await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs&component=WlButton")), { waitUntil: "domcontentloaded" });
-  await expect(buttonWorkspace(page)).toBeVisible();
+  await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs&section=why")), { waitUntil: "domcontentloaded" });
+  await expect(page.locator('[data-guide="why"]')).toBeVisible();
   const docs = await openDocumentationMenu(page);
-  const overview = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true });
-  await expectNativeOverviewLink(page, overview, baseURL);
+  const installation = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true })
+    .getByRole("link", { name: "Установка", exact: true });
+  await expectNativeInstallationLink(page, installation, baseURL);
 });
 
-test("getting-started links persist across Docs pages and preserve SPA history and mobile closure", async ({ page, baseURL }) => {
-  await page.setViewportSize({ width: 1280, height: 800 });
-  await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs&component=WlButton")), { waitUntil: "domcontentloaded" });
+test("the Installation entry stays in place across Docs pages and is usable in the mobile menu", async ({ page, baseURL }) => {
   const docs = page.getByTestId("docs-page");
-  const overview = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true, includeHidden: true });
-  await expect(buttonWorkspace(page)).toBeVisible();
-  await page.evaluate(() => {
-    document.documentElement.dataset.overviewSpa = "retained";
-  });
-  const basePath = new URL(baseURL ?? defaultStand).pathname;
-  const destinations = [
-    { component: "WlButton", section: null, anchor: "docs-components" },
-    { component: null, section: "layout", anchor: "docs-foundations", group: "Основы", label: "Layout и сетка" },
-    { component: null, section: "icons", anchor: "docs-icons", group: "Оформление", label: "Иконки" }
+  const start = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true, includeHidden: true });
+  const installation = start.getByRole("link", { name: "Установка", exact: true, includeHidden: true });
+  const visits = [
+    { section: null, width: 1280 },
+    { section: "how-it-is-built", width: 1280 },
+    { section: "icons", width: 320 }
   ] as const;
-
-  for (const [index, destination] of destinations.entries()) {
-    await enterOverviewSource(page, docs, destination, index);
-    await expectRoute(page, baseURL, "docs", destination.component, destination.section);
+  for (const { section, width } of visits) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(russianPlaygroundUrl(pageUrl(baseURL, section ? "?view=docs&section=" + section : "?view=docs")), { waitUntil: "domcontentloaded" });
+    await expectRoute(page, baseURL, "docs", null, section);
     await openDocumentationMenu(page);
-    await expect(overview).toBeVisible();
-    await expect(overview.getByRole("link", { includeHidden: true })).toHaveText(documentationOverviewHeadings.map((heading) => heading.title));
-    await expect(overview.locator("[aria-current]")).toHaveCount(0);
-    const overviewLinks = await overview.getByRole("link").evaluateAll((links: HTMLAnchorElement[]) => links.map((link) => link.href));
-    expect(overviewLinks.map((href) => {
-      const url = new URL(href);
-      return { path: playgroundBasePath(url), view: playgroundRouteParams(url).get("view"), component: playgroundRouteParams(url).get("component"), section: playgroundRouteParams(url).get("section"), hash: url.hash };
-    })).toEqual(documentationOverviewHeadings.map((heading) => ({
-      path: basePath, view: "docs", component: null, section: null, hash: "#" + heading.id
-    })));
-
-    const sourceAnchors: Record<string, string> = { layout: "docs-layout-nested-grid" };
-    const sourceAnchor = sourceAnchors[destination.section ?? ""];
-    await expectLayoutSourceAnchor(docs, sourceAnchor, true);
+    await expect(start.getByRole("link")).toHaveText(["Установка"]);
+    await expect(start.locator("[aria-current]")).toHaveCount(0);
+    await page.evaluate(() => {
+      document.documentElement.dataset.installationSpa = "retained";
+    });
     const sourceUrl = page.url();
+    const menuHeight = (await start.boundingBox())!.height;
     const historyLength = await page.evaluate(() => history.length);
-    const heading = documentationOverviewHeadings.find((item) => item.id === destination.anchor)!;
-    await overview.getByRole("link", { name: heading.title, exact: true }).click();
-    await expectRoute(page, baseURL, "docs");
-    expect(new URL(page.url()).hash).toBe("#" + destination.anchor);
-    await expect(docs.locator("#" + destination.anchor)).toBeInViewport();
-    await expect(overview.getByRole("link", { name: heading.title, exact: true, includeHidden: true })).toHaveAttribute("aria-current", "location");
-    await expect(page.locator("html")).toHaveAttribute("data-overview-spa", "retained");
+    await installation.click();
+    await expectRoute(page, baseURL, "docs", null, "installation");
+    await expect(installation).toHaveAttribute("aria-current", "page");
+    await expect(page.locator("html")).toHaveAttribute("data-installation-spa", "retained");
     expect(await page.evaluate(() => history.length)).toBe(historyLength + 1);
-    await expectCompactOverviewClosed(page, docs, index);
+    await expectSinglePageOutline(docs);
+    await expect(documentationOutline(docs).getByRole("link")).toHaveText([
+      "Что понадобится", "Установка пакета", "Стили и тема", "Первый компонент", "Подписи на русском"
+    ]);
+    await expect(docs.locator(".docs-menu")).toHaveJSProperty("open", width !== 320);
+    await expectNoHorizontalOverflow(page, docs);
+    await openDocumentationMenu(page);
+    expect((await start.boundingBox())!.height).toBeCloseTo(menuHeight);
     await page.goBack();
     await expect.poll(() => page.url()).toBe(sourceUrl);
-    await expectRoute(page, baseURL, "docs", destination.component, destination.section);
-    await expectLayoutSourceAnchor(docs, sourceAnchor);
-    await expect(overview.locator("[aria-current]")).toHaveCount(0);
+    await expect(start.locator("[aria-current]")).toHaveCount(0);
     await page.goForward();
-    await expectRoute(page, baseURL, "docs");
-    await expect(docs.locator("#" + destination.anchor)).toBeInViewport();
-    await expect(page.locator("html")).toHaveAttribute("data-overview-spa", "retained");
+    await expectRoute(page, baseURL, "docs", null, "installation");
+    await expect(installation).toHaveAttribute("aria-current", "page");
   }
+});
 
+test("overview anchors keep the same page and do not add duplicate history entries", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  await overview.getByRole("link", { name: "Миграция", exact: true }).click();
+  await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs")), { waitUntil: "domcontentloaded" });
+  const docs = page.getByTestId("docs-page");
+  const outline = documentationOutline(docs);
+  await outline.getByRole("link", { name: "Миграция", exact: true }).click();
   await expect(docs.locator("#docs-migration")).toBeInViewport();
   const currentHistoryLength = await page.evaluate(() => history.length);
-  await overview.getByRole("link", { name: "Миграция", exact: true }).click();
+  await outline.getByRole("link", { name: "Миграция", exact: true }).click();
   expect(await page.evaluate(() => history.length)).toBe(currentHistoryLength);
-  await overview.getByRole("link", { name: "Установка", exact: true }).click();
+  await outline.getByRole("link", { name: "Установка", exact: true }).click();
   await expect(docs.locator("#docs-install")).toBeInViewport();
   await page.goBack();
   await expect(docs.locator("#docs-migration")).toBeInViewport();
@@ -529,15 +512,19 @@ test("history restores Docs anchors after an interrupted smooth overview transit
   const docs = page.getByTestId("docs-page");
   const source = docs.locator("#docs-responsive-breakpoints");
   await expect(source).toBeInViewport();
-  await docs.getByRole("navigation", { name: "Разделы начала работы", exact: true })
-    .getByRole("link", { name: "Миграция", exact: true }).click();
-  // Traverse before the long smooth scroll to the overview's final section completes.
+  await docs.getByTestId("playground-page-header").getByRole("link", { name: "Документация", exact: true }).click();
   await expectRoute(page, baseURL, "docs");
+  await documentationOutline(docs).getByRole("link", { name: "Миграция", exact: true }).click();
+  // Traverse before the long smooth scroll to the overview's final section completes.
+  await expect.poll(() => new URL(page.url()).hash).toBe("#docs-migration");
+  await page.goBack();
+  expect(new URL(page.url()).hash).toBe("");
   await page.goBack();
   await expectRoute(page, baseURL, "docs", null, "responsive");
   await expect(source).toBeInViewport();
   await page.goForward();
   await expectRoute(page, baseURL, "docs");
+  await page.goForward();
   expect(new URL(page.url()).hash).toBe("#docs-migration");
   await expect.poll(() => page.evaluate(async () => {
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -573,11 +560,12 @@ test("home and interactive WlButton documentation remain usable at 320px", async
   const preview = page.getByTestId("docs-button-preview");
   const button = preview.getByRole("button", { name: "Добавить", exact: true });
   await expect(button).toHaveAttribute("data-variant", "ghost");
-  await expect(button).toHaveAttribute("data-size", "sm");
+  await expect(button).toHaveAttribute("data-size", "md");
+  await expect(workspace.locator('[data-docs-button-example="sizes"] .button-sample-stage button')).toHaveAttribute("data-size", "sm");
   await button.click();
   await expect(preview.getByRole("status")).toHaveText("Нажатий: 1");
   await expectNoHorizontalOverflow(page, preview);
-  await expect(page.getByTestId("docs-button-source").locator("pre code")).toContainText('"variant":"ghost"');
+  await expect(page.getByTestId("docs-button-source").locator("pre code")).toContainText('variant="ghost"');
   await workspace.getByRole("tab", { name: "API", exact: true }).click();
   await expect(workspace.getByRole("region", { name: "Props WlButton", exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page, docs);
@@ -608,9 +596,8 @@ test("foundations navigation keeps representative examples, copy and 320px layou
     await expect(docs.getByRole("heading", { level: 1 })).toHaveText(section.label);
     await expectRoute(page, baseURL, "docs", null, section.name);
     await expect(foundation.locator("[data-docs-example]")).toHaveCount(section.examples.length);
-    await openDocumentationMenu(page);
-    const toc = documentationSidebarToc(docs);
-    await expectMatchingDocumentationOutlines(docs);
+    const toc = documentationOutline(docs);
+    await expectSinglePageOutline(docs);
     await expect(toc.getByRole("link")).toHaveCount(section.examples.length + (section.name === "layout" ? 4 : 2));
     await expect.poll(() => toc.getByRole("link").evaluateAll((links: HTMLAnchorElement[]) => links.every((link) => {
       const heading = document.getElementById(link.hash.slice(1));
@@ -671,8 +658,8 @@ test("foundations navigation keeps representative examples, copy and 320px layou
       await expectNoHorizontalOverflow(page, foundation.locator('[data-docs-example="' + name + '"]').getByTestId("docs-foundation-preview"));
     }
   }
-  await openDocumentationMenu(page);
-  await documentationSidebarToc(docs).getByRole("link", { name: "Готово, загрузка, пусто и ошибка", exact: true }).click();
+  await expectSinglePageOutline(docs);
+  await documentationOutline(docs).getByRole("link", { name: "Готово, загрузка, пусто и ошибка", exact: true }).click();
   await expect(foundation.locator("#docs-content-states")).toBeInViewport();
   expect(new URL(page.url()).hash).toBe("#docs-content-states");
   await page.reload();
@@ -696,8 +683,8 @@ test("documentation scrollspy follows real Layout and icon scrolling without rew
     await openDocumentationMenu(page);
     await docs.getByRole("navigation", { name: route.group, exact: true }).getByRole("button", { name: route.label, exact: true }).click();
     await expectRoute(page, baseURL, "docs", null, route.section);
-    await openDocumentationMenu(page);
-    const toc = documentationSidebarToc(docs);
+    const toc = documentationOutline(docs);
+    await expectSinglePageOutline(docs);
     const anchor = toc.locator('a[href="#' + route.anchor + '"]');
     await anchor.click();
     await expect(content.locator("#" + route.anchor)).toBeInViewport();
@@ -727,50 +714,46 @@ test("documentation scrollspy follows real Layout and icon scrolling without rew
   }
 });
 
-test("generic documentation keeps controls beside live code, preserves tab state and stacks at 320px", async ({ page, baseURL }) => {
+test("component examples keep controls above their preview and code, with independent state at 320px", async ({ page, baseURL }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
   await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs&component=WlInput")), { waitUntil: "domcontentloaded" });
   const docs = page.getByTestId("docs-page");
   const workspace = docs.locator('[data-docs-component="WlInput"]');
-  await expect(workspace).toBeVisible();
-  await expectRoute(page, baseURL, "docs", "WlInput");
   const tabs = workspace.getByRole("tablist", { name: "Руководство WlInput", exact: true });
   await expect(tabs).toBeVisible();
   await expect(tabs).toHaveCSS("border-bottom-width", "0px");
+  await expectRoute(page, baseURL, "docs", "WlInput");
   const explorer = workspace.getByTestId("ds-explorer");
-  await expect(explorer).toHaveAttribute("data-component", "WlInput");
-  const controls = explorer.locator(".ds-explorer-controls");
+  const controls = explorer.locator(".docs-example-controls");
   const size = explorer.getByRole("combobox", { name: "Пример: size", exact: true });
   const density = explorer.getByRole("combobox", { name: "Пример: density", exact: true });
-  const invalid = explorer.getByRole("checkbox", { name: "invalid", exact: true });
-  const disabled = explorer.getByRole("checkbox", { name: "disabled", exact: true });
   const preview = explorer.getByTestId("ds-example-preview");
   const input = preview.getByRole("textbox", { name: "Название материала", exact: true });
   const inputRoot = preview.locator('[data-wl="input"]');
   const source = explorer.locator(".ds-source");
-  await expect(input).toHaveValue("Материал команды");
-  await expect(inputRoot).toHaveAttribute("data-size", "md");
-  await expect(inputRoot).toHaveAttribute("data-density", "default");
+  const states = workspace.locator('[data-docs-example="example-states"]');
+  const statesInput = states.locator(".docs-example-stage").getByRole("textbox", { name: "Название материала", exact: true });
+  const statesSource = states.locator(".ds-source");
+  const invalid = states.getByRole("checkbox", { name: "invalid", exact: true });
+  const disabled = states.getByRole("checkbox", { name: "disabled", exact: true });
 
-  await expect.poll(async () => {
+  const expectVerticalLayout = () => expect.poll(async () => {
     const [settingsBounds, previewBounds, sourceBounds] = await Promise.all([
       controls.boundingBox(), preview.boundingBox(), source.boundingBox()
     ]);
     if (!settingsBounds || !previewBounds || !sourceBounds) return false;
-    return settingsBounds.x + settingsBounds.width <= previewBounds.x + 1
+    return settingsBounds.y + settingsBounds.height <= previewBounds.y + 1
       && Math.abs(previewBounds.x - sourceBounds.x) <= 1
       && sourceBounds.y >= previewBounds.y + previewBounds.height - 1;
-  }, "Desktop controls occupy the left column; preview and code share the right column").toBe(true);
+  }, "Controls, preview, and code share the card at the current width").toBe(true);
+  await expectVerticalLayout();
 
+  const exampleHeadings = ["Размер и плотность", "Состояния", "Содержимое", "Размеры, слоты и проверка"];
   const outline = docs.locator(".docs-component-outline");
-  await expectComponentOutline(workspace, ["Пример", "Размеры, слоты и проверка"]);
-  await expect(outline.getByRole("link").first()).toBeVisible();
-  await outline.getByRole("link").first().click();
-  await page.mouse.move(0, 0);
+  await expectComponentOutline(workspace, exampleHeadings);
+  await outline.getByRole("link", { name: "Состояния", exact: true }).click();
+  expect(new URL(page.url()).hash).toBe("#docs-wlinput-example-states");
   await expect(outline.locator("[aria-current]")).toHaveCount(0);
-  await expect.poll(() => outline.getByRole("link").evaluateAll((links) => links.every((link) =>
-    getComputedStyle(link).backgroundColor === "rgba(0, 0, 0, 0)"
-  )), "Component jump links retain no active background after following an anchor").toBe(true);
 
   await input.fill("Задача документации");
   await chooseDropdownOption(page, size, "lg");
@@ -778,80 +761,91 @@ test("generic documentation keeps controls beside live code, preserves tab state
   await invalid.check();
   await disabled.check();
   await expect(input).toHaveValue("Задача документации");
-  await expect(input).toHaveAttribute("aria-invalid", "true");
-  await expect(input).toBeDisabled();
+  await expect(input).toBeEnabled();
+  await expect(input).not.toHaveAttribute("aria-invalid", "true");
   await expect(inputRoot).toHaveAttribute("data-size", "lg");
   await expect(inputRoot).toHaveAttribute("data-density", "compact");
-  const code = source.locator("pre code");
+  await expect(statesInput).toHaveValue("Материал команды");
+  await expect(statesInput).toBeDisabled();
+  await expect(statesInput).toHaveAttribute("aria-invalid", "true");
   await revealDocumentationCode(source);
+  await revealDocumentationCode(statesSource);
+  const code = source.locator("details pre code");
+  const statesCode = statesSource.locator("details pre code");
   await expect(code).toBeVisible();
-  for (const value of ['"size":"lg"', '"density":"compact"', '"invalid":true', '"disabled":true']) {
-    await expect(code).toContainText(value);
-  }
   await expect(code).toContainText('from "legato-ui"');
-  expect(await code.textContent()).not.toContain("packages/ui-kit");
+  await expect(code).toContainText('"size":"lg"');
+  await expect(code).toContainText('"density":"compact"');
+  await expect(code).not.toContainText('"invalid":true');
+  await expect(statesCode).toContainText('"invalid":true');
+  await expect(statesCode).toContainText('"disabled":true');
 
   await tabs.getByRole("tab", { name: "API", exact: true }).click();
   await expect(workspace.getByRole("region", { name: "Props WlInput", exact: true })).toBeVisible();
   await expectComponentOutline(workspace, ["Props", "События", "Слоты", "Pass-through: pt"]);
   await expect(preview).toBeHidden();
-  await expect(outline.locator("[aria-current]")).toHaveCount(0);
   await tabs.getByRole("tab", { name: "Доступность", exact: true }).click();
-  await expect(workspace.getByRole("heading", { name: "Клавиатура и доступность", exact: true })).toBeVisible();
   await expectComponentOutline(workspace, ["Клавиатура и доступность"]);
   await tabs.getByRole("tab", { name: "Примеры", exact: true }).click();
   await expect(preview).toBeVisible();
-  await expectComponentOutline(workspace, ["Пример", "Размеры, слоты и проверка"]);
+  await expectComponentOutline(workspace, exampleHeadings);
+  await expect(input).toHaveValue("Задача документации");
   await expect(size).toContainText("lg");
   await expect(density).toContainText("compact");
-  await expect(invalid).toBeChecked();
-  await expect(disabled).toBeChecked();
-  await expect(input).toHaveValue("Задача документации");
-  await expect(input).toBeDisabled();
-  await expect(code).toContainText('"size":"lg"');
-  await expect(code).toContainText('"invalid":true');
+  await expect(statesInput).toBeDisabled();
 
   await explorer.getByRole("button", { name: "Сбросить пример", exact: true }).click();
   await expect(input).toHaveValue("Материал команды");
-  await expect(input).toBeEnabled();
-  await expect(input).not.toHaveAttribute("aria-invalid", "true");
   await expect(inputRoot).toHaveAttribute("data-size", "md");
-  await expect(inputRoot).toHaveAttribute("data-density", "default");
-  await expect(size).toContainText("md");
-  await expect(density).toContainText("default");
-  await expect(invalid).not.toBeChecked();
-  await expect(disabled).not.toBeChecked();
   await expect(code).not.toContainText('"size":"lg"');
-  await expect(code).not.toContainText('"invalid":true');
+  await expect(statesInput).toBeDisabled();
+  await states.getByRole("button", { name: "Сбросить пример", exact: true }).click();
+  await expect(statesInput).toBeEnabled();
+  await expect(invalid).not.toBeChecked();
+
   const extra = workspace.locator('[data-docs-component-extra="WlInput"]');
   await expect(extra.getByTestId("docs-component-extra-preview").getByRole("textbox", { name: "Название, sm", exact: true })).toHaveValue("План команды");
   await expect(extra.getByTestId("docs-component-extra-source").locator("pre code")).toContainText('from "legato-ui"');
 
   await page.setViewportSize({ width: 320, height: 740 });
-  await expect.poll(async () => {
-    const [settingsBounds, previewBounds, sourceBounds] = await Promise.all([
-      controls.boundingBox(), preview.boundingBox(), source.boundingBox()
-    ]);
-    if (!settingsBounds || !previewBounds || !sourceBounds) return false;
-    return settingsBounds.y + settingsBounds.height <= previewBounds.y + 1
-      && sourceBounds.y >= previewBounds.y + previewBounds.height - 1;
-  }, "Narrow Docs stack controls before the live example and code").toBe(true);
-  for (const surface of [docs, workspace, explorer, controls, preview, source, extra]) {
+  await expectVerticalLayout();
+  for (const surface of [docs, workspace, explorer, controls, preview, source, states, extra]) {
     await expectNoHorizontalOverflow(page, surface);
   }
   await chooseDropdownOption(page, size, "sm");
   await expect(inputRoot).toHaveAttribute("data-size", "sm");
   await expect(code).toContainText('"size":"sm"');
-  await input.fill("Мобильный пример");
-  await tabs.getByRole("tab", { name: "API", exact: true }).click();
-  await expect(workspace.getByRole("region", { name: "Props WlInput", exact: true })).toBeVisible();
-  await expectComponentOutline(workspace, ["Props", "События", "Слоты", "Pass-through: pt"]);
-  await tabs.getByRole("tab", { name: "Примеры", exact: true }).click();
-  await expect(input).toHaveValue("Мобильный пример");
-  await expect(inputRoot).toHaveAttribute("data-size", "sm");
-  await expect(tabs).toHaveCSS("border-bottom-width", "0px");
-  await expect(outline.locator("[aria-current]")).toHaveCount(0);
-  await expectNoHorizontalOverflow(page, docs);
+});
+
+test("a modal example preserves both documentation outlines and the position of the examples", async ({ page, baseURL }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(russianPlaygroundUrl(pageUrl(baseURL, "?view=docs&component=WlDialog")), { waitUntil: "domcontentloaded" });
+  const docs = page.getByTestId("docs-page");
+  const inline = docs.locator(".docs-component-outline a");
+  const sidebar = docs.locator(".docs-on-page nav a");
+  const heading = docs.locator("#docs-wldialog-preview");
+  const opener = docs.getByRole("button", { name: "Редактировать название", exact: true });
+  await expect(inline).toHaveCount(3);
+  await expect(sidebar).toHaveCount(3);
+  await opener.scrollIntoViewIfNeeded();
+  const initial = await heading.evaluate((element) => element.getBoundingClientRect().top + window.scrollY);
+
+  await opener.click();
+  const dialog = page.getByRole("dialog", { name: "Редактирование материала", exact: true });
+  await expect(dialog).toBeVisible();
+  await expect(page.locator("#app")).toHaveAttribute("inert", "");
+  await expect(inline).toHaveCount(3);
+  await expect(sidebar).toHaveCount(3);
+  expect(Math.abs(await heading.evaluate((element) => element.getBoundingClientRect().top + window.scrollY) - initial))
+    .toBeLessThanOrEqual(1);
+
+  await page.keyboard.press("Escape");
+  await expect(dialog).toBeHidden();
+  await expect(opener).toBeFocused();
+  await expect(inline).toHaveCount(3);
+  await expect(sidebar).toHaveCount(3);
+  expect(Math.abs(await heading.evaluate((element) => element.getBoundingClientRect().top + window.scrollY) - initial))
+    .toBeLessThanOrEqual(1);
 });
 
 test("documentation tabs keep header spacing stable and preserve sidebar placement on desktop and mobile", async ({ page, baseURL }, testInfo) => {

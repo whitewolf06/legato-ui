@@ -7,6 +7,7 @@ import { compileScript, compileTemplate, parse } from "vue/compiler-sfc";
 import { consumerSource } from "../../../scripts/example-source.mjs";
 import { acceptsDocumentationValue, documentationControlSamples, documentationDefaults, documentationPresets } from "../src/design-system/documentation-controls";
 import { documentationControls, stateCases, stateControls } from "../src/design-system/states";
+import { componentExampleTopics } from "../src/documentation/components/topics";
 import { playgroundI18n } from "../src/i18n";
 
 let previousLocale = playgroundI18n.global.locale.value;
@@ -37,6 +38,20 @@ function assertCompiles(source: string, filename: string): void {
 describe("copyable examples are public package consumers", () => {
   it("has a source for every public component, without extra or missing entries", () => {
     expect(readdirSync(examples).map((name) => name.replace(/\.vue$/, "")).sort()).toEqual(wlManifest.map((entry) => entry.name).sort());
+  });
+  it("uses only supported controls in every documentation topic", () => {
+    for (const entry of wlManifest.filter(({ name }) => name !== "WlButton")) {
+      const raw = readFileSync(join(examples, entry.name + ".vue"), "utf8");
+      const available = new Set(documentationControls(entry, raw).map(({ name }) => name));
+      const topics = componentExampleTopics(entry.name);
+      expect(topics[0]?.id, entry.name).toBe("preview");
+      const withSettings = topics.some(({ controls, presets }) => controls.length || presets);
+      expect(withSettings, entry.name).toBe(!["WlConfirmDialog", "WlMenu", "WlToast"].includes(entry.name));
+      for (const topic of topics) {
+        expect(topic.controls.length + Number(topic.presets), entry.name + " " + topic.id).toBeLessThanOrEqual(3);
+        expect(topic.controls.filter((control) => !available.has(control)), entry.name + " " + topic.id).toEqual([]);
+      }
+    }
   });
   for (const entry of wlManifest) it(`${entry.name}: every documented preview state produces compilable consumer code`, () => {
     const raw = readFileSync(join(examples, `${entry.name}.vue`), "utf8");

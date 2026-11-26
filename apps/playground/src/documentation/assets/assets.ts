@@ -17,6 +17,7 @@ export const iconDocumentationHeadings = localizeDocumentation({
   pipeline: { id: "docs-icons-pipeline", title: "documentation.strings.s0007" }
 } as const);
 export const colorDocumentationHeadings = localizeDocumentation({
+  palette: { id: "docs-colors-palette", title: "documentation.strings.paletteOverview" },
   themes: { id: "docs-colors-themes", title: "documentation.strings.s0008" },
   setup: { id: "docs-colors-setup", title: "documentation.strings.s0009" },
   surfaces: { id: "docs-colors-surfaces", title: "documentation.strings.s0010" },

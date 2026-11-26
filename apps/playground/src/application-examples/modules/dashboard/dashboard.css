@@ -1,0 +1,118 @@
+.app-example-root {
+  --wl-example-rail-width: 190px;
+  display: grid;
+  grid-template: "rail top" auto "rail main" 1fr / var(--wl-example-rail-width) minmax(0, 1fr);
+  min-height: 100dvh;
+  color: var(--wl-text);
+  background: color-mix(in srgb, var(--wl-bg) 75%, var(--wl-bg-soft));
+  font-family: var(--wl-font);
+}
+.app-example-rail {
+  grid-area: rail;
+  position: sticky;
+  inset-block-start: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100dvh;
+  padding: 15px 10px 10px;
+  background: var(--wl-bg-raised);
+  border-inline-end: 1px solid var(--wl-border);
+  overflow: auto;
+}
+.app-example-brand, .app-example-account { display: flex; align-items: center; gap: 10px; padding-inline: 8px; }
+.app-example-brand { color: var(--wl-text); text-decoration: none; }
+.app-example-brand strong { font-size: 17px; }
+.app-example-brand :where(strong, small), .app-example-account :where(strong, small) { display: block; line-height: 1.3; }
+.app-example-brand small, .app-example-account small { color: var(--wl-text-muted); font-size: var(--wl-type-small-size); }
+.app-example-brand-icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  inline-size: 35px;
+  block-size: 35px;
+  border-radius: var(--wl-radius);
+  color: var(--wl-action-primary-text);
+  background: var(--wl-action-primary-bg);
+}
+.app-example-nav { display: grid; gap: 22px; margin-block: 34px 20px; }
+.app-example-nav-group { display: grid; gap: 2px; }
+.app-example-nav-group p { padding-inline: 9px; margin-bottom: 5px; font-weight: 600; }
+.app-example-nav .wl-nav-item { width: 100%; white-space: nowrap; }
+.app-example-account { margin-top: auto; padding-block: 14px 6px; border-top: 1px solid var(--wl-border); font-size: var(--wl-type-small-size); }
+.app-example-bar {
+  grid-area: top;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  min-height: 62px;
+  min-width: 0;
+  padding: 8px clamp(15px, 2.2vw, 30px);
+  border-bottom: 1px solid var(--wl-border);
+  background: var(--wl-bg-raised);
+}
+.app-example-search kbd {
+  margin-inline-start: 18px;
+  padding: 1px 4px;
+  border: 1px solid var(--wl-border);
+  border-radius: 4px;
+  font-size: 10px;
+  color: var(--wl-text-muted);
+}
+.app-example-back { color: var(--wl-text-accent); font-size: var(--wl-type-small-size); }
+.app-example-main {
+  grid-area: main;
+  width: min(100%, 1480px);
+  margin-inline: auto;
+  padding: clamp(18px, 2.4vw, 32px) clamp(14px, 2.2vw, 30px) 38px;
+}
+.app-example-main > *, .app-example-split > * { min-width: 0; }
+.app-example-main > h1:focus { outline: none; }
+.app-example-panel {
+  padding: clamp(12px, 1.8vw, 20px);
+  background: var(--wl-bg-raised);
+  border: 1px solid var(--wl-border);
+  border-radius: var(--wl-corner-surface);
+}
+.app-example-split {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--wl-space-md);
+}
+.app-example-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--wl-space-sm);
+}
+.app-example-status { min-height: 1.5em; }
+.app-example-inline-field { max-width: 320px; width: 100%; }
+@media (max-width: 860px) {
+  .app-example-split { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 740px) {
+  .app-example-root { grid-template: "brand top" auto "rail rail" auto "main main" 1fr / minmax(0, 1fr) auto; }
+  .app-example-rail { display: contents; }
+  .app-example-brand { grid-area: brand; background: var(--wl-bg-raised); padding-inline: 14px 0; }
+  .app-example-bar { border-bottom: none; gap: 6px; }
+  .app-example-nav {
+    grid-area: rail;
+    display: flex;
+    gap: 7px;
+    padding: 0 14px 8px;
+    margin: 0;
+    overflow: auto;
+    background: var(--wl-bg-raised);
+    border-bottom: 1px solid var(--wl-border);
+  }
+  .app-example-nav-group { display: flex; }
+  .app-example-nav-group p, .app-example-account, .app-example-search kbd { display: none; }
+  .app-example-nav .wl-nav-item { width: max-content; }
+}
+@media (max-width: 485px) {
+  .app-example-search .wl-btn__label { display: none; }
+  .app-example-search { min-width: 36px; }
+}

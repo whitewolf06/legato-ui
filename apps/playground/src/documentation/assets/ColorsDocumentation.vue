@@ -9,6 +9,7 @@ import { getLocalizedDesignThemes } from "../../design-system/localized-tokens";
 import { translateDocumentationText } from "../localize";
 import AssetExample from "./AssetExample.vue";
 import { documentationColorGroups, colorDocumentationHeadings as headings } from "./assets";
+import ColorPalette from "./ColorPalette.vue";
 import ColorRoles from "./examples/ColorRoles.vue";
 import rolesSource from "./examples/ColorRoles.vue?raw";
 import ColorStates from "./examples/ColorStates.vue";
@@ -60,6 +61,10 @@ async function copyToken(token: string, value: string): Promise<void> {
 
 <template>
   <div class="docs-colors wl-stack" data-space="2xl">
+    <section class="wl-stack" data-space="lg" :aria-labelledby="headings.palette.id">
+      <h2 :id="headings.palette.id" class="docs-assets-anchor wl-text-heading">{{ headings.palette.title }}</h2>
+      <ColorPalette :theme="theme" />
+    </section>
     <section class="wl-stack" data-space="lg" :aria-labelledby="headings.themes.id">
       <h2 :id="headings.themes.id" class="docs-assets-anchor wl-text-heading">{{ headings.themes.title }}</h2>
       <p class="wl-text-body" data-testid="docs-color-theme">
@@ -106,55 +111,58 @@ async function copyToken(token: string, value: string): Promise<void> {
     >
       <h2 :id="group.heading.id" class="docs-assets-anchor wl-text-heading">{{ group.heading.title }}</h2>
       <p class="wl-text-body wl-text-muted">{{ group.description }}</p>
-      <div class="docs-color-grid">
-        <article
-          v-for="token in group.tokens"
-          :key="token.name"
-          class="docs-color-card wl-stack"
-          data-space="md"
-          :data-color-token="token.name"
-          :data-resolved-value="token.resolved"
-        >
-          <div class="docs-color-swatch" aria-hidden="true"><span :style="{ backgroundColor: token.resolved }"></span></div>
-          <code class="wl-text-code">{{ token.variable }}</code><p class="wl-text-small wl-text-muted">{{ token.description }}</p>
-          <dl class="docs-color-values">
-            <div>
-              <dt>{{ t('documentation.strings.s0035') }}</dt>
-              <dd><code data-testid="docs-color-resolved">{{ token.resolved }}</code></dd>
-            </div>
-            <div>
-              <dt>{{ t('documentation.strings.s0036') }}</dt>
-              <dd><code>{{ token.value }}</code></dd>
-            </div>
-          </dl>
-          <div class="wl-inline" data-space="xs"><WlButton
-            size="sm"
-            variant="ghost"
-            :disabled="pendingToken === token.name"
-            :aria-label="t('documentation.strings.s0037') + token.name"
-            @click="copyToken(token.name, token.variable)"
-          >{{ t('documentation.strings.s0038') }}</WlButton><WlButton
-            size="sm"
-            variant="ghost"
-            :disabled="pendingToken === token.name"
-            :aria-label="t('documentation.strings.s0039') + token.name"
-            @click="copyToken(token.name, token.resolved)"
-          >{{ t('documentation.strings.s0035') }}</WlButton></div>
-          <p
-            v-if="feedback?.token === token.name"
-            class="wl-text-small"
-            :role="feedback.failed ? 'alert' : 'status'"
-          >{{ feedback.message }}</p>
-          <textarea
-            v-if="feedback?.token === token.name && feedback.failed"
-            class="docs-color-manual"
-            readonly
-            :aria-label="t('documentation.strings.s0040') + token.name"
-            :value="feedback.value"
-            @focus="($event.target as HTMLTextAreaElement).select()"
-          ></textarea>
-        </article>
-      </div>
+      <details class="docs-color-details">
+        <summary class="docs-text-link">{{ t('documentation.strings.paletteFullGroup') }}</summary>
+        <div class="docs-color-grid">
+          <article
+            v-for="token in group.tokens"
+            :key="token.name"
+            class="docs-color-card wl-stack"
+            data-space="md"
+            :data-color-token="token.name"
+            :data-resolved-value="token.resolved"
+          >
+            <div class="docs-color-swatch" aria-hidden="true"><span :style="{ backgroundColor: token.resolved }"></span></div>
+            <code class="wl-text-code">{{ token.variable }}</code><p class="wl-text-small wl-text-muted">{{ token.description }}</p>
+            <dl class="docs-color-values">
+              <div>
+                <dt>{{ t('documentation.strings.s0035') }}</dt>
+                <dd><code data-testid="docs-color-resolved">{{ token.resolved }}</code></dd>
+              </div>
+              <div>
+                <dt>{{ t('documentation.strings.s0036') }}</dt>
+                <dd><code>{{ token.value }}</code></dd>
+              </div>
+            </dl>
+            <div class="wl-inline" data-space="xs"><WlButton
+              size="sm"
+              variant="ghost"
+              :disabled="pendingToken === token.name"
+              :aria-label="t('documentation.strings.s0037') + token.name"
+              @click="copyToken(token.name, token.variable)"
+            >{{ t('documentation.strings.s0038') }}</WlButton><WlButton
+              size="sm"
+              variant="ghost"
+              :disabled="pendingToken === token.name"
+              :aria-label="t('documentation.strings.s0039') + token.name"
+              @click="copyToken(token.name, token.resolved)"
+            >{{ t('documentation.strings.s0035') }}</WlButton></div>
+            <p
+              v-if="feedback?.token === token.name"
+              class="wl-text-small"
+              :role="feedback.failed ? 'alert' : 'status'"
+            >{{ feedback.message }}</p>
+            <textarea
+              v-if="feedback?.token === token.name && feedback.failed"
+              class="docs-color-manual"
+              readonly
+              :aria-label="t('documentation.strings.s0040') + token.name"
+              :value="feedback.value"
+              @focus="($event.target as HTMLTextAreaElement).select()"
+            ></textarea>
+          </article>
+        </div>
+      </details>
     </section>
     <section class="wl-stack" data-space="xl" :aria-labelledby="headings.examples.id">
       <h2 :id="headings.examples.id" class="docs-assets-anchor wl-text-heading">{{ headings.examples.title }}</h2>
@@ -177,6 +185,8 @@ async function copyToken(token: string, value: string): Promise<void> {
 
 <style>
 .docs-colors { min-width: 0; }
+.docs-color-details summary { width: fit-content; cursor: pointer; }
+.docs-color-details .docs-color-grid { margin-block-start: var(--wl-space-md); }
 .docs-theme-grid, .docs-color-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));

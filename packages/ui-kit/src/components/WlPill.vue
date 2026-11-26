@@ -51,6 +51,6 @@ const section = useWlPt("pill", computed(() => props.pt));
       class="wl-pill__dot"
       aria-hidden="true"
     ></span>
-    <span v-bind="section('label')"><slot>{{ label }}</slot></span>
+    <span v-bind="section('label')" class="wl-pill__label"><slot>{{ label }}</slot></span>
   </span>
 </template>

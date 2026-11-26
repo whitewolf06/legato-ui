@@ -23,7 +23,10 @@ import CodePanel from "./design-system/CodePanel.vue";
 import ComponentExplorer from "./design-system/ComponentExplorer.vue";
 import ContentStress from "./design-system/ContentStress.vue";
 import RecipeGallery from "./design-system/RecipeGallery.vue";
+import PageOutline from "./documentation/PageOutline.vue";
+import { useDocumentationScrollspy } from "./documentation/useDocumentationScrollspy";
 import PlaygroundPageHeader from "./PlaygroundPageHeader.vue";
+import { hostedSite } from "./site/target";
 import { usePageAnchor } from "./usePageAnchor";
 
 const WlButton = defineAsyncComponent(() => import("legato-ui").then((module) => module.WlButton));
@@ -39,12 +42,18 @@ const WlTable = defineAsyncComponent(() => import("legato-ui").then((module) => 
 const WlDrawer = defineAsyncComponent(() => import("legato-ui").then((module) => module.WlDrawer));
 
 const pageElement = ref<HTMLElement | null>(null);
+const contentElement = ref<HTMLElement | null>(null);
 usePageAnchor(pageElement);
-const sections = [
+const sections = computed(() => ([
   ["foundations", t("shell.DesignSystem.text141")], ["typography", t("shell.DesignSystem.text142")], ["layout", t("shell.DesignSystem.text143")],
   ["tokens", t("shell.DesignSystem.text144")], ["components", t("shell.DesignSystem.text145")], ["patterns", t("shell.DesignSystem.text146")],
   ["recipes", t("shell.DesignSystem.text147")], ["stress", t("shell.DesignSystem.text148")], ["accessibility", t("shell.DesignSystem.text149")]
-] as const;
+] as const).map(([id, title]) => ({ id: "ds-" + id, title })));
+const { activeId } = useDocumentationScrollspy({
+  root: contentElement,
+  key: () => "system",
+  headingSelector: ".ds-section[id]"
+});
 const themePreviews = playgroundThemeOptions.map(({ value }) => wlDesignThemes.find((item) => item.name === value)!);
 const semanticColors = ["bg", "bg-soft", "text", "text-muted", "accent", "success", "warn", "danger"] as const;
 const query = ref("");
@@ -112,25 +121,28 @@ const tokenCode = t("shell.DesignSystem.text167");
 </script>
 
 <template>
-  <main id="ds-top" ref="pageElement" class="ds-main wl-container">
-    <PlaygroundPageHeader
-      class="ds-hero"
-      :title="t('shell.DesignSystem.text168')"
-      :description="t('shell.DesignSystem.text169')"
-      :breadcrumbs="[{ label: t('shell.DesignSystem.text170') }]"
-    >
-      <template #meta><div class="ds-metrics wl-inline" data-space="xl">
-        <span><strong>{{ wlManifest.length }}</strong> {{ t('shell.DesignSystem.text171') }}</span>
-        <span><strong>{{ wlDesignTokens.length }}</strong> {{ t('shell.DesignSystem.text172') }}</span>
-        <span><strong>{{ WL_ICON_NAMES.length }}</strong> {{ t('shell.DesignSystem.text173') }}</span>
-        <span><strong>{{ wlDesignThemes.length }}</strong> {{ t('shell.DesignSystem.text174') }}</span>
-      </div></template>
-    </PlaygroundPageHeader>
+  <main
+    id="ds-top"
+    ref="pageElement"
+    class="ds-main"
+    :class="hostedSite ? 'legato-site-container' : 'wl-container'"
+  >
     <div class="ds-shell">
-      <nav class="ds-nav" :aria-label="t('shell.DesignSystem.text175')">
-        <a v-for="[id, label] in sections" :key="id" :href="`#ds-${id}`">{{ label }}</a>
-      </nav>
-      <div class="ds-content wl-stack" data-space="4xl">
+      <PlaygroundPageHeader
+        class="ds-hero"
+        :title="t('shell.DesignSystem.text168')"
+        :description="t('shell.DesignSystem.text169')"
+        :breadcrumbs="[{ label: t('shell.DesignSystem.text170') }]"
+      >
+        <template #meta><div class="ds-metrics wl-inline" data-space="xl">
+          <span><strong>{{ wlManifest.length }}</strong> {{ t('shell.DesignSystem.text171') }}</span>
+          <span><strong>{{ wlDesignTokens.length }}</strong> {{ t('shell.DesignSystem.text172') }}</span>
+          <span><strong>{{ WL_ICON_NAMES.length }}</strong> {{ t('shell.DesignSystem.text173') }}</span>
+          <span><strong>{{ wlDesignThemes.length }}</strong> {{ t('shell.DesignSystem.text174') }}</span>
+        </div></template>
+      </PlaygroundPageHeader>
+      <PageOutline class="ds-on-page" :headings="sections" :active-id="activeId" />
+      <div ref="contentElement" class="ds-content wl-stack" data-space="4xl">
         <section id="ds-foundations" class="ds-section wl-stack" data-space="xl">
           <div class="wl-stack" data-space="sm">
             <p class="ds-eyebrow">{{ t('shell.DesignSystem.text176') }}</p>
@@ -612,7 +624,7 @@ const tokenCode = t("shell.DesignSystem.text167");
 
 <style>
 .ds-main { padding-block: var(--wl-space-2xl) var(--wl-space-4xl); }
-.ds-hero { margin-bottom: var(--wl-space-2xl); }
+.ds-hero { grid-area: heading; }
 .ds-eyebrow {
   font-family: var(--wl-mono);
   font-size: 11px;
@@ -623,21 +635,15 @@ const tokenCode = t("shell.DesignSystem.text167");
 }
 .ds-metrics { color: var(--wl-text-muted); font-size: 12px; }
 .ds-metrics strong { color: var(--wl-text); font-size: 18px; margin-right: 4px; }
-.ds-shell { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--wl-space-2xl); }
-.ds-nav {
-  position: sticky;
-  top: 84px;
-  align-self: start;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-left: 1px solid var(--wl-border);
-  padding-left: var(--wl-space-md);
+.ds-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 180px;
+  grid-template-areas: "heading outline" "content outline";
+  gap: var(--wl-space-xl);
 }
-.ds-nav a { color: var(--wl-text-muted); font-size: 13px; padding: 8px; text-decoration: none; border-radius: var(--wl-radius-sm); }
-.ds-nav a:hover { color: var(--wl-text); background: var(--wl-bg-soft); }
-.ds-nav a:focus-visible, .ds-table-scroll:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; }
-.ds-content { min-width: 0; }
+.ds-on-page { grid-area: outline; }
+.ds-table-scroll:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; }
+.ds-content { grid-area: content; min-width: 0; }
 .ds-section, .ds-theme-grid { scroll-margin-top: 90px; }
 .ds-section > div:first-child > p:last-child { max-width: 72ch; }
 .ds-theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -696,17 +702,8 @@ const tokenCode = t("shell.DesignSystem.text167");
 .ds-data-preview { min-height: 180px; overflow-x: auto; }
 .ds-contrast-pass { color: var(--wl-ok-text); font-weight: 600; }
 .ds-footer { padding-top: var(--wl-space-lg); border-top: 1px solid var(--wl-border); }
-@media (max-width: 900px) {
-  .ds-shell { grid-template-columns: minmax(0, 1fr); gap: var(--wl-space-xl); }
-  .ds-nav {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    border-left: 0;
-    padding-left: 0;
-    border-bottom: 1px solid var(--wl-border);
-    padding-bottom: var(--wl-space-md);
-  }
+@media (max-width: 1200px) {
+  .ds-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "heading" "outline" "content"; }
 }
 @media (max-width: 640px) {
   .ds-theme-grid, .ds-token-filters { grid-template-columns: minmax(0, 1fr); }

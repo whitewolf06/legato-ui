@@ -1,17 +1,17 @@
 <script setup lang="ts">
+import { WlButton, type WlComponentManifest } from "legato-ui";
+import { nextTick, onBeforeUnmount, onMounted, ref } from "vue";
+import type { ButtonTopic } from "./button/sample";
 import { usePlaygroundI18n } from "../i18n";
-import KeyboardContract from "./KeyboardContract.vue";
-const props = defineProps<{ entry: WlComponentManifest }>();
-const { t } = usePlaygroundI18n();
-import type { WlComponentManifest, WlPropManifest } from "legato-ui";
-import { WlButton, WlCheckbox, WlSelect } from "legato-ui";
-import { type Component, computed, nextTick, onBeforeUnmount, onMounted, ref } from "vue";
-import { consumerSource } from "../design-system/code";
-import CodePanel from "../design-system/CodePanel.vue";
-import CanonicalButtonExample from "../design-system/examples/WlButton.vue";
-import canonicalSource from "../design-system/examples/WlButton.vue?raw";
+import ActionPreview from "./button/ActionPreview.vue";
+import actionRaw from "./button/ActionPreview.vue?raw";
+import ButtonExampleCard from "./button/ButtonExampleCard.vue";
 import ButtonForm from "./button/Form.vue";
 import formSource from "./button/Form.vue?raw";
+import FormPreview from "./button/FormPreview.vue";
+import formRaw from "./button/FormPreview.vue?raw";
+import IconPreview from "./button/IconPreview.vue";
+import iconRaw from "./button/IconPreview.vue?raw";
 import ButtonSizes from "./button/Sizes.vue";
 import sizesSource from "./button/Sizes.vue?raw";
 import ButtonSlots from "./button/Slots.vue";
@@ -23,53 +23,54 @@ import variantsSource from "./button/Variants.vue?raw";
 import { buttonContractAnchors, buttonDocumentationToc, buttonPtSections, buttonDocumentationHeadings as headings } from "./catalog";
 import DocumentationContract from "./DocumentationContract.vue";
 import DocumentationTabs, { type DocumentationTab } from "./DocumentationTabs.vue";
+import KeyboardContract from "./KeyboardContract.vue";
 
-const enumControls = computed(() => props.entry.props.filter((prop) => prop.type === "enum" && prop.values?.length));
-const booleanControls = computed(() => props.entry.props.filter((prop) => prop.type === "boolean"));
-function defaults(): Record<string, unknown> {
-  return Object.fromEntries(props.entry.props.filter((prop) => prop.type === "enum" || prop.type === "boolean").map((prop) => [prop.name, prop.default]));
-}
-const preview = ref(defaults());
-const revision = ref(0);
-const previewElement = ref<HTMLElement | null>(null);
+defineProps<{ entry: WlComponentManifest }>();
+const { t } = usePlaygroundI18n();
 const selectedTab = ref<DocumentationTab>("examples");
-const source = computed(() => consumerSource(canonicalSource, preview.value));
-
-interface ButtonExample { name: string; id: string; title: string; description: string; component: Component; source: string }
-const examples: readonly ButtonExample[] = [
-  { name: "variants", id: "docs-button-variants", title: t("documentation.strings.s0066"), description: t("documentation.strings.s0067"), component: ButtonVariants, source: consumerSource(variantsSource) },
-  { name: "sizes", id: "docs-button-sizes", title: t("documentation.strings.s0068"), description: t("documentation.strings.s0069"), component: ButtonSizes, source: consumerSource(sizesSource) },
-  { name: "states", id: "docs-button-states", title: t("documentation.strings.s0070"), description: t("documentation.strings.s0071"), component: ButtonStates, source: consumerSource(statesSource) },
-  { name: "slots", id: "docs-button-slot-layout", title: t("documentation.strings.s0072"), description: t("documentation.strings.s0073"), component: ButtonSlots, source: consumerSource(slotsSource) },
-  { name: "form", id: "docs-button-form", title: t("documentation.strings.s0074"), description: t("documentation.strings.s0075"), component: ButtonForm, source: consumerSource(formSource) }
+const examples: readonly ButtonTopic[] = [
+  {
+    name: "variants", id: "docs-button-variants", defaults: { variant: "primary", tone: "auto" },
+    title: "documentation.strings.s0066", description: "documentation.strings.s0067",
+    demo: ActionPreview, raw: actionRaw, comparison: ButtonVariants, comparisonRaw: variantsSource,
+    comparisonLabel: "documentation.buttonExamples.compareVariants"
+  },
+  {
+    name: "sizes", id: "docs-button-sizes", defaults: { size: "md", density: "default" },
+    title: "documentation.strings.s0068", description: "documentation.strings.s0069",
+    demo: ActionPreview, raw: actionRaw, comparison: ButtonSizes, comparisonRaw: sizesSource,
+    comparisonLabel: "documentation.buttonExamples.compareSizes"
+  },
+  {
+    name: "states", id: "docs-button-states", defaults: { loading: false, disabled: false },
+    title: "documentation.strings.s0070", description: "documentation.strings.s0071",
+    demo: ActionPreview, raw: actionRaw, comparison: ButtonStates, comparisonRaw: statesSource,
+    comparisonLabel: "documentation.buttonExamples.compareStates"
+  },
+  {
+    name: "slots", id: "docs-button-slot-layout", defaults: { iconPosition: "start" },
+    title: "documentation.strings.s0072", description: "documentation.strings.s0073",
+    demo: IconPreview, raw: iconRaw, comparison: ButtonSlots, comparisonRaw: slotsSource,
+    comparisonLabel: "documentation.buttonExamples.compareIcons"
+  },
+  {
+    name: "form", id: "docs-button-form", defaults: { type: "submit", block: false },
+    title: "documentation.strings.s0074", description: "documentation.strings.s0075",
+    demo: FormPreview, raw: formRaw, comparison: ButtonForm, comparisonRaw: formSource,
+    comparisonLabel: "documentation.buttonExamples.compareForms"
+  }
 ];
 
-function updateEnum(name: string, value: unknown): void {
-  const definition = enumControls.value.find((prop) => prop.name === name);
-  if (definition?.values?.some((option) => Object.is(option, value))) {
-    preview.value = { ...preview.value, [name]: value };
-  }
-}
-function enumValue(control: WlPropManifest): string | number | undefined {
-  const value = preview.value[control.name];
-  if (typeof value !== "string" && typeof value !== "number") return undefined;
-  return control.values?.some((option) => Object.is(option, value)) ? value : undefined;
-}
-function updateBoolean(name: string, value: unknown): void {
-  preview.value = { ...preview.value, [name]: Boolean(value) };
-}
-function reset(): void {
-  preview.value = defaults();
-  revision.value++;
-}
 async function focusPreview(): Promise<void> {
+  selectedTab.value = "examples";
   await nextTick();
-  previewElement.value?.querySelector<HTMLButtonElement>("button:not(:disabled)")?.focus({ preventScroll: true });
+  document.getElementById(headings.preview.id)?.querySelector("button")?.focus();
 }
 async function showHeading(id: string): Promise<void> {
-  const heading = buttonDocumentationToc.find((item) => item.id === id) ?? examples.map((example) => ({ ...example, tab: "examples" as const })).find((example) => example.id === id);
-  if (!heading) return;
-  selectedTab.value = heading.tab;
+  const tab = buttonDocumentationToc.find((item) => item.id === id)?.tab
+    ?? (examples.some((example) => example.id === id) ? "examples" : undefined);
+  if (!tab) return;
+  selectedTab.value = tab;
   await nextTick();
   document.getElementById(id)?.scrollIntoView({ block: "start" });
 }
@@ -108,93 +109,14 @@ defineExpose({ showHeading });
       id="docs-button-panel-examples"
       role="tabpanel"
       aria-labelledby="docs-button-tab-examples"
-      class="wl-stack"
-      data-space="xl"
+      class="button-topics"
     >
-      <p class="wl-text-body wl-text-muted">{{ t('documentation.strings.s0077') }}</p>
-      <div class="docs-button-workspace">
-        <section class="docs-controls wl-stack" data-space="lg" :aria-labelledby="headings.controls.id">
-          <div class="wl-inline" data-space="sm">
-            <h2 :id="headings.controls.id" class="wl-text-subheading">{{ headings.controls.title }}</h2>
-            <WlButton size="sm" variant="ghost" @click="reset">{{ t('documentation.strings.s0078') }}</WlButton>
-          </div>
-          <div v-for="control in enumControls" :key="control.name" class="docs-control-label">
-            <span>{{ control.name }}</span>
-            <WlSelect
-              :id="'docs-control-' + control.name"
-              class="docs-control-select"
-              :aria-label="control.name"
-              :aria-describedby="'docs-control-description-' + control.name"
-              :data-testid="'docs-control-' + control.name"
-              :model-value="enumValue(control)"
-              :options="[...(control.values ?? [])]"
-              @update:model-value="updateEnum(control.name, $event)"
-            />
-            <span :id="'docs-control-description-' + control.name" class="wl-text-small wl-text-muted">{{ control.description }}</span>
-          </div>
-          <div class="docs-control-flags wl-stack" data-space="md">
-            <WlCheckbox
-              v-for="control in booleanControls"
-              :key="control.name"
-              :model-value="Boolean(preview[control.name])"
-              :data-testid="'docs-control-' + control.name"
-              @update:model-value="updateBoolean(control.name, $event)"
-            >{{ control.name }}</WlCheckbox>
-          </div>
-          <p class="wl-text-small wl-text-muted">
-            {{ t('documentation.strings.s0079') }} <code>default</code>{{ t('documentation.strings.s0080') }}
-            <code>plus</code> {{ t('documentation.strings.s0081') }} <code>icon</code>.
-          </p>
-        </section>
-
-        <div class="docs-button-output wl-stack" data-space="lg">
-          <section class="wl-stack" data-space="md" :aria-labelledby="headings.preview.id">
-            <h2 :id="headings.preview.id" class="wl-text-subheading">{{ headings.preview.title }}</h2>
-            <div ref="previewElement" class="docs-button-preview" data-testid="docs-button-preview">
-              <CanonicalButtonExample :key="revision" :preview="preview" />
-            </div>
-            <div class="wl-inline" data-space="sm">
-              <WlButton
-                size="sm"
-                variant="ghost"
-                :disabled="Boolean(preview.disabled || preview.loading)"
-                @click="focusPreview"
-              >{{ t('documentation.strings.s0082') }}</WlButton>
-              <span class="wl-text-small wl-text-muted">{{ t('documentation.strings.s0083') }}</span>
-            </div>
-            <p class="wl-text-small wl-text-muted">{{ t('documentation.strings.s0084') }}</p>
-          </section>
-          <section
-            class="wl-stack"
-            data-space="md"
-            :aria-labelledby="headings.source.id"
-            data-testid="docs-button-source"
-          >
-            <h2 :id="headings.source.id" class="wl-text-subheading">{{ headings.source.title }}</h2>
-            <CodePanel :source="source" :title="t('documentation.strings.s0085')" :expanded="true" />
-          </section>
-        </div>
-      </div>
-      <section
+      <ButtonExampleCard
         v-for="example in examples"
         :key="example.name"
-        class="docs-button-example wl-stack"
-        data-space="lg"
-        :data-docs-button-example="example.name"
-        :aria-labelledby="example.id"
-      >
-        <div class="wl-stack" data-space="sm">
-          <h2 :id="example.id" class="wl-text-heading" :data-testid="'docs-button-example-heading-' + example.name">{{ example.title }}</h2>
-          <p class="wl-text-body wl-text-muted">{{ example.description }}</p>
-        </div>
-        <div
-          class="docs-button-example-preview"
-          data-testid="docs-button-example-preview"
-          role="region"
-          :aria-label="example.title + t('documentation.strings.s0086')"
-        ><component :is="example.component" /></div>
-        <div data-testid="docs-button-example-source"><CodePanel :source="example.source" :title="t('documentation.strings.s0002')" /></div>
-      </section>
+        :topic="example"
+        :entry="entry"
+      />
       <section class="docs-guide wl-stack" data-space="md">
         <h2 :id="headings.usage.id" class="wl-text-heading">{{ headings.usage.title }}</h2>
         <ul class="docs-guide-list">
@@ -212,7 +134,7 @@ defineExpose({ showHeading });
             <strong>density</strong> {{ t('documentation.strings.s0092') }}
           </li>
         </ul>
-        <p class="wl-text-small wl-text-muted">{{ t('documentation.strings.s0093') }} <code>button</code>.</p>
+        <p class="wl-text-small wl-text-muted">{{ t('documentation.strings.s0093') }} <code>href</code>.</p>
       </section>
     </div>
 
@@ -241,6 +163,7 @@ defineExpose({ showHeading });
     >
       <h2 :id="headings.accessibility.id" class="wl-text-heading">{{ headings.accessibility.title }}</h2>
       <KeyboardContract name="WlButton" />
+      <div><WlButton size="sm" variant="secondary" @click="focusPreview">{{ t('documentation.strings.s0082') }}</WlButton></div>
       <ul class="docs-guide-list">
         <li>{{ t('documentation.strings.s0094') }}</li>
         <li>
@@ -267,40 +190,7 @@ defineExpose({ showHeading });
 
 <style>
 .docs-button { min-width: 0; }
-.docs-button-workspace {
-  display: grid;
-  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
-  gap: var(--wl-space-xl);
-  align-items: start;
-}
-.docs-controls {
-  min-width: 0;
-  padding: var(--wl-space-lg);
-  border: 1px solid var(--wl-border);
-  border-radius: var(--wl-corner-surface);
-  background: var(--wl-bg-soft);
-}
-.docs-control-label { display: grid; gap: var(--wl-space-xs); min-width: 0; font-size: var(--wl-type-small-size); }
-.docs-control-select { width: 100%; min-width: 0; }
-.docs-control-flags { padding-top: var(--wl-space-xs); }
-.docs-button-output { min-width: 0; }
-.docs-button-preview {
-  min-width: 0;
-  padding: var(--wl-space-xl);
-  border: 1px solid var(--wl-border);
-  border-radius: var(--wl-corner-surface);
-  background: var(--wl-bg);
-  overflow-wrap: anywhere;
-}
-.docs-button-example { min-width: 0; }
-.docs-button-example-preview {
-  min-width: 0;
-  padding: var(--wl-space-lg);
-  border: 1px solid var(--wl-border);
-  border-radius: var(--wl-corner-surface);
-  background: var(--wl-bg);
-  overflow-wrap: anywhere;
-}
+.button-topics { display: grid; gap: var(--wl-space-2xl); min-width: 0; }
 .docs-guide { min-width: 0; }
 .docs-guide-list {
   display: grid;
@@ -310,5 +200,4 @@ defineExpose({ showHeading });
   font-size: var(--wl-type-body-size);
   line-height: var(--wl-type-body-line-height);
 }
-@media (max-width: 860px) { .docs-button-workspace { grid-template-columns: minmax(0, 1fr); } }
 </style>

@@ -8,6 +8,7 @@ import { parseChangelog } from "./project/changelog";
 import { localizeChangelogMarkdown } from "./project/changelog-localization";
 import ChangelogInline from "./project/ChangelogInline.vue";
 import { gaviaProjectInfo as project } from "./project/project-info";
+import { hostedSite } from "./site/target";
 import { usePageAnchor } from "./usePageAnchor";
 
 const changelog = computed(() => parseChangelog(localizeChangelogMarkdown(changelogSource), project.documentationBaseUrl));
@@ -20,7 +21,8 @@ usePageAnchor(projectElement);
   <main
     id="project-top"
     ref="projectElement"
-    class="project-main wl-container wl-stack"
+    class="project-main wl-stack"
+    :class="hostedSite ? 'legato-site-container' : 'wl-container'"
     data-space="2xl"
     data-testid="changelog-page"
     aria-labelledby="project-title"
