@@ -36,29 +36,27 @@ describe.each(components)("$name active option contract", ({ component, props })
     } finally { wrapper.unmount(); }
   });
 
-  it("scrolls the active option into view and handles shorter or empty results", async () => {
-    const descriptor = Object.getOwnPropertyDescriptor(Element.prototype, "scrollIntoView");
-    const scrollIntoView = vi.fn();
-    Object.defineProperty(Element.prototype, "scrollIntoView", { configurable: true, value: scrollIntoView });
+  it("scrolls only the list for an active option and handles shorter or empty results", async () => {
     const wrapper = mount(component, { attachTo: document.body, props: { ...props, motion: false } });
     try {
       const control = wrapper.get('[role="combobox"]');
       await control.trigger("keydown", { key: "ArrowDown" });
+      const list = document.getElementById(control.attributes("aria-controls")!)!;
+      const last = list.querySelectorAll<HTMLElement>('[role="option"]')[2]!;
+      Object.defineProperties(list, { clientHeight: { value: 50 }, scrollHeight: { value: 90 } });
+      vi.spyOn(list, "getBoundingClientRect").mockReturnValue(new DOMRect(0, 100, 200, 50));
+      vi.spyOn(last, "getBoundingClientRect").mockImplementation(() => new DOMRect(0, 160 - list.scrollTop, 200, 30));
       await control.trigger("keydown", { key: "End" });
       await nextTick();
-      expect(scrollIntoView).toHaveBeenCalledWith({ block: "nearest" });
-      expect(scrollIntoView.mock.contexts.at(-1)).toBe(document.getElementById(control.attributes("aria-activedescendant")!));
+      expect(document.getElementById(control.attributes("aria-activedescendant")!)).toBe(last);
+      expect(list.scrollTop).toBe(40);
       await wrapper.setProps("suggestions" in props ? { suggestions: ["One"] } : { options: ["One"] });
       expect(document.getElementById(control.attributes("aria-activedescendant")!)?.textContent).toContain("One");
       await wrapper.setProps("suggestions" in props ? { suggestions: [] } : { options: [] });
       expect(control.attributes("aria-activedescendant")).toBeUndefined();
       await control.trigger("keydown", { key: "Enter" });
       expect(wrapper.emitted("update:modelValue")).toBeUndefined();
-    } finally {
-      wrapper.unmount();
-      if (descriptor) Object.defineProperty(Element.prototype, "scrollIntoView", descriptor);
-      else Reflect.deleteProperty(Element.prototype, "scrollIntoView");
-    }
+    } finally { wrapper.unmount(); }
   });
 
   it("derives option IDs from a consumer's list ID", async () => {

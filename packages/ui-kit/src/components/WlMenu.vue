@@ -78,7 +78,7 @@ function hide(event?: Event): void {
 function show(event?: Event): void {
   last = event instanceof KeyboardEvent && event.key === "ArrowUp";
   const target = event?.currentTarget ?? event?.target;
-  if (target instanceof HTMLElement) target.focus();
+  if (target instanceof HTMLElement) target.focus({ preventScroll: true });
   showOverlay(event);
 }
 function toggle(event?: Event): void {
@@ -88,7 +88,7 @@ function toggle(event?: Event): void {
 function dismiss(reason: MenuDismissReason): void {
   const hadChildren = content.value?.closeChildren() ?? false;
   if (props.popup) {
-    anchor.value?.focus();
+    anchor.value?.focus({ preventScroll: true });
     hide();
   } else if (hadChildren || reason === "tab") content.value?.focusActive();
 }

@@ -163,13 +163,17 @@ function valueOf(option: Option): WlOptionValue<Option, TResolver> {
 function isDisabled(option: Option): boolean {
   return resolveOptionDisabled(option, props.optionDisabled);
 }
+function isSelected(option: Option): boolean {
+  const optionValue = valueOf(option);
+  return model.value.some((value) => Object.is(value, optionValue));
+}
 function keyOf(option: Option, index: number): PropertyKey {
   return resolveOptionKey(option, props.optionKey, index, valueOf(option));
 }
 const allOptions = computed(() => optionSections(props.options, props.optionGroupChildren as TGroupChildren, props.optionGroupLabel, props.optionLabel, "").flatMap((group) => group.options.map((item) => item.option)));
 const groups = computed(() => optionSections(props.options, props.optionGroupChildren as TGroupChildren, props.optionGroupLabel, props.optionLabel, props.filter ? query.value : ""));
 const filtered = computed(() => groups.value.flatMap((group) => group.options.map((item) => item.option)));
-const selectedOptions = computed(() => allOptions.value.filter((option) => model.value.some((value) => Object.is(valueOf(option), value))));
+const selectedOptions = computed(() => allOptions.value.filter(isSelected));
 const selectable = computed(() => filtered.value.filter((option) => !isDisabled(option)).map(valueOf)
   .filter((value, index, values) => values.findIndex((current) => Object.is(current, value)) === index));
 const selectedCount = computed(() => selectable.value.filter((value) => model.value.some((current) => Object.is(current, value))).length);
@@ -197,7 +201,7 @@ function choose(index: number): void {
   model.value = model.value.some((current) => Object.is(current, value))
     ? model.value.filter((current) => !Object.is(current, value))
     : [...model.value, value];
-  nextTick(() => control.value?.focus());
+  nextTick(() => control.value?.focus({ preventScroll: true }));
 }
 function remove(value: WlOptionValue<Option, TResolver>): void {
   if (props.disabled) return;
@@ -214,7 +218,7 @@ function open(_event?: Event): void {
   anchor.value = root.value;
   show();
   active.value = 0;
-  if (props.filter) nextTick(() => filterInput.value?.focus());
+  if (props.filter) nextTick(() => filterInput.value?.focus({ preventScroll: true }));
 }
 defineExpose<WlSelectionExpose>({ open, close: hide, focus: () => control.value?.focus() });
 function onKeydown(event: KeyboardEvent): void {
@@ -269,7 +273,7 @@ useWlResultsAnnouncement({
               :disabled="disabled"
               :aria-label="formatWlLocaleText(locale.removeItem, { label: resolveOptionLabel(option, props.optionLabel) })"
               @click.stop="remove(valueOf(option))"
-            >×</button>
+            ><WlIcon name="x" :size="11" /></button>
           </slot>
         </span>
       </div>
@@ -395,14 +399,14 @@ useWlResultsAnnouncement({
               <div
                 v-for="({ option, index }) in group.options"
                 v-bind="section('option', {
-                  focused: active === index, selected: model.some((value) => Object.is(value, valueOf(option)))
+                  focused: active === index, selected: isSelected(option)
                 })"
                 :id="optionId(index)"
                 :key="keyOf(option, index)"
                 class="wl-select__option wl-select-panel__option"
                 role="option"
                 :data-active="active === index"
-                :aria-selected="model.some((value) => Object.is(value, valueOf(option)))"
+                :aria-selected="isSelected(option)"
                 :aria-disabled="isDisabled(option) || undefined"
                 tabindex="-1"
                 @pointerdown.prevent
@@ -412,10 +416,16 @@ useWlResultsAnnouncement({
                   name="option"
                   :option="option"
                   :index="index"
-                  :selected="model.some((value) => Object.is(value, valueOf(option)))"
+                  :selected="isSelected(option)"
                   :active="active === index"
                 >
                   <span v-bind="section('optionLabel')">{{ resolveOptionLabel(option, props.optionLabel) }}</span>
+                  <WlIcon
+                    v-if="isSelected(option)"
+                    class="wl-multiselect__option-check"
+                    name="check"
+                    :size="14"
+                  />
                 </slot>
               </div>
             </div>

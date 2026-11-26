@@ -105,6 +105,7 @@
     --wl-palette-danger-soft: var(--wl-red-50);
     --wl-palette-danger-soft-hover: var(--wl-red-75);
     --wl-palette-danger-border: var(--wl-red-100);
+    --wl-palette-info-soft: #edf3fd;
     --wl-palette-info-text: var(--wl-blue-700);
     --wl-palette-ok-text: var(--wl-green-700);
     --wl-palette-warn-text: var(--wl-amber-700);
@@ -145,6 +146,7 @@
     --wl-dimension-filter-drawer-width: 380px;
     --wl-dimension-filter-z: 90;
     --wl-dimension-toast-z: 100;
+    --wl-palette-toast-accent: #6699fb;
     --wl-dimension-stepper-input-width: 76px;
     --wl-dimension-stepper-btn-width: 36px;
     --wl-dimension-slider-height: 6px;
@@ -270,6 +272,7 @@
     --wl-danger-soft: var(--wl-palette-danger-soft);
     --wl-danger-soft-hover: var(--wl-palette-danger-soft-hover);
     --wl-danger-border: var(--wl-palette-danger-border);
+    --wl-info-soft: var(--wl-palette-info-soft);
     --wl-info-text: var(--wl-palette-info-text);
     --wl-ok-text: var(--wl-palette-ok-text);
     --wl-warn-text: var(--wl-palette-warn-text);
@@ -317,6 +320,7 @@
     --wl-metric-filter-drawer-width: var(--wl-dimension-filter-drawer-width);
     --wl-layer-filter: var(--wl-dimension-filter-z);
     --wl-layer-toast: var(--wl-dimension-toast-z);
+    --wl-status-accent-icon: var(--wl-palette-toast-accent);
     --wl-status-info-icon: var(--wl-blue-300);
     --wl-status-success-icon: var(--wl-green-400);
     --wl-status-warning-icon: var(--wl-amber-400);
@@ -389,6 +393,8 @@
     --wl-action-primary-bg: var(--wl-accent);
     --wl-action-primary-hover: var(--wl-accent-hover);
     --wl-action-primary-text: var(--wl-on-accent);
+    --wl-action-warning-bg: var(--wl-warn-text);
+    --wl-action-warning-text: var(--wl-bg);
     --wl-action-danger-bg: var(--wl-danger-hover);
     --wl-action-danger-hover: var(--wl-red-700);
     --wl-action-danger-text: var(--wl-on-accent);

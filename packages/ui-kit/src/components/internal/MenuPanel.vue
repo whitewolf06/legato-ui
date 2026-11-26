@@ -63,9 +63,9 @@ const childLayer = { visible: () => visible.value, panel: () => panel.value, anc
 function itemElement(index: number): HTMLElement | undefined {
   return list.value?.querySelector<HTMLElement>(`[data-wl-menu-index="${index}"]`) ?? undefined;
 }
-function focusItem(index: number): void {
-  if (index >= 0) itemElement(index)?.focus();
-  else list.value?.focus();
+function focusItem(index: number, preventScroll = false): void {
+  const target = index >= 0 ? itemElement(index) : list.value;
+  target?.focus({ preventScroll });
 }
 const { active, tabIndex, onKeydown: navigate } = useWlRovingFocus({
   count: () => props.items.length, isDisabled: (index) => menuItemDisabled(props.items[index]), focus: focusItem
@@ -80,7 +80,7 @@ const typeahead = useWlTypeahead({
 });
 function focusFirst(): void {
   active.value = props.items.findIndex((item) => !menuItemDisabled(item));
-  focusItem(active.value);
+  focusItem(active.value, true);
 }
 function focusLast(): void {
   active.value = -1;
@@ -90,14 +90,14 @@ function focusLast(): void {
       break;
     }
   }
-  focusItem(active.value);
+  focusItem(active.value, true);
 }
 function closeChildren(restoreFocus = false): boolean {
   cancelTimer();
   const wasOpen = visible.value;
   const trigger = anchor.value;
   hide();
-  if (wasOpen && restoreFocus) nextTick(() => trigger?.focus());
+  if (wasOpen && restoreFocus) nextTick(() => trigger?.focus({ preventScroll: true }));
   return wasOpen;
 }
 function hasChildren(item: MenuEntry<Item>): boolean {

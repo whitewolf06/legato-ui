@@ -272,7 +272,7 @@ useWlResultsAnnouncement({
             :aria-label="formatWlLocaleText(locale.removeItem, { label: resolveOptionLabel(item, props.optionLabel) })"
             :disabled="props.disabled"
             @click="remove(index)"
-          >×</button>
+          ><WlIcon name="x" :size="11" /></button>
         </slot>
       </span>
       <input

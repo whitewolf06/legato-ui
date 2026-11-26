@@ -82,11 +82,13 @@ const liveRole = computed(() => {
       :size="16"
       class="wl-alert__icon"
     /></slot>
-    <div v-bind="section('body')" class="wl-alert__body">
-      <div v-if="title" v-bind="section('title')" class="wl-alert__title">{{ title }}</div>
-      <div v-bind="section('text')" class="wl-alert__text"><slot></slot></div>
+    <div class="wl-alert__content">
+      <div v-bind="section('body')" class="wl-alert__body">
+        <div v-if="title" v-bind="section('title')" class="wl-alert__title">{{ title }}</div>
+        <div v-bind="section('text')" class="wl-alert__text"><slot></slot></div>
+      </div>
+      <div v-if="$slots.action" v-bind="section('action')" class="wl-alert__action"><slot name="action"></slot></div>
     </div>
-    <div v-if="$slots.action" v-bind="section('action')" class="wl-alert__action"><slot name="action"></slot></div>
     <button
       v-if="closable"
       v-bind="section('closeButton')"

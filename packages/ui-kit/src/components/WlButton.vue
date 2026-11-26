@@ -74,18 +74,19 @@ const emit = defineEmits<{
 const groupDefaults = useWlButtonGroupDefaults(props);
 const isLink = computed(() => props.as === "a" || props.href !== undefined || props.to !== undefined);
 const tone = computed(() => props.tone ?? (["primary", "soft", "link"].includes(groupDefaults.value.variant) ? "accent" : "neutral"));
-const visualVariant = computed(() => {
-  const variant = groupDefaults.value.variant;
-  if (tone.value === "danger") {
-    if (variant === "primary") return "danger";
-    return variant === "soft" ? "soft-danger" : "danger-quiet";
-  }
-  return variant;
-});
+// Keep the historical danger classes alongside the actual visual variant.
+const dangerModifiers: Record<WlButtonVariant, string> = {
+  primary: "wl-btn--danger",
+  secondary: "wl-btn--danger-quiet",
+  ghost: "wl-btn--danger-quiet",
+  soft: "wl-btn--soft-danger",
+  link: "wl-btn--danger-quiet"
+};
 
 const rootClass = computed(() => [
   "wl-btn",
-  `wl-btn--${visualVariant.value}`,
+  `wl-btn--${groupDefaults.value.variant}`,
+  tone.value === "danger" && dangerModifiers[groupDefaults.value.variant],
   `wl-btn--${groupDefaults.value.size}`,
   props.block && "wl-btn--block",
   groupDefaults.value.density === "compact" && "is-compact",

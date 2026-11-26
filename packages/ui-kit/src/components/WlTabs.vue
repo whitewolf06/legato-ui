@@ -81,6 +81,16 @@ function onUpdate(item: Item, event?: MouseEvent): void {
 
 const section = useWlPt("tabs", computed(() => props.pt));
 const buttons = ref<({ focus: () => void } | undefined)[]>([]);
+const scrollContainer = shallowRef<HTMLElement | null>(null);
+function onFocus(event: FocusEvent, index: number): void {
+  active.value = index;
+  const container = scrollContainer.value;
+  if (!container || container.scrollWidth <= container.clientWidth || !(event.currentTarget instanceof HTMLElement)) return;
+  const tab = event.currentTarget.getBoundingClientRect();
+  const viewport = container.getBoundingClientRect();
+  if (tab.left < viewport.left) container.scrollLeft += Math.floor(tab.left - viewport.left);
+  else if (tab.right > viewport.right) container.scrollLeft += Math.ceil(tab.right - viewport.right);
+}
 function setTabRef(value: Element | ComponentPublicInstance | null, index: number): void {
   const element = value && "$el" in value ? value.$el : value;
   if (element instanceof HTMLElement) buttons.value[index] = element;
@@ -118,7 +128,7 @@ function onKeydown(event: KeyboardEvent, index: number): void {
     data-wl="tabs"
     :data-orientation="orientation"
   >
-    <div v-bind="section('content')" class="wl-tabs__content">
+    <div ref="scrollContainer" v-bind="section('content')" class="wl-tabs__content">
       <div
         v-bind="section('tabList')"
         class="wl-tabs__list"
@@ -142,7 +152,7 @@ function onKeydown(event: KeyboardEvent, index: number): void {
           class="wl-tab"
           :class="{ 'is-active': selectedKey === item.key, 'is-disabled': item.disabled }"
           @click="onUpdate(item, $event)"
-          @focus="active = index"
+          @focus="onFocus($event, index)"
           @keydown="onKeydown($event, index)"
         >
           <WlIcon v-if="item.icon" :name="item.icon" :size="16" />

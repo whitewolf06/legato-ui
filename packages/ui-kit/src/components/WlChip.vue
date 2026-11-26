@@ -97,7 +97,9 @@ function remove(event: MouseEvent): void {
         v-if="count !== undefined"
         v-bind="section('count')"
         class="wl-chip__count"
-      ><slot name="count" :count="count">{{ count }}</slot></span>
+      >
+        <slot name="count" :count="count"><span class="wl-chip__count-value">{{ count }}</span></slot>
+      </span>
     </component>
     <button
       v-if="removable"

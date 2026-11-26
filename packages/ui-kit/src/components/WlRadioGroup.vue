@@ -169,7 +169,9 @@ function onKeydown(event: KeyboardEvent, index: number): void {
             @focus="roving.active.value = index"
             @keydown="onKeydown($event, index)"
           />
-          <span class="wl-radio__box" aria-hidden="true"><span class="wl-radio__icon"></span></span>
+          <span class="wl-radio__box" :class="{ 'is-checked': checked(option) }" aria-hidden="true">
+            <span class="wl-radio__icon"></span>
+          </span>
         </span>
         <span class="wl-checkline__label"><slot
           name="option"
