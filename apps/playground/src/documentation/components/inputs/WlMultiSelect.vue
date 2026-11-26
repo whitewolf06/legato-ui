@@ -10,7 +10,7 @@ const options = [{ id: "design", label: t("examples.design_0079") }, { id: "code
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlMultiSelect">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.chips_filter_and_counter_0758") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.chips_filter_and_counter_0758") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-multi-chips"
@@ -42,7 +42,7 @@ const options = [{ id: "design", label: t("examples.design_0079") }, { id: "code
       <p class="wl-text-small wl-text-muted">{{ t("examples.enter_toggles_the_selected_item_the_list_stays_open_for_the_ne_0763") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_and_states_0764") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_and_states_0764") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"

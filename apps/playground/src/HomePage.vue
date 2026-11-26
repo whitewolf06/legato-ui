@@ -4,7 +4,6 @@ const props = defineProps<{ theme: WlThemeName }>();
 const emit = defineEmits<{
   navigate: [view: "docs" | "font" | "system" | "project" | "theme-builder"];
   route: [route: PlaygroundRoute, anchor?: string];
-  catalog: [];
   component: [name: string];
   quality: [];
   "toggle-theme": [];
@@ -181,8 +180,8 @@ const setupSource = t("shell.HomePage.text67");
               data-variant="secondary"
               data-size="md"
               data-density="default"
-              :href="themedHref('?view=docs#docs-components')"
-              @click.prevent="emit('catalog')"
+              :href="metricHref({ view: 'docs', section: 'components' })"
+              @click="openMetric($event, { view: 'docs', section: 'components' })"
             >{{ t('shell.HomePage.text73') }}</a>
           </nav>
           <div class="home-font-entry">
@@ -196,7 +195,12 @@ const setupSource = t("shell.HomePage.text67");
             {{ t('shell.HomePage.text76') }}
             <a class="home-text-link" :href="project.author.url">{{ project.author.name }}</a>.
             <a class="home-text-link" :href="project.licenseUrl">{{ project.license }}</a> ·
-            <a class="home-text-link" :href="project.repositoryUrl">GitHub <WlIcon name="external-link" :size="13" /></a>
+            <a
+              class="home-text-link"
+              :href="project.repositoryUrl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >GitHub <WlIcon name="external-link" :size="13" /></a>
           </p>
         </div>
         <img

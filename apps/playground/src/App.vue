@@ -16,6 +16,7 @@ import PlaygroundHeader from "./PlaygroundHeader.vue";
 import { savePlaygroundPreference } from "./preferences";
 import FontDownloadLink from "./project/FontDownloadLink.vue";
 import { gaviaProjectInfo as project } from "./project/project-info";
+import GitHubMark from "./site/GitHubMark.vue";
 import SiteHeader from "./site/SiteHeader.vue";
 import { hostedSite } from "./site/target";
 import { appliedTheme, applyThemeToRoot, clearAppliedTheme, setAppliedTheme, type ThemeApplication } from "./theme-builder/application";
@@ -184,10 +185,7 @@ function qualityRouteHref(): string {
   return target.pathname + target.search + target.hash;
 }
 function openDocsCatalog(): Promise<void> {
-  return hostedSite ? openDocsSection("components") : navigate({ view: "docs" }, "docs-components");
-}
-function openDocsOverview(anchor: string): Promise<void> {
-  return navigate({ view: "docs" }, anchor);
+  return openDocsSection("components");
 }
 function openDocsAnchor(anchor: string): Promise<void> {
   return navigate({ view: "docs", component: activeRoute.value.component, section: activeRoute.value.section }, anchor);
@@ -577,7 +575,6 @@ watch([theme, appliedTheme], ([value]) => {
     @route="navigate"
     @navigate="showView"
     @component="openDocs"
-    @catalog="openDocsCatalog"
     @quality="openDocsSection('quality')"
     @toggle-theme="toggleThemeVariant"
   />
@@ -589,7 +586,6 @@ watch([theme, appliedTheme], ([value]) => {
     :theme="theme"
     @section="openDocsSection"
     @component="openDocs"
-    @overview="openDocsOverview"
     @anchor="openDocsAnchor"
     @navigate="showView"
   />
@@ -615,7 +611,12 @@ watch([theme, appliedTheme], ([value]) => {
   <footer class="pg-footer">
     <span>Legato UI · v{{ project.version }} · <a :href="project.licenseUrl">MIT</a></span>
     <span>{{ t('shell.App.text51') }} <a :href="project.author.url">{{ t('shell.author.name') }}</a></span>
-    <a :href="project.repositoryUrl">GitHub</a>
+    <a
+      class="pg-footer-repository"
+      :href="project.repositoryUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+    ><GitHubMark /> GitHub</a>
     <a :href="qualityRouteHref()" @click="openQualityLink">{{ t('shell.App.text52') }}</a>
     <FontDownloadLink variant="secondary">{{ t('shell.App.text53') }}</FontDownloadLink>
   </footer>
@@ -628,8 +629,9 @@ watch([theme, appliedTheme], ([value]) => {
   --wl-playground-gutter: clamp(20px, 3.6vw, 48px);
 
   :is(
-    .pg-header-inner, .pg-theme-draft, .home-hero-tools, .home-hero-content, .home-content,
-    .docs-page, .ds-main, .wl-type-shell, .project-main, .tb-page
+    .pg-header-inner:not(.pg-secondary), .pg-theme-draft, .home-hero-tools, .home-hero-content, .home-content,
+    .docs-page:not(.legato-site-container), .ds-main:not(.legato-site-container), .wl-type-shell:not(.legato-site-container),
+    .project-main:not(.legato-site-container), .tb-page:not(.legato-site-container)
   ) {
     padding-inline: var(--wl-playground-gutter);
   }
@@ -688,6 +690,7 @@ watch([theme, appliedTheme], ([value]) => {
   font-size: var(--wl-type-small-size);
 }
 .pg-footer a { color: var(--wl-text-accent); text-underline-offset: 3px; }
+.pg-footer-repository { display: inline-flex; align-items: center; gap: var(--wl-space-xs); }
 .pg-footer a:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 3px; }
 /* Temporary suppression prevents component transitions leaking into the snapshot. */
 html[data-wl-playground-theme-transition="native"] :where(body, body *),

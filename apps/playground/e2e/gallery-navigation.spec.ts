@@ -46,9 +46,11 @@ async function expectPickerDestination(page: Page, name: PickerName): Promise<Lo
   const preview = pickerPreview(page, name);
   await expect(preview.locator(":scope > .wl-stack")).toBeVisible();
   if (name === "WlTimePicker") {
-    // The primary and rich examples must not duplicate the canonical label/id.
-    await expect(page.locator('[id="example-time"]')).toHaveCount(1);
-    await expect(preview.getByLabel("Время встречи", { exact: true })).toBeVisible();
+    const input = preview.getByLabel("Время встречи", { exact: true });
+    await expect(input).toBeVisible();
+    const id = await input.getAttribute("id");
+    expect(id).toBeTruthy();
+    await expect(page.locator(`[id="${id}"]`)).toHaveCount(1);
   } else {
     await expect(preview.getByRole("button", { name: "Выбрать файлы", exact: true })).toBeVisible();
   }
@@ -73,7 +75,7 @@ test.beforeEach(async ({ page, baseURL }) => {
   await page.goto(russianPlaygroundUrl(docsUrl), { waitUntil: "domcontentloaded" });
   // The SPA bootstrap and Docs chunk can finish after the static document loads.
   await page.getByTestId("docs-page").waitFor({ state: "visible" });
-  await expect(page.getByTestId("docs-page").getByRole("heading", { level: 1 })).toHaveText("Документация");
+  await expect(page.getByTestId("docs-page").getByRole("heading", { level: 1 })).toHaveText("WlButton");
   await expect.poll(() => playgroundRouteParams(new URL(page.url())).get("view")).toBe("docs");
   await page.addStyleTag({ content: "html { scroll-behavior: auto; }" });
 });
@@ -97,10 +99,10 @@ test("legacy component input resolves to a canonical hosted route without losing
 test("Docs catalog keeps release badges current and opens the real button example", async ({ page }) => {
   const docs = await openDocumentationMenu(page);
   const catalog = docs.getByRole("navigation", { name: "Каталог компонентов", exact: true });
-  const item = catalog.getByRole("button", { name: "WlButton", exact: true });
+  const item = catalog.getByRole("link", { name: "WlButton", exact: true });
   await expect(item.locator(".docs-component-version")).toHaveCount(0);
   await expect(item).not.toHaveAttribute("aria-describedby");
-  const linkItem = catalog.getByRole("button", { name: "WlLink", exact: true });
+  const linkItem = catalog.getByRole("link", { name: "WlLink", exact: true });
   // WlLink was introduced in 1.0.0-rc.1; later numeric releases retire its badge.
   const linkIsNew = sourceVersion.split(/[+-]/, 1)[0] === "1.0.0";
   await expect(linkItem.locator(".docs-component-version")).toHaveText(linkIsNew ? ["Новое"] : []);

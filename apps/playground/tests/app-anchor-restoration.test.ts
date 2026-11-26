@@ -12,8 +12,7 @@ import { createThemeOverrides, createThemePalette } from "../src/theme-builder/p
 import ThemeBuilderPage from "../src/ThemeBuilderPage.vue";
 import { playgroundThemePreference } from "../src/themes";
 
-// The real DocsPage's metadata/TOC loads normally. Only its async Assets module
-// is gated, reproducing a clickable TOC before that child import has completed.
+// Hold the Assets page so a deep link arrives before its target is rendered.
 const assets = vi.hoisted(() => {
   let release!: () => void;
   const ready = new Promise<void>((resolve) => {
@@ -310,18 +309,15 @@ describe("App-owned page anchor restoration", () => {
     expect(history.length).toBe(historyLength); // restores never add history
   });
 
-  it("restores an explicit TOC anchor whose async child appears after App mounted and the first request frame", async () => {
+  it("restores a deep link whose target appears after the first request frame", async () => {
     releases.push(assets.release); // also release a held import if an assertion fails
     const app = await mountedApp("/docs/?theme=gavia");
     await paint();
     expect(app.wrapper.find('[data-testid="docs-page"]').exists()).toBe(true);
     expect(window.location.hash).toBe("");
-    await app.router.push("/docs/icons/?theme=gavia");
-    await paint();
     scroll.mockClear();
     scrollTop.mockClear();
-    const toc = app.wrapper.get('.docs-sidebar a[href="#docs-icons-catalog"]');
-    await toc.trigger("click");
+    await app.router.push("/docs/icons/?theme=gavia#docs-icons-catalog");
     await paint(); // request's first frame definitely runs before child resolves
     expect(document.getElementById("docs-icons-catalog")).toBeNull();
     expect(window.location.hash).toBe("#docs-icons-catalog");

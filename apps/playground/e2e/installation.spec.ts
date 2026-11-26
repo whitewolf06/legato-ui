@@ -28,6 +28,14 @@ test("home installs the published release and documentation uses the current pac
     const panel = page.locator("details").filter({ has: page.locator("summary", { hasText: "Установка через" }) });
     await expect(panel.locator("code")).toHaveText(prefix + " legato-ui vue");
   }
+  await page.getByRole("link", { name: "Подробная инструкция по установке", exact: true }).click();
+  const guide = page.locator('[data-guide="installation"]');
+  await expect(guide).toBeVisible();
+  const packageStep = guide.locator("section").filter({ has: page.locator("#install-package") });
+  for (const [name, prefix] of [["pnpm", "pnpm add"], ["npm", "npm install"], ["Bun", "bun add"]]) {
+    await packageStep.getByRole("button", { name, exact: true }).click();
+    await expect(packageStep.locator("pre code")).toHaveText(prefix + " legato-ui");
+  }
   await expect.poll(() => page.evaluate(() =>
     document.documentElement.scrollWidth - document.documentElement.clientWidth
   )).toBeLessThanOrEqual(1);

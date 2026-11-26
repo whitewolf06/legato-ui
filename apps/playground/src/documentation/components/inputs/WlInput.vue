@@ -11,7 +11,7 @@ const login = ref("");
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlInput">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_and_density_0741") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_and_density_0741") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"
@@ -28,7 +28,7 @@ const login = ref("");
       </div>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.slots_and_states_0744") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.slots_and_states_0744") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-input-cost"

@@ -24,7 +24,7 @@ function copyStatic(from, to) {
   } else throw new Error("Unexpected non-static asset: " + from);
 }
 
-for (const name of ["docs", "ru", "system", "font", "theme-builder", "changelog", "_playground", "downloads",
+for (const name of ["docs", "ru", "system", "font", "theme-builder", "changelog", "examples", "project-previews", "_playground", "downloads",
   "legato-social.png", "gavia-social.png", "sitemap.xml", "robots.txt", "llms.txt", "llms-full.txt"]) copyStatic(join(dist, name), join(output, name));
 for (const name of ["index.html", "assets", "yandex_4ebe5cdcb9707dc7.html"]) copyStatic(join(landing, name), join(output, name));
 await syncLandingHeader(output);

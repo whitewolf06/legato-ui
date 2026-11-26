@@ -5,7 +5,7 @@ import { wlDesignThemes } from "../../../packages/ui-kit/src/design-system/token
 import { wlManifest } from "../../../packages/ui-kit/src/manifest";
 import { consumerSource } from "../../../scripts/example-source.mjs";
 import { russianPlaygroundUrl } from "./playground-url";
-import { chooseShowcaseTheme, copyCodePanel } from "./select-helpers";
+import { chooseDropdownOption, chooseShowcaseTheme, copyCodePanel } from "./select-helpers";
 
 const russianExamples = JSON.parse(readFileSync(new URL("../src/i18n/messages/examples.ru.json", import.meta.url), "utf8")) as Record<string, string>;
 
@@ -36,6 +36,7 @@ async function openDocumentation(page: Page, baseURL?: string): Promise<void> {
   await page.goto(russianPlaygroundUrl(url.href), { waitUntil: "domcontentloaded" });
   await expect(workspace(page).getByRole("tab", { name: "Примеры", exact: true })).toHaveAttribute("aria-selected", "true");
   await expect(workspace(page).locator("[data-docs-button-example]")).toHaveCount(5);
+  for (const comparison of await workspace(page).locator(".button-topic-comparison > summary").all()) await comparison.click();
 }
 async function fillRatio(button: Locator): Promise<number> {
   return button.evaluate((element) => element.getBoundingClientRect().width / element.parentElement!.getBoundingClientRect().width);
@@ -54,16 +55,34 @@ test.afterEach(async ({ page }) => {
 test("button comparisons cover manifest variants and sizes, and every copied example is its canonical SFC", async ({ page, baseURL }) => {
   await openDocumentation(page, baseURL);
   const variants = preview(page, "variants");
-  const variantButtons = variants.locator('button[data-wl="button"]:not([data-tone="danger"])');
+  const presentations = variants.locator(".button-variant-grid");
+  const variantButtons = presentations.locator('button[data-wl="button"]:not([data-tone="danger"])');
   await expect(variantButtons).toHaveCount(buttonManifest.props.find((prop) => prop.name === "variant")!.values!.length);
   expect(await variantButtons.evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-variant"))))
     .toEqual(buttonManifest.props.find((prop) => prop.name === "variant")!.values);
-  const dangerButtons = variants.locator('button[data-wl="button"][data-tone="danger"]');
+  const dangerButtons = presentations.locator('button[data-wl="button"][data-tone="danger"]');
   await expect(dangerButtons).toHaveCount(3);
   expect(await dangerButtons.evaluateAll((buttons) => buttons.map((button) => button.getAttribute("data-variant"))))
     .toEqual(["primary", "ghost", "soft"]);
   await variants.getByRole("button", { name: "Создать", exact: true }).click();
   await expect(variants.getByRole("status")).toHaveText("Последнее действие: Создать");
+
+  const comparison = variants.getByRole("group", { name: "Тоны кнопки с заливкой" });
+  const tones = comparison.getByRole("button");
+  const toneValues = buttonManifest.props.find((prop) => prop.name === "tone")!.values!.map(String);
+  await expect(tones).toHaveText(toneValues);
+  const filledSuccess = await comparison.getByRole("button", { name: "success", exact: true })
+    .evaluate((button) => getComputedStyle(button).backgroundColor);
+  const sample = example(page, "variants").locator(".button-sample");
+  const liveButton = sample.locator(".button-sample-stage button");
+  const variantControl = sample.getByRole("combobox", { name: "variant", exact: true });
+  await chooseDropdownOption(page, sample.getByRole("combobox", { name: "tone", exact: true }), "success");
+  await expect(liveButton).toHaveCSS("background-color", filledSuccess);
+  await chooseDropdownOption(page, variantControl, "soft");
+  await expect(liveButton).not.toHaveCSS("background-color", filledSuccess);
+  await expect(liveButton).not.toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await chooseDropdownOption(page, variantControl, "link");
+  await expect(liveButton).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
 
   const sizes = preview(page, "sizes");
   for (const density of ["default", "compact"]) {
@@ -191,6 +210,9 @@ test("all button comparisons fit 320px and inherit each shipped theme", async ({
       return { foreground: style.color, background: style.backgroundColor };
     });
     expect(contrast.foreground, theme + " primary button has distinct text and background").not.toBe(contrast.background);
+    const tones = preview(page, "variants").getByRole("group", { name: "Тоны кнопки с заливкой" }).getByRole("button");
+    await expect.poll(() => tones.evaluateAll((buttons) => new Set(buttons.map((button) => getComputedStyle(button).backgroundColor)).size),
+      theme + " keeps all six filled button colors distinct").toBe(6);
     await expect(preview(page, "sizes").locator('[data-button-density="compact"]')).toBeVisible();
   }
 });

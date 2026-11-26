@@ -125,12 +125,15 @@ test("The mirror opens its own catalog and preserves the old project query", asy
     });
     return colors.map(normalizeWlHex);
   }).toEqual([resolveWlToken("--wl-accent", "legato"), resolveWlToken("--wl-bg", "legato")].map(normalizeWlHex));
-  const card = catalog.getByRole("link").filter({ has: page.getByText("WlTable", { exact: true }) });
-  await expect(card).toHaveAttribute("href", /^\/legato-ui\/ru\/docs\/components\/WlTable\//);
+  await expect(page.locator("h1")).toHaveText("WlButton");
+  await openDocumentationMenu(page);
+  await expect(catalog.getByRole("link").first()).toHaveAttribute("aria-current", "page");
+  const tableLink = catalog.getByRole("link", { name: "WlTable", exact: true });
+  await expect(tableLink).toHaveAttribute("href", /^\/legato-ui\/ru\/docs\/components\/WlTable\//);
   await expect(page.locator(".legato-head-brand")).toHaveAttribute("href", pagesPath);
   await expect(page.locator(".legato-head-nav a[aria-current=page]")).toHaveText("Компоненты");
   await catalog.locator('input[type="search"]').fill("WlTable");
-  await card.click();
+  await tableLink.click();
   await expect(page.locator("h1")).toHaveText("WlTable");
   await expectNoPageOverflow(page);
 

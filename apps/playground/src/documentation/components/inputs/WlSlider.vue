@@ -10,7 +10,7 @@ const interval = ref(20);
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlSlider">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.range_step_and_current_value_0830") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.range_step_and_current_value_0830") }}</h3>
       <WlField
         id="docs-slider-volume"
         v-slot="{ id, ariaDescribedby }"
@@ -50,7 +50,7 @@ const interval = ref(20);
       <p class="wl-text-small wl-text-muted">{{ t("examples.arrow_keys_home_and_end_control_the_native_range_the_current_v_0836") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.unavailable_slider_0837") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.unavailable_slider_0837") }}</h3>
       <WlField id="docs-slider-disabled" v-slot="{ id }" :label="t('examples.fixed_level_0838')"><WlSlider
         :id="id"
         :model-value="60"

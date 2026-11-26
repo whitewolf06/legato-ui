@@ -1,8 +1,9 @@
 import type { Plugin } from "vue";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { defineComponent, h, nextTick } from "vue";
+import { defineComponent, h, nextTick, ref } from "vue";
 import DocsPage from "../src/DocsPage.vue";
+import * as scrollspy from "../src/documentation/useDocumentationScrollspy";
 import { playgroundI18n, playgroundLocale } from "../src/i18n";
 
 const plugin = playgroundI18n as unknown as Plugin;
@@ -38,10 +39,16 @@ afterEach(() => {
 
 const surfaces = [
   { name: "overview jump link", section: undefined, selector: '.docs-section-links a[href="#docs-foundations"]', anchor: "docs-foundations" },
-  { name: "Layout sidebar TOC", section: "layout" as const, selector: '.docs-sidebar a[href="#docs-layout-nested-grid"]', anchor: "docs-layout-nested-grid" }
+  { name: "Layout page outline", section: "layout" as const, selector: '.docs-on-page a[href="#docs-layout-nested-grid"]', anchor: "docs-layout-nested-grid" }
 ];
 
 async function mountedLink(surface: typeof surfaces[number]) {
+  if (surface.section) {
+    vi.spyOn(scrollspy, "useDocumentationScrollspy").mockReturnValue({
+      activeId: ref(surface.anchor),
+      headings: ref([{ id: surface.anchor, title: "Nested grid" }])
+    });
+  }
   const wrapper = mount(DocsPage, {
     attachTo: document.body,
     props: { section: surface.section },
@@ -85,6 +92,7 @@ async function click(link: HTMLAnchorElement, init: MouseEventInit = {}, already
 describe.each(surfaces)("Docs same-page anchor: $name", (surface) => {
   it("hands one ordinary click to the application navigation owner", async () => {
     const { wrapper, link } = await mountedLink(surface);
+    expect(wrapper.find('.docs-sidebar a[href="#' + surface.anchor + '"]').exists()).toBe(false);
     expect(link.getAttribute("href")).toBe("#" + surface.anchor);
     expect(await click(link)).toBe(true);
     expect(wrapper.emitted("anchor")).toEqual([[surface.anchor]]);

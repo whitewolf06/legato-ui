@@ -16,6 +16,8 @@ async function showError(visible: boolean, retry = false): Promise<void> {
 
 <template>
   <div class="wl-stack" data-space="lg">
+    <WlAlert tone="neutral" live="off">{{ t("examples.local_example_notification_0614") }}</WlAlert>
+    <WlAlert tone="accent" live="off">{{ t("examples.new_version_available_0611") }}</WlAlert>
     <WlAlert tone="info" :title="t('examples.tip_0309')">{{ t("examples.your_application_saves_the_settings_0310") }}</WlAlert>
     <WlAlert tone="success" :title="t('examples.saved_0311')">{{
       t("examples.all_changes_are_recorded_in_the_local_example_0312")

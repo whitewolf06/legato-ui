@@ -42,14 +42,15 @@ export default defineConfig(({ mode }) => {
       // CI interaction checks exercise production output; the public Pages build
       // does not include the synthetic component fixture.
       rolldownOptions: {
-        ...(process.env.GAVIA_E2E_BUILD === "1"
-          ? {
-              input: {
-                index: fileURLToPath(new URL("./index.html", import.meta.url)),
+        input: {
+          index: fileURLToPath(new URL("./index.html", import.meta.url)),
+          examples: fileURLToPath(new URL("./examples/index.html", import.meta.url)),
+          ...(process.env.GAVIA_E2E_BUILD === "1"
+            ? {
                 e2e: fileURLToPath(new URL("./e2e.html", import.meta.url))
               }
-            }
-          : {}),
+            : {})
+        },
         output: {
           codeSplitting: {
             includeDependenciesRecursively: false,

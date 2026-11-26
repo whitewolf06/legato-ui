@@ -10,8 +10,11 @@ async function mount(): Promise<void> {
   const router = createPlaygroundRouter(import.meta.env.BASE_URL);
   const route = parsePlaygroundRoute(window.location.search, window.location.hash, window.location.pathname);
   // Keep an already rendered component guide on screen until its interactive replacement is ready.
-  const guide = route.view === "docs" && route.component && document.documentElement.hasAttribute("data-playground-prerendered")
-    ? componentGuideLoaders[route.component === "WlButton" ? "button" : "standard"]()
+  const component = route.component ?? (route.section === "components"
+    ? document.querySelector<HTMLElement>("#app [data-docs-component]")?.dataset.docsComponent
+    : undefined);
+  const guide = route.view === "docs" && component && document.documentElement.hasAttribute("data-playground-prerendered")
+    ? componentGuideLoaders[component === "WlButton" ? "button" : "standard"]()
     : undefined;
   await Promise.all([preloadPlaygroundPage(route.view), preparePlaygroundPage(route.view), guide]);
   const app = createApp(App);

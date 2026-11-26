@@ -10,7 +10,6 @@ const value = ref<string | null>("09:30");
 <template>
   <div class="wl-stack" data-space="md">
     <WlField
-      id="example-time"
       v-slot="field"
       :label="t('examples.meeting_time_0140')"
       :hint="t('examples.from_08_00_to_18_00_clearing_the_field_sets_the_model_to_null_0141')"

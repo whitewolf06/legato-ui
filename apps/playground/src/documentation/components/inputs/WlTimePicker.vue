@@ -10,7 +10,7 @@ const night = ref<string | null>("23:30");
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlTimePicker">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_and_daytime_range_0873") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_and_daytime_range_0873") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"
@@ -37,7 +37,7 @@ const night = ref<string | null>("23:30");
       </div>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.overnight_range_error_and_disabled_0877") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.overnight_range_error_and_disabled_0877") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-time-night"

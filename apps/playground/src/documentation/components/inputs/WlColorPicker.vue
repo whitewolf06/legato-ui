@@ -10,7 +10,7 @@ const swatches = ["#2563eb", "#2e9e68", "#bf8615", "#d2494f", "#22252b", "#f7f7f
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlColorPicker">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.custom_palette_sizes_and_hex_0669") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.custom_palette_sizes_and_hex_0669") }}</h3>
       <div class="wl-grid" data-space="lg">
         <div
           v-for="size in ['sm', 'md'] as const"
@@ -28,7 +28,7 @@ const swatches = ["#2563eb", "#2e9e68", "#bf8615", "#d2494f", "#22252b", "#f7f7f
       <p class="wl-text-small wl-text-muted">{{ t("examples.rgb_and_rrggbb_input_is_normalized_to_lowercase_rrggbb_invalid_0673") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.external_error_and_disabled_0674") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.external_error_and_disabled_0674") }}</h3>
       <div class="wl-grid" data-space="lg">
         <div
           class="wl-stack"

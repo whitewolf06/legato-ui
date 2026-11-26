@@ -8,13 +8,12 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   component: [name: string | undefined];
   section: [name: DocumentationSection | undefined];
-  overview: [anchor: string];
   anchor: [anchor: string];
   navigate: [view: "system" | "project" | "components"];
 }>();
 const { t } = usePlaygroundI18n();
 import type { AsyncComponentLoader, Component } from "vue";
-import { WlButton, WlIcon, WlIconButton, WlInput, WlSegmented, type WlThemeName } from "legato-ui";
+import { WlButton, WlIcon, WlIconButton, WlInput, type WlThemeName } from "legato-ui";
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getLocalizedManifest, isComponentNewInRelease } from "./documentation/manifest";
 const wlManifest = getLocalizedManifest();
@@ -28,44 +27,61 @@ import { documentationAssetPages, documentationAssets } from "./documentation/as
 const DocumentationAssetsPage = asyncContent(() => import("./documentation/assets/DocumentationAssetsPage.vue"));
 const ButtonDocumentation = asyncContent(componentGuideLoaders.button);
 import { documentationCategories, documentationFoundationPages, documentationFoundations, type DocumentationHeading, documentationOverviewHeadings, foundationHeadings, installationSource } from "./documentation/catalog";
+import { componentExampleTopics } from "./documentation/components/topics";
 const ComponentDocumentation = asyncContent(componentGuideLoaders.standard);
 const FoundationPage = asyncContent(() => import("./documentation/foundations/FoundationPage.vue"));
 const DocumentationQualityPage = asyncContent(() => import("./documentation/quality/DocumentationQualityPage.vue"));
 const GuidePage = asyncContent(() => import("./documentation/GuidePage.vue"));
-import { documentationGuide, documentationGuideSections } from "./documentation/guides";
+import { documentationGuide, documentationGuideHeadingId, documentationGuideSections } from "./documentation/guides";
+import InstallationCommand from "./documentation/InstallationCommand.vue";
+import PageOutline from "./documentation/PageOutline.vue";
 import { documentationQualityPage } from "./documentation/quality/quality";
 import { useDocumentationScrollspy } from "./documentation/useDocumentationScrollspy";
 import { playgroundLocale } from "./i18n";
 import { createPlaygroundNavigationUrl as createPlaygroundUrl, type DocumentationSection, isDocumentationAssetSection, isDocumentationFoundationSection, isDocumentationGuideSection, isDocumentationQualitySection } from "./navigation";
 import PlaygroundPageHeader from "./PlaygroundPageHeader.vue";
-import { getInstallCommand, installationManagers, type PackageManager } from "./project/installation";
 import { gaviaProjectInfo } from "./project/project-info";
+import { hostedSite } from "./site/target";
 import { playgroundDefaultTheme, playgroundThemePreference, withPlaygroundTheme } from "./themes";
 import { usePageAnchor } from "./usePageAnchor";
-const installManager = ref<string | null>("pnpm");
-const installationCommand = computed(() => getInstallCommand((installManager.value ?? "pnpm") as PackageManager, true));
 
 const foundationSection = computed(() => isDocumentationFoundationSection(props.section) ? props.section : undefined);
 const assetSection = computed(() => isDocumentationAssetSection(props.section) ? props.section : undefined);
 const qualitySection = computed(() => isDocumentationQualitySection(props.section) ? props.section : undefined);
 const guideSection = computed(() => isDocumentationGuideSection(props.section) ? props.section : undefined);
 const guide = computed(() => guideSection.value ? documentationGuide(guideSection.value, playgroundLocale.value) : undefined);
-const guideLinks = computed(() => documentationGuideSections.map((key) => ({ key, ...documentationGuide(key, playgroundLocale.value) })));
+const guideLinks = computed(() => documentationGuideSections.filter((key) => key !== "installation")
+  .map((key) => ({ key, ...documentationGuide(key, playgroundLocale.value) })));
 const pageElement = ref<HTMLElement | null>(null);
 const contentElement = ref<HTMLElement | null>(null);
+const catalogGroups = computed(() => documentationCategories.map((category) => ({
+  ...category,
+  entries: wlManifest.filter((item) => item.category === category.key)
+    .sort((left, right) => left.name.localeCompare(right.name, "en"))
+})).filter((group) => group.entries.length));
+const selectedComponent = computed(() => {
+  if (props.section === "components") return catalogGroups.value[0]?.entries[0]?.name;
+  return props.section ? undefined : props.component;
+});
+const entry = computed(() => wlManifest.find((item) => item.name === selectedComponent.value));
+const inCatalog = computed(() => props.section === "components" || !!entry.value);
+const sidebarLabel = computed(() => t(inCatalog.value ? "documentation.strings.s0840" : "documentation.strings.s0833"));
 const headingIds = computed(() => guideSection.value
-  ? guide.value?.sections.map((_, index) => `guide-${guideSection.value}-${index}`)
+  ? [
+      ...(guideSection.value === "recipes" ? ["recipe-applications", "recipe-simple"] : []),
+      ...(guide.value?.sections.map((item, index) => documentationGuideHeadingId(guideSection.value!, item, index)) ?? [])
+    ]
   : qualitySection.value
     ? documentationQualityPage.headings.map((heading) => heading.id)
     : foundationSection.value
       ? foundationHeadings(foundationSection.value).map((heading) => heading.id)
       : assetSection.value
         ? documentationAssets.find((asset) => asset.key === assetSection.value)?.headings.map((heading) => heading.id)
-        : props.component === "WlButton"
-          ? ["docs-button-preview-title", "docs-button-usage", "docs-button-variants", "docs-button-sizes", "docs-button-states", "docs-button-slot-layout", "docs-button-form", "docs-button-props", "docs-button-events", "docs-button-slots", "docs-button-pt", "docs-button-accessibility"]
-          : props.component
-            ? ["preview", "examples", "service", "props", "events", "slots", "pt", "accessibility"]
-                .map((key) => "docs-" + props.component!.toLowerCase() + "-" + key)
+        : selectedComponent.value === "WlButton"
+          ? ["docs-button-variants", "docs-button-sizes", "docs-button-states", "docs-button-slot-layout", "docs-button-form", "docs-button-usage", "docs-button-props", "docs-button-events", "docs-button-slots", "docs-button-pt", "docs-button-accessibility"]
+          : selectedComponent.value
+            ? [...componentExampleTopics(selectedComponent.value).map((topic) => topic.id), "examples", "service", "props", "events", "slots", "pt", "accessibility"]
+                .map((key) => "docs-" + selectedComponent.value!.toLowerCase() + "-" + key)
             : documentationOverviewHeadings.map((heading) => heading.id));
 const { activeId, headings: currentHeadings } = useDocumentationScrollspy({
   root: contentElement,
@@ -74,34 +90,33 @@ const { activeId, headings: currentHeadings } = useDocumentationScrollspy({
 });
 usePageAnchor(pageElement);
 
-const entry = computed(() => props.section ? undefined : wlManifest.find((item) => item.name === props.component));
 const categoryLabel = computed(() => documentationCategories.find((category) => category.key === entry.value?.category)?.label);
 const pageIntroduction = computed(() => {
-  if (props.section === "components") {
-    const title = t("shell.seo.section.components");
-    return { title, description: t("shell.catalog.description"), breadcrumbs: [{ label: t("documentation.strings.s0827"), route: { view: "docs" as const } }, { label: title }] };
+  if (entry.value) {
+    return { title: entry.value.name, description: entry.value.description ?? "", breadcrumbs: [
+      { label: t("documentation.strings.s0839"), route: { view: "docs" as const, section: "components" as const } },
+      { label: entry.value.name }
+    ] };
   }
   const metadata = qualitySection.value
     ? documentationQualityPage
     : assetSection.value
       ? documentationAssetPages[assetSection.value]
       : foundationSection.value ? documentationFoundationPages[foundationSection.value] : undefined;
-  const title = guide.value?.title ?? metadata?.label ?? entry.value?.name ?? t("documentation.strings.s0827");
-  const description = guide.value?.description ?? metadata?.description ?? entry.value?.description
-    ?? t("documentation.strings.s0828");
-  return { title, description, breadcrumbs: metadata || entry.value || guide.value
+  const title = guide.value?.title ?? metadata?.label ?? t("documentation.strings.s0827");
+  const description = guide.value?.description ?? metadata?.description ?? t("documentation.strings.s0828");
+  return { title, description, breadcrumbs: metadata || guide.value
     ? [{ label: t("documentation.strings.s0827"), route: { view: "docs" as const } }, { label: title }]
     : [{ label: t("documentation.strings.s0827") }] };
 });
 const componentQuery = ref("");
 const groups = computed(() => {
   const needle = componentQuery.value.trim().toLowerCase();
-  return documentationCategories.map((category) => ({
-    ...category,
-    entries: wlManifest.filter((item) => item.category === category.key
-      && (!needle || item.name.toLowerCase().includes(needle) || (item.description ?? "").toLowerCase().includes(needle)))
-      .sort((left, right) => left.name.localeCompare(right.name, "en"))
-  })).filter((category) => category.entries.length > 0);
+  if (!needle) return catalogGroups.value;
+  return catalogGroups.value.map((group) => ({
+    ...group,
+    entries: group.entries.filter((item) => item.name.toLowerCase().includes(needle) || item.description?.toLowerCase().includes(needle))
+  })).filter((group) => group.entries.length);
 });
 async function clearComponentSearch(): Promise<void> {
   componentQuery.value = "";
@@ -130,12 +145,6 @@ function updateMobile(): void {
 function toggleMenu(event: Event): void {
   if (isMobile.value) mobileMenuOpen.value = (event.currentTarget as HTMLDetailsElement).open;
 }
-function overviewHref(heading: DocumentationHeading): string {
-  const current = new URL(typeof window === "undefined" ? "http://localhost/" : window.location.href);
-  const target = createPlaygroundUrl(current, { view: "docs" });
-  target.hash = heading.id;
-  return withPlaygroundTheme(target.pathname + target.search + target.hash, playgroundThemePreference.value);
-}
 const qualityHref = computed(() => {
   const current = new URL(typeof window === "undefined" ? "http://localhost/" : window.location.href);
   const target = createPlaygroundUrl(current, { view: "docs", section: "quality" });
@@ -146,7 +155,7 @@ function guideHref(section: DocumentationSection): string {
   return target.pathname + target.search + target.hash;
 }
 function componentHref(component: string): string {
-  const target = createPlaygroundUrl(new URL(window.location.href), { view: "docs", component });
+  const target = createPlaygroundUrl(new URL(typeof window === "undefined" ? "http://localhost/" : window.location.href), { view: "docs", component });
   return target.pathname + target.search;
 }
 function followComponent(event: MouseEvent, name: string): void {
@@ -166,20 +175,16 @@ function navigateQuality(event: MouseEvent): void {
   closeMobileMenu();
   emit("section", "quality");
 }
-function navigateOverview(event: MouseEvent, heading: DocumentationHeading): void {
-  // Preserve the native new-tab/window and context-menu behavior of a real link.
-  if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
-  event.preventDefault();
-  closeMobileMenu();
-  emit("overview", heading.id);
-}
 function navigateAnchor(event: MouseEvent, heading: DocumentationHeading): void {
   if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
   event.preventDefault();
   closeMobileMenu();
   emit("anchor", heading.id);
 }
-watch(() => [props.component, props.section], closeMobileMenu);
+watch(() => [props.component, props.section], () => {
+  closeMobileMenu();
+  if (!props.component) componentQuery.value = "";
+});
 onMounted(() => {
   mobileMedia = window.matchMedia("(max-width: 760px)");
   updateMobile();
@@ -194,6 +199,7 @@ onBeforeUnmount(() => {
   <main
     ref="pageElement"
     class="docs-page"
+    :class="{ 'legato-site-container': hostedSite }"
     data-testid="docs-page"
     :aria-label="t('documentation.strings.s0829')"
   >
@@ -222,15 +228,15 @@ onBeforeUnmount(() => {
           >{{ t('documentation.strings.s0832') }}</WlButton>
         </template>
       </PlaygroundPageHeader>
-      <aside class="docs-sidebar" :aria-label="t('documentation.strings.s0833')">
+      <aside class="docs-sidebar" :aria-label="sidebarLabel" :data-testid="inCatalog ? 'component-catalog' : undefined">
         <details
           ref="menuElement"
           class="docs-menu"
           :open="!isMobile || mobileMenuOpen"
           @toggle="toggleMenu"
         >
-          <summary class="docs-menu-summary">{{ t('documentation.strings.s0833') }}</summary>
-          <div class="docs-menu-content wl-stack" data-space="lg">
+          <summary class="docs-menu-summary">{{ sidebarLabel }}</summary>
+          <div v-if="!inCatalog" class="docs-menu-content wl-stack" data-space="lg">
             <nav class="docs-guide-nav" :aria-label="playgroundLocale === 'ru' ? 'Руководства' : 'Guides'">
               <a
                 v-for="link in guideLinks"
@@ -247,16 +253,13 @@ onBeforeUnmount(() => {
                   <WlIcon class="docs-sidebar-icon docs-sidebar-icon--book" name="book" :size="16" />
                 </span>{{ t('documentation.strings.s0834') }}
               </h2>
-              <nav class="docs-subnav" :aria-label="t('documentation.strings.s0835')">
-                <ul class="docs-toc-list"><li v-for="heading in overviewSections" :key="heading.id"><a
-                  class="docs-anchor-link"
-                  :href="overviewHref(heading)"
-                  :aria-current="!component && !section && activeId === heading.id ? 'location' : undefined"
-                  @click="navigateOverview($event, heading)"
-                >
-                  <span class="docs-toc-indicator" aria-hidden="true"><WlIcon name="chevron-right" :size="10" /></span>
-                  {{ heading.title }}
-                </a></li></ul>
+              <nav :aria-label="t('documentation.strings.s0835')">
+                <a
+                  class="docs-component-link"
+                  :href="guideHref('installation')"
+                  :aria-current="section === 'installation' ? 'page' : undefined"
+                  @click="navigateGuide($event, 'installation')"
+                >{{ installHeading.title }}</a>
               </nav>
               <div class="docs-foundation-nav">
                 <a
@@ -265,17 +268,6 @@ onBeforeUnmount(() => {
                   :aria-current="qualitySection ? 'page' : undefined"
                   @click="navigateQuality"
                 >{{ documentationQualityPage.label }}</a>
-                <nav v-if="qualitySection" class="docs-subnav" :aria-label="t('documentation.strings.s0836')">
-                  <ul class="docs-toc-list"><li v-for="heading in documentationQualityPage.headings" :key="heading.id"><a
-                    class="docs-anchor-link"
-                    :href="'#' + heading.id"
-                    :aria-current="activeId === heading.id ? 'location' : undefined"
-                    @click="navigateAnchor($event, heading)"
-                  >
-                    <span class="docs-toc-indicator" aria-hidden="true"><WlIcon name="chevron-right" :size="10" /></span>
-                    {{ heading.title }}
-                  </a></li></ul>
-                </nav>
               </div>
             </section>
             <nav class="docs-nav-section wl-stack" data-space="xs" :aria-label="t('documentation.strings.s0837')">
@@ -290,17 +282,6 @@ onBeforeUnmount(() => {
                   :aria-current="section === foundation.key ? 'page' : undefined"
                   @click="emit('section', foundation.key)"
                 >{{ foundation.label }}</button>
-                <nav v-if="section === foundation.key" class="docs-subnav" :aria-label="t('documentation.strings.s0836')">
-                  <ul class="docs-toc-list"><li v-for="heading in foundationHeadings(foundation.key)" :key="heading.id"><a
-                    class="docs-anchor-link"
-                    :href="'#' + heading.id"
-                    :aria-current="activeId === heading.id ? 'location' : undefined"
-                    @click="navigateAnchor($event, heading)"
-                  >
-                    <span class="docs-toc-indicator" aria-hidden="true"><WlIcon name="chevron-right" :size="10" /></span>
-                    {{ heading.title }}
-                  </a></li></ul>
-                </nav>
               </div>
             </nav>
             <nav class="docs-nav-section wl-stack" data-space="xs" :aria-label="t('documentation.strings.s0838')">
@@ -315,86 +296,83 @@ onBeforeUnmount(() => {
                   :aria-current="section === asset.key ? 'page' : undefined"
                   @click="emit('section', asset.key)"
                 >{{ asset.label }}</button>
-                <nav v-if="section === asset.key" class="docs-subnav" :aria-label="t('documentation.strings.s0836')">
-                  <ul class="docs-toc-list"><li v-for="heading in asset.headings" :key="heading.id"><a
-                    class="docs-anchor-link"
-                    :href="'#' + heading.id"
-                    :aria-current="activeId === heading.id ? 'location' : undefined"
-                    @click="navigateAnchor($event, heading)"
-                  >
-                    <span class="docs-toc-indicator" aria-hidden="true"><WlIcon name="chevron-right" :size="10" /></span>
-                    {{ heading.title }}
-                  </a></li></ul>
-                </nav>
               </div>
             </nav>
-            <section
-              v-if="section !== 'components'"
-              class="docs-nav-section wl-stack"
-              data-space="md"
-              :aria-label="t('documentation.strings.s0839')"
-            >
-              <h2 class="docs-sidebar-heading">
-                <span class="docs-sidebar-mark"><WlIcon class="docs-sidebar-icon" name="box" :size="16" /></span>
-                {{ t('documentation.strings.s0839') }}
-              </h2>
-              <WlInput
-                id="docs-component-search"
-                v-model="componentQuery"
-                class="docs-component-search"
-                size="sm"
-                type="search"
-                :placeholder="t('documentation.componentSearch.label')"
-                :aria-label="t('documentation.componentSearch.label')"
-                aria-controls="docs-component-catalog"
-                autocomplete="off"
-                spellcheck="false"
-                @keydown.esc.prevent.stop="clearComponentSearch"
-              >
-                <template #prefix><WlIcon name="search" :size="14" /></template>
-                <template v-if="componentQuery" #suffix><WlIconButton
-                  class="docs-component-search-clear"
-                  size="sm"
-                  icon="x"
-                  :aria-label="t('documentation.componentSearch.clear')"
-                  :title="t('documentation.componentSearch.clear')"
-                  @click="clearComponentSearch"
-                /></template>
-              </WlInput>
-              <p v-if="!groups.length" class="docs-component-search-empty wl-text-small wl-text-muted" role="status">
-                {{ t('documentation.componentSearch.empty') }}
-              </p>
-              <nav id="docs-component-catalog" class="docs-catalog" :aria-label="t('documentation.strings.s0840')">
-                <section v-for="group in groups" :key="group.key" class="docs-catalog-group">
-                  <h3 class="docs-category-label">{{ group.label }}</h3>
-                  <ul class="docs-catalog-list">
-                    <li v-for="item in group.entries" :key="item.name">
-                      <button
-                        type="button"
-                        class="docs-component-link"
-                        :aria-label="item.name"
-                        :aria-describedby="isComponentNewInRelease(item.introducedIn, gaviaProjectInfo.version)
-                          ? 'docs-catalog-version-' + item.name : undefined"
-                        :aria-current="component === item.name ? 'page' : undefined"
-                        @click="navigateComponent(item.name)"
-                      >
-                        <span class="docs-component-name">{{ item.name }}</span>
-                        <span
-                          v-if="isComponentNewInRelease(item.introducedIn, gaviaProjectInfo.version)"
-                          :id="'docs-catalog-version-' + item.name"
-                          class="docs-component-version"
-                          :title="t('documentation.strings.s0841') + item.introducedIn"
-                        >{{ playgroundLocale === 'ru' ? 'Новое' : 'New' }}</span>
-                      </button>
-                    </li>
-                  </ul>
-                </section>
-              </nav>
-            </section>
+            <a class="docs-sidebar-heading docs-catalog-entry" :href="guideHref('components')" @click="navigateGuide($event, 'components')">
+              <span class="docs-sidebar-mark"><WlIcon name="box" :size="16" /></span>
+              {{ t('documentation.strings.s0839') }}
+              <WlIcon name="arrow-right" :size="14" />
+            </a>
           </div>
+          <section v-else class="docs-menu-content docs-nav-section wl-stack" data-space="md">
+            <h2 class="docs-sidebar-heading">
+              <span class="docs-sidebar-mark"><WlIcon class="docs-sidebar-icon" name="box" :size="16" /></span>
+              {{ t('documentation.strings.s0839') }}
+            </h2>
+            <WlInput
+              id="docs-component-search"
+              v-model="componentQuery"
+              class="docs-component-search"
+              size="sm"
+              type="search"
+              :placeholder="t('documentation.componentSearch.label')"
+              :aria-label="t('documentation.componentSearch.label')"
+              aria-controls="docs-component-catalog"
+              autocomplete="off"
+              spellcheck="false"
+              @keydown.esc.prevent.stop="clearComponentSearch"
+            >
+              <template #prefix><WlIcon name="search" :size="14" /></template>
+              <template v-if="componentQuery" #suffix><WlIconButton
+                class="docs-component-search-clear"
+                size="sm"
+                icon="x"
+                :aria-label="t('documentation.componentSearch.clear')"
+                :title="t('documentation.componentSearch.clear')"
+                @click="clearComponentSearch"
+              /></template>
+            </WlInput>
+            <p v-if="!groups.length" class="docs-component-search-empty wl-text-small wl-text-muted" role="status">
+              {{ t('documentation.componentSearch.empty') }}
+            </p>
+            <nav id="docs-component-catalog" class="docs-catalog" :aria-label="t('documentation.strings.s0840')">
+              <section v-for="group in groups" :key="group.key" class="docs-catalog-group">
+                <h3 class="docs-category-label">{{ group.label }}</h3>
+                <ul class="docs-catalog-list">
+                  <li v-for="item in group.entries" :key="item.name">
+                    <a
+                      :href="componentHref(item.name)"
+                      class="docs-component-link"
+                      :aria-label="item.name"
+                      :aria-describedby="isComponentNewInRelease(item.introducedIn, gaviaProjectInfo.version)
+                        ? 'docs-catalog-version-' + item.name : undefined"
+                      :aria-current="selectedComponent === item.name ? 'page' : undefined"
+                      @click="followComponent($event, item.name)"
+                    >
+                      <span class="docs-component-name">{{ item.name }}</span>
+                      <span
+                        v-if="isComponentNewInRelease(item.introducedIn, gaviaProjectInfo.version)"
+                        :id="'docs-catalog-version-' + item.name"
+                        class="docs-component-version"
+                        :title="t('documentation.strings.s0841') + item.introducedIn"
+                      >{{ playgroundLocale === 'ru' ? 'Новое' : 'New' }}</span>
+                    </a>
+                  </li>
+                </ul>
+              </section>
+            </nav>
+          </section>
         </details>
       </aside>
 
+      <PageOutline
+        v-if="currentHeadings.length"
+        class="docs-on-page"
+        :class="{ 'docs-on-page--compact': section && !entry }"
+        :headings="currentHeadings"
+        :active-id="activeId"
+        @follow="navigateAnchor"
+      />
       <div ref="contentElement" class="docs-content wl-stack" data-space="2xl">
         <GuidePage v-if="guideSection" :section="guideSection" />
         <DocumentationQualityPage v-else-if="qualitySection" />
@@ -411,30 +389,6 @@ onBeforeUnmount(() => {
           @component="emit('component', $event)"
           @navigate="emit('navigate', $event)"
         />
-        <section v-else-if="section === 'components'" class="component-directory" data-testid="component-catalog">
-          <WlInput
-            id="docs-component-search"
-            v-model="componentQuery"
-            type="search"
-            :aria-label="t('documentation.componentSearch.label')"
-            :placeholder="t('documentation.componentSearch.label')"
-            aria-controls="component-results"
-            @keydown.esc.prevent="clearComponentSearch"
-          >
-            <template #prefix><WlIcon name="search" :size="16" /></template>
-          </WlInput>
-          <div id="component-results">
-            <p v-if="!groups.length" role="status">{{ t('documentation.componentSearch.empty') }}</p>
-            <section v-for="group in groups" :key="group.key">
-              <h2>{{ group.label }} <small>{{ group.entries.length }}</small></h2>
-              <ul><li v-for="item in group.entries" :key="item.name">
-                <a :href="componentHref(item.name)" @click="followComponent($event, item.name)">
-                  <strong>{{ item.name }}</strong><span>{{ item.description }}</span>
-                </a>
-              </li></ul>
-            </section>
-          </div>
-        </section>
         <template v-else-if="entry">
 
           <component
@@ -443,8 +397,19 @@ onBeforeUnmount(() => {
             :entry="entry"
           >
             <template #outline>
+              <details v-if="entry.name === 'WlButton' && currentHeadings.length" class="button-compact-outline">
+                <summary>{{ t('documentation.strings.s0836') }}</summary>
+                <nav :aria-label="t('documentation.strings.s0836')">
+                  <a
+                    v-for="heading in currentHeadings"
+                    :key="heading.id"
+                    :href="'#' + heading.id"
+                    @click="navigateAnchor($event, heading)"
+                  >{{ heading.title }}</a>
+                </nav>
+              </details>
               <nav
-                v-if="currentHeadings.length"
+                v-else-if="currentHeadings.length"
                 class="docs-section-links docs-component-outline"
                 :aria-label="t('documentation.strings.s0836')"
               ><a
@@ -475,18 +440,16 @@ onBeforeUnmount(() => {
               <h2 :id="installHeading.id" class="wl-text-heading">{{ installHeading.title }}</h2>
               <p class="wl-text-body wl-text-muted">{{ t('documentation.strings.s0847') }}</p>
             </div>
-            <WlSegmented v-model="installManager" :options="installationManagers" :aria-label="t('documentation.strings.s0848')" />
-            <CodePanel
-              :source="installationCommand"
-              :title="t('documentation.strings.s1280', { manager: installManager ?? 'pnpm' })"
-              :expanded="true"
-            />
+            <InstallationCommand include-vue />
             <CodePanel :source="installationSource" :title="t('documentation.strings.s0849')" :expanded="true" />
             <p class="wl-text-small wl-text-muted">
               {{ t('documentation.strings.s0850') }} <code>legato-ui/themes/</code>
               {{ t('documentation.strings.s0851') }} <code>data-wl-theme</code>
               {{ t('documentation.strings.s0852') }} <code>legato-ui/styles/fonts/legato.css</code>.
             </p>
+            <a class="docs-text-link" :href="guideHref('installation')" @click="navigateGuide($event, 'installation')">
+              {{ t('documentation.strings.installationGuide') }}
+            </a>
           </section>
 
           <section class="docs-overview-section wl-stack" data-space="lg">
@@ -583,68 +546,39 @@ onBeforeUnmount(() => {
           </section>
         </template>
       </div>
-      <aside v-if="currentHeadings.length" class="docs-on-page">
-        <nav :aria-label="playgroundLocale === 'ru' ? 'На этой странице' : 'On this page'">
-          <p class="wl-text-label">{{ playgroundLocale === 'ru' ? 'На этой странице' : 'On this page' }}</p>
-          <ul class="docs-toc-list"><li v-for="heading in currentHeadings" :key="heading.id"><a
-            :href="'#' + heading.id"
-            :aria-current="activeId === heading.id ? 'location' : undefined"
-            @click="navigateAnchor($event, heading)"
-          >{{ heading.title }}</a></li></ul>
-        </nav>
-      </aside>
     </div>
   </main>
 </template>
 
 <style>
-.component-directory > .wl-input { max-width: 32rem; }
-.component-directory h2 { font-size: 1.3rem; margin: 2rem 0 .8rem; }
-.component-directory small { color: var(--wl-text-muted); font-weight: 400; font-size: .85rem; }
-.component-directory ul {
-  list-style: none; padding: 0; display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: .7rem;
-}
-.component-directory li a {
-  display: grid; align-content: start; height: 100%; gap: .4rem; padding: 1rem;
-  border: 1px solid var(--wl-border); border-radius: var(--wl-radius-md); color: var(--wl-text); text-decoration: none;
-}
-.component-directory li a:hover, .component-directory li a:focus-visible { border-color: var(--wl-accent); }
-.component-directory li span { color: var(--wl-text-muted); font-size: .9rem; }
-.docs-page {
+.docs-page { padding-block: var(--wl-space-2xl); color: var(--wl-text); }
+.docs-page:not(.legato-site-container) {
   width: 100%;
   max-width: var(--wl-layout-page-max);
   margin-inline: auto;
-  padding: var(--wl-space-2xl) var(--wl-layout-page-gutter);
-  color: var(--wl-text);
+  padding-inline: var(--wl-layout-page-gutter);
 }
-.docs-page-header { grid-column: 2; grid-row: 1; }
+.docs-page-header { grid-area: heading; }
 .docs-layout {
   display: grid;
   grid-template-columns: 224px minmax(0, 1fr) 180px;
   grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas: "sidebar heading outline" "sidebar content outline";
   gap: var(--wl-space-xl);
   align-items: start;
 }
 .docs-sidebar {
-  grid-column: 1;
-  grid-row: 1 / span 2;
+  grid-area: sidebar;
   min-width: 0;
   position: sticky;
   top: var(--wl-playground-header-offset, 80px);
   max-height: calc(100dvh - var(--wl-playground-header-offset, 80px) - var(--wl-space-xl));
   overflow: auto;
-  padding-inline-end: var(--wl-space-md);
+  margin-inline-start: calc(-1 * var(--wl-space-xs));
+  padding-inline: var(--wl-space-xs) var(--wl-space-md);
   border-inline-end: 1px solid var(--wl-border);
 }
-.docs-on-page {
-  grid-column: 3;
-  grid-row: 2;
-  position: sticky;
-  top: var(--wl-playground-header-offset, 80px);
-  max-height: calc(100dvh - 100px);
-  overflow: auto;
-}
+.docs-on-page { grid-area: outline; }
 .docs-guide-nav { display: grid; gap: var(--wl-space-xs); }
 .docs-sidebar-heading {
   display: flex;
@@ -658,6 +592,8 @@ onBeforeUnmount(() => {
   font-weight: var(--wl-type-label-weight);
 }
 .docs-sidebar-icon { flex: none; color: var(--wl-text-muted); }
+.docs-catalog-entry { color: var(--wl-text-accent); text-underline-offset: 3px; }
+.docs-catalog-entry:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; }
 .docs-sidebar-mark {
   display: inline-flex;
   align-items: center;
@@ -682,45 +618,23 @@ onBeforeUnmount(() => {
 .docs-menu-summary:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; }
 .docs-nav-section { min-width: 0; }
 .docs-nav-section + .docs-nav-section { border-block-start: 1px solid var(--wl-border); padding-block-start: var(--wl-space-lg); }
-.docs-toc-list { margin: var(--wl-space-xs) 0 var(--wl-space-sm); padding: 0; list-style: none; }
-.docs-toc-list a {
-  position: relative;
-  display: block;
-  padding: var(--wl-space-xs) var(--wl-space-sm);
-  border-radius: var(--wl-corner-control);
-  color: var(--wl-text-muted);
-  font: var(--wl-type-small-size)/1.5 var(--wl-font);
-  text-decoration: none;
-  overflow-wrap: anywhere;
-  transition: padding-inline-start var(--wl-motion-normal) var(--wl-motion-ease),
-    color var(--wl-motion-fast) var(--wl-motion-ease), background-color var(--wl-motion-fast) var(--wl-motion-ease);
-}
-.docs-toc-indicator {
-  position: absolute;
-  inset-inline-start: var(--wl-space-sm);
-  inset-block-start: var(--wl-space-xs);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--wl-space-sm);
-  block-size: 1.5em;
-  opacity: 0;
-  transform: translateX(calc(-1 * var(--wl-space-2xs)));
-  pointer-events: none;
-  transition: opacity var(--wl-motion-normal) var(--wl-motion-ease), transform var(--wl-motion-normal) var(--wl-motion-ease);
-}
-.docs-toc-list .docs-anchor-link[aria-current="location"] {
-  padding-inline-start: calc(var(--wl-space-sm) * 2);
-  color: var(--wl-text-accent);
-  font-weight: var(--wl-type-label-weight);
-  background: transparent;
-}
-.docs-anchor-link[aria-current="location"] .docs-toc-indicator { opacity: 1; transform: translateX(0); }
 .docs-component-outline { margin-block: var(--wl-space-sm); }
+.button-compact-outline { display: none; }
+@media (max-width: 1200px) {
+  .button-compact-outline { display: block; color: var(--wl-text-muted); font-size: var(--wl-type-small-size); }
+  .button-compact-outline summary { width: fit-content; padding-block: var(--wl-space-xs); cursor: pointer; }
+  .button-compact-outline summary:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; }
+  .button-compact-outline nav {
+    display: grid;
+    gap: var(--wl-space-xs);
+    margin-top: var(--wl-space-xs);
+    padding-inline-start: var(--wl-space-md);
+    border-inline-start: 1px solid var(--wl-border);
+  }
+  .button-compact-outline a { width: fit-content; color: var(--wl-text-accent); text-underline-offset: 3px; }
+}
 .docs-component-header-actions { padding-block-start: var(--wl-space-xs); }
 .docs-design-rules { background: var(--wl-bg-soft); }
-.docs-toc-list a:hover { color: var(--wl-text-accent); background: var(--wl-bg-soft); }
-.docs-toc-list a:focus-visible { outline: 2px solid var(--wl-focus-color); outline-offset: 2px; border-radius: var(--wl-corner-control); }
 :where(.docs-component-search) input::-webkit-search-cancel-button { appearance: none; }
 :where(.docs-component-search) .wl-input-wrap__suffix { right: var(--wl-space-2xs); }
 .docs-component-search-clear { pointer-events: auto; }
@@ -757,7 +671,7 @@ onBeforeUnmount(() => {
   min-height: var(--wl-space-2xl);
   padding-block: calc(var(--wl-space-sm) - var(--wl-space-2xs));
 }
-.docs-catalog-list .docs-component-link { min-height: 30px; padding: 6px var(--wl-space-sm); line-height: 1.25; }
+.docs-catalog-list .docs-component-link { min-height: 30px; padding: 6px var(--wl-space-sm); line-height: 1.25; text-decoration: none; }
 .docs-component-name { min-width: 0; overflow-wrap: anywhere; }
 .docs-component-version {
   flex: none;
@@ -777,7 +691,7 @@ onBeforeUnmount(() => {
   color: var(--wl-text-muted);
   font-size: 10px;
 }
-.docs-content { grid-column: 2; grid-row: 2; min-width: 0; overflow-wrap: anywhere; }
+.docs-content { grid-area: content; min-width: 0; overflow-wrap: anywhere; }
 .docs-eyebrow { font-size: var(--wl-type-small-size); color: var(--wl-text-muted); }
 .docs-version {
   font-size: var(--wl-type-small-size);
@@ -817,27 +731,35 @@ onBeforeUnmount(() => {
   padding-left: var(--wl-space-lg);
   font-size: var(--wl-type-small-size);
 }
-@media (prefers-reduced-motion: reduce) { .docs-toc-list a, .docs-toc-indicator { transition: none; } }
-@media (max-width: 1200px) { .docs-layout { grid-template-columns: 224px minmax(0, 1fr); } .docs-on-page { display: none; } }
+@media (max-width: 1200px) {
+  .docs-layout {
+    grid-template-columns: 224px minmax(0, 1fr);
+    grid-template-areas: "sidebar heading" "sidebar content";
+    grid-template-rows: none;
+  }
+  .docs-layout:has(> .docs-on-page--compact) {
+    grid-template-areas: "sidebar heading" "sidebar outline" "sidebar content";
+  }
+  .docs-on-page:not(.docs-on-page--compact) { display: none; }
+}
 @media (max-width: 760px) {
-  .docs-page-header { grid-column: 1; }
   .docs-sidebar { border-inline-end: 0; }
   .docs-page { padding-block: var(--wl-space-xl); }
   .docs-layout {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: auto auto auto;
-    gap: var(--wl-space-xl);
+    grid-template-areas: "heading" "sidebar" "content";
+  }
+  .docs-layout:has(> .docs-on-page--compact) {
+    grid-template-areas: "heading" "sidebar" "outline" "content";
   }
   .docs-sidebar {
-    grid-column: 1;
-    grid-row: 2;
     position: static;
     max-height: none;
     overflow: visible;
+    margin-inline-start: 0;
     padding: 0;
     border-inline-start: 0;
   }
-  .docs-content { grid-column: 1; grid-row: 3; }
   .docs-menu-summary { display: list-item; list-style-position: inside; }
   .docs-menu-content {
     max-height: 65dvh;

@@ -25,14 +25,18 @@ const summary = computed(() =>
 
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlCheckbox">
-    <fieldset class="wl-stack" data-space="sm">
-      <legend>{{ t("documentation.strings.generatedWlCheckboxGroupLabel") }}</legend>
-      <WlCheckbox v-model="permissions" :value="1" size="sm">{{ t("documentation.strings.generatedWlCheckboxGroupRead") }}</WlCheckbox>
-      <WlCheckbox v-model="permissions" :value="2" size="sm">{{ t("documentation.strings.generatedWlCheckboxGroupShare") }}</WlCheckbox>
-      <output :aria-label="t('documentation.strings.generatedWlCheckboxGroupLabel')">{{ permissions.join(", ") }}</output>
+    <fieldset class="wl-choice-group">
+      <legend class="wl-choice-group__legend wl-text-label">{{ t("documentation.strings.generatedWlCheckboxGroupLabel") }}</legend>
+      <div class="wl-surface wl-stack" data-space="sm">
+        <WlCheckbox v-model="permissions" :value="1" size="sm">{{ t("documentation.strings.generatedWlCheckboxGroupRead") }}</WlCheckbox>
+        <WlCheckbox v-model="permissions" :value="2" size="sm">{{ t("documentation.strings.generatedWlCheckboxGroupShare") }}</WlCheckbox>
+        <output class="wl-text-small wl-text-muted" :aria-label="t('documentation.strings.generatedWlCheckboxGroupLabel')">
+          <code>{{ JSON.stringify(permissions) }}</code>
+        </output>
+      </div>
     </fieldset>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.linked_selection_and_indeterminate_0657") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.linked_selection_and_indeterminate_0657") }}</h3>
       <WlCheckbox v-model="allSelected" :indeterminate="mixed">{{ t("examples.all_available_notifications_0658") }}</WlCheckbox>
       <div class="wl-stack" data-space="sm">
         <WlCheckbox v-for="item in notifications" :key="item.id" v-model="item.enabled">{{ item.label }}</WlCheckbox>
@@ -40,7 +44,7 @@ const summary = computed(() =>
       <p class="wl-text-small wl-text-muted">{{ t("examples.the_application_computes_the_intermediate_state_when_some_chil_0659") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.label_error_and_disabled_0660") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.label_error_and_disabled_0660") }}</h3>
       <WlField
         id="docs-checkbox-consent"
         v-slot="{ id, ariaDescribedby, invalid }"

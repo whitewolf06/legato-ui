@@ -58,28 +58,27 @@ async function expectHeaderLayout(page: Page, header: Locator, mobile: boolean):
     if (!boxes.content || !near(boxes.brand.x, boxes.content.x)
       || !near(right(mobile ? boxes.menu : boxes.language), right(boxes.content))
       || !near(boxes.search.width, boxes.theme.width) || !near(boxes.search.height, boxes.theme.height)
-      || !near(boxes.language.width, 68)
       || right(boxes.search) > boxes.theme.x) return false;
     if (!mobile) {
       const centers = visible.map(center);
-      return near(boxes.search.width, 120) && near(boxes.theme.width, 120)
+      return near(boxes.search.width, 120) && near(boxes.theme.width, 120) && near(boxes.language.width, 68)
         && Math.max(...centers) - Math.min(...centers) <= 1
         && right(boxes.theme) <= boxes.language.x
         && right(boxes.brand) <= boxes.navigation.x && right(boxes.navigation) <= boxes.search.x
         && near(boxes.header.height, Math.max(boxes.minHeight,
           Math.max(...visible.map((box) => box.height)) + boxes.paddingTop + boxes.paddingBottom));
     }
-    const centers = visible.map(center);
+    const compactIcons = (page.viewportSize()?.width ?? 0) <= 380;
     return [boxes.menu, boxes.language, boxes.search, boxes.theme].every((box) => near(box.height, 44))
-      && [boxes.menu, boxes.search, boxes.theme].every((box) => near(box.width, 44))
-      && Math.max(...centers) - Math.min(...centers) <= 1
-      && right(boxes.brand) <= boxes.search.x && right(boxes.language) <= boxes.menu.x
+      && near(boxes.menu.width, 44) && near(boxes.search.width, boxes.language.width)
+      && near(center(boxes.brand), center(boxes.menu)) && boxes.search.y >= bottom(boxes.menu)
+      && near(center(boxes.search), center(boxes.theme)) && near(center(boxes.search), center(boxes.language))
+      && near(boxes.search.x, boxes.brand.x) && near(right(boxes.language), right(boxes.menu))
       && right(boxes.theme) <= boxes.language.x
-      && [[boxes.searchIcon, boxes.search], [boxes.menuIcon, boxes.menu], [boxes.themeIcon, boxes.theme]]
-        .every(([icon, control]) => near(centerX(icon!), centerX(control!)) && near(center(icon!), center(control!)))
-        && near(boxes.header.height, Math.max(boxes.minHeight,
-          44 + boxes.paddingTop + boxes.paddingBottom));
-  }, "Header keeps equal utility controls and one mobile row with centered icons and its menu on the right").toBe(true);
+      && near(centerX(boxes.menuIcon), centerX(boxes.menu)) && near(center(boxes.menuIcon), center(boxes.menu))
+      && (!compactIcons || [[boxes.searchIcon, boxes.search], [boxes.themeIcon, boxes.theme]]
+        .every(([icon, control]) => near(centerX(icon!), centerX(control!)) && near(center(icon!), center(control!))));
+  }, "The mobile header keeps the menu beside the wordmark and three equal controls below").toBe(true);
   await expectNoOverflow(page, header);
 }
 
@@ -103,7 +102,7 @@ async function expectDesktopOverflowMenu(
   } else await expect(overflow).toHaveCount(0);
 }
 
-test("responsive header preserves ordered desktop overflow, a compact mobile row and focus through dismissal and resize", { tag: "@cross-browser" }, async ({ page, baseURL }) => {
+test("responsive header preserves ordered desktop overflow, aligned mobile controls and focus through dismissal and resize", { tag: "@cross-browser" }, async ({ page, baseURL }) => {
   const pageErrors: string[] = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   const homeUrl = new URL(baseURL ?? "http://127.0.0.1:4173/");
@@ -239,11 +238,12 @@ test("responsive header preserves ordered desktop overflow, a compact mobile row
     await expect(header.locator(".pg-kit-version"), "The compact brand hides its version at " + width + "px").toBeHidden();
     await expect(brand).toHaveAccessibleName("Legato UI — главная");
     await expect(brand.locator(".pg-logo")).toBeVisible();
-    await expect(search.locator(".wl-btn__label")).toBeHidden();
     await expect(search.locator('svg[data-icon="search"]')).toBeVisible();
-    await expect(theme.locator(".wl-select__label")).toBeHidden();
-    await expect(theme.locator(".wl-select__dropdown")).toBeHidden();
-    await expect(themeIcon).toBeVisible();
+    const labelsVisible = width > 380;
+    await expect(search.locator(".wl-btn__label")).toBeVisible({ visible: labelsVisible });
+    await expect(theme.locator(".wl-select__label")).toBeVisible({ visible: labelsVisible });
+    await expect(theme.locator(".wl-select__dropdown")).toBeVisible({ visible: labelsVisible });
+    await expect(themeIcon).toBeVisible({ visible: !labelsVisible });
     await expectHeaderLayout(page, header, true);
   }
   await search.click();

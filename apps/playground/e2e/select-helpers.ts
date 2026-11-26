@@ -70,6 +70,11 @@ async function openNavigationOverlay(trigger: Locator, overlay: Locator): Promis
 /** Navigate through a visible desktop destination, its overflow menu, or the mobile drawer. */
 export async function navigateMainView(page: Page, label: string): Promise<void> {
   await expect(page.locator(".pg-header-inner")).toBeVisible();
+  const sharedLink = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
+  if (await sharedLink.isVisible()) {
+    await sharedLink.click();
+    return;
+  }
   await page.evaluate(() => document.fonts.ready);
   const mobileTrigger = page.locator(".pg-menu-trigger");
   if (await mobileTrigger.isVisible()) {
@@ -112,6 +117,11 @@ export async function expectMainViewCurrent(page: Page, label: string): Promise<
   // Wait for the actual destination before reopening More to inspect its state.
   await expect(page.locator(marker)).toBeVisible();
   await expect(page.locator(".pg-header-inner")).toBeVisible();
+  const sharedLink = page.locator(".legato-head-nav").getByRole("link", { name: label, exact: true });
+  if (await sharedLink.isVisible()) {
+    await expect(sharedLink).toHaveAttribute("aria-current", "page");
+    return;
+  }
   const navigation = page.locator(".pg-views");
   const mobileTrigger = page.locator(".pg-menu-trigger");
   // The desktop nav can appear after a lazy route finishes mounting. Only use
@@ -141,22 +151,29 @@ export async function expectMainViewCurrent(page: Page, label: string): Promise<
   }
 }
 
-/** Open the compact Docs catalog without toggling an already open menu. */
+/** Reveal the current sidebar on compact screens before interacting with its links. */
 export async function openDocumentationMenu(page: Page): Promise<Locator> {
   const docs = page.getByTestId("docs-page");
   await expect(docs).toBeVisible();
+  await expect(page.locator("#app")).toHaveAttribute("data-v-app", "");
   const menu = docs.locator(".docs-menu");
   const summary = menu.locator(".docs-menu-summary");
   if (await summary.isVisible() && await menu.getAttribute("open") === null) await summary.click();
-  await expect(docs.getByRole("navigation", { name: "Каталог компонентов", exact: true })).toBeVisible();
+  await expect(menu.locator(".docs-menu-content")).toBeVisible();
   return docs;
 }
 
 /** Select a real Docs catalog destination through desktop or compact navigation. */
 export async function navigateDocumentationComponent(page: Page, name: string): Promise<Locator> {
   const docs = await openDocumentationMenu(page);
+  const catalogLink = docs.locator(".docs-catalog-entry");
+  if (await catalogLink.isVisible()) {
+    await catalogLink.click();
+    await expect(docs.getByTestId("component-catalog")).toBeVisible();
+    await openDocumentationMenu(page);
+  }
   const item = docs.getByRole("navigation", { name: "Каталог компонентов", exact: true, includeHidden: true })
-    .getByRole("button", { name, exact: true, includeHidden: true });
+    .getByRole("link", { name, exact: true, includeHidden: true });
   await item.click();
   await expect(item).toHaveAttribute("aria-current", "page");
   await expect(docs.getByRole("heading", { level: 1, name, exact: true })).toBeVisible();

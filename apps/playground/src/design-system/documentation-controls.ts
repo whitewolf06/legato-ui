@@ -14,6 +14,27 @@ type Scalar = string | number | boolean;
 const serviceNames = new Set(["WlToast", "WlConfirmDialog"]);
 const referenceProps = new Set(["id", "ariaLabelledby", "href", "optionLabel", "optionValue", "dataKey"]);
 const namedModelProps: Record<string, readonly string[]> = { WlSidebar: ["pinned", "mobileOpen"], WlChip: ["active"], WlPagination: ["page"] };
+const enumTypes: Readonly<Record<string, readonly (string | number)[]>> = {
+  WlDensity: ["default", "compact"],
+  WlSize: ["xs", "sm", "md", "lg"],
+  WlSizeSm: ["sm", "md", "lg"],
+  WlSwitchSize: ["sm", "md"],
+  WlOverlaySize: ["sm", "md", "lg", "full"],
+  WlPopoverPlacement: ["auto", "top", "right", "bottom", "left"],
+  WlPopoverAlign: ["start", "center", "end"],
+  WlTimePickerHourFormat: ["auto", 12, 24]
+};
+
+function finiteValues(prop: WlPropManifest): readonly (string | number)[] {
+  if (prop.values?.length) return prop.values;
+  const signature = prop.typescriptType ?? "";
+  const known = enumTypes[signature];
+  if (known) return known;
+  const members = signature.split(" | ");
+  return members.length > 1 && members.every((member) => /^"[\w-]+"$/.test(member))
+    ? members.map((member) => member.slice(1, -1))
+    : [];
+}
 
 /** Read literals only: documentation must never execute an example to discover defaults. */
 function literal(expression: string): Scalar | undefined {
@@ -76,7 +97,7 @@ export function documentationDefaults(entry: WlComponentManifest, source: string
 
 function numericControl(entry: WlComponentManifest, prop: WlPropManifest): DocumentationControl {
   let numberMin = -1e12, numberMax = 1e12, numberStep = 1;
-  if (["count", "activeCount", "minLength", "maxFiles", "maxSize", "siblings", "badge"].includes(prop.name)) numberMin = 0;
+  if (["count", "activeCount", "minLength", "maxFiles", "maxSize", "siblings", "badge", "precision"].includes(prop.name)) numberMin = 0;
   if (["rows", "pageCount", "size"].includes(prop.name)) numberMin = 1;
   if (prop.name === "step") {
     numberMin = 0.01;
@@ -111,7 +132,8 @@ export function createDocumentationControls(entry: WlComponentManifest, source?:
     if (entry.name === "WlInput" && prop.name === "type") return [{ ...prop, values: ["text", "email", "search", "tel", "url", "number"], editor: "select" }];
     if (prop.type === "boolean") return [{ ...prop, editor: "checkbox" }];
     if (prop.type === "icon") return [{ ...prop, editor: "icon" }];
-    if (prop.values?.length) return [{ ...prop, editor: "select" }];
+    const values = finiteValues(prop);
+    if (values.length) return [{ ...prop, values, editor: "select" }];
     if (prop.type === "number") return [numericControl(entry, prop)];
     if (entry.name === "WlIcon" && prop.name === "size") return [numericControl(entry, {
       ...prop, description: (prop.description ?? "") + t("shell.design_system.documentation_controls.text471")
@@ -134,12 +156,6 @@ export function createDocumentationControls(entry: WlComponentManifest, source?:
     return rank(a) - rank(b);
   });
 }
-export function documentationComplexProps(entry: WlComponentManifest, controls: readonly DocumentationControl[]): string[] {
-  if (serviceNames.has(entry.name)) return [];
-  const editable = new Set(controls.map((control) => control.name));
-  return entry.props.filter((prop) => !editable.has(prop.name)).map((prop) => prop.name);
-}
-
 /** Known literal data keeps option keys and selected models compatible with the primary SFC. */
 export function documentationPresets(entry: WlComponentManifest): DocumentationPreset[] {
   if (entry.name === "WlSelect") return [{

@@ -112,6 +112,7 @@ test("colors resolve shipped themes, preserve alpha, copy exact CSS values and e
     await expect(assets.getByTestId("docs-color-setup").locator("pre code")).toContainText('import "legato-ui/themes/' + theme.name + '.css";');
   }
   await clipboardCapture(page);
+  await assets.locator('[data-color-group="surfaces"]').getByRole("button", { name: "Все токены раздела" }).click();
   await background.getByRole("button", { name: "Копировать переменную --wl-bg", exact: true }).click();
   await expect(background.getByRole("status")).toHaveText("Скопировано: var(--wl-bg)");
   await expect(page.locator("html")).toHaveAttribute("data-asset-copied", "var(--wl-bg)");
@@ -168,18 +169,15 @@ test("asset routes and TOC remain usable at 320px with light and dark themes", a
   expect(playgroundBasePath(new URL(page.url()))).toBe(new URL(baseURL ?? "http://127.0.0.1:4173/").pathname);
   await noOverflow(page, docs);
   await docs.locator(".docs-menu-summary").click();
-  const overview = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true });
-  await expect(overview.getByRole("link")).toHaveCount(6);
-  await expect(overview.locator("[aria-current]")).toHaveCount(0);
-  await overview.getByRole("link", { name: "Токены и темы", exact: true }).click();
+  const start = docs.getByRole("navigation", { name: "Разделы начала работы", exact: true });
+  await expect(start.getByRole("link")).toHaveText(["Установка"]);
+  await start.getByRole("link", { name: "Установка", exact: true }).click();
   await expect(docs.getByTestId("docs-assets-page")).toHaveCount(0);
-  await expect(docs.locator("#docs-tokens")).toBeInViewport();
+  await expect(docs.locator('[data-guide="installation"]')).toBeVisible();
   await expect(docs.locator(".docs-menu")).toHaveJSProperty("open", false);
-  const overviewUrl = new URL(page.url());
-  expect(playgroundBasePath(overviewUrl)).toBe(new URL(baseURL ?? "http://127.0.0.1:4173/").pathname);
-  expect(playgroundRouteParams(overviewUrl).get("view")).toBe("docs");
-  expect(playgroundRouteParams(overviewUrl).get("component")).toBeNull();
-  expect(playgroundRouteParams(overviewUrl).get("section")).toBeNull();
-  expect(overviewUrl.hash).toBe("#docs-tokens");
+  const installationUrl = new URL(page.url());
+  expect(playgroundBasePath(installationUrl)).toBe(new URL(baseURL ?? "http://127.0.0.1:4173/").pathname);
+  expect(playgroundRouteParams(installationUrl).get("view")).toBe("docs");
+  expect(playgroundRouteParams(installationUrl).get("section")).toBe("installation");
   await noOverflow(page, docs);
 });

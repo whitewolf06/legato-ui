@@ -8,6 +8,7 @@ import { WlAlert, WlButton, WlCheckbox, WlIcon, WlInput, WlSelect, WlSwitch, WlT
 import { computed, onMounted, ref, watch } from "vue";
 import CodePanel from "./design-system/CodePanel.vue";
 import PlaygroundPageHeader from "./PlaygroundPageHeader.vue";
+import { hostedSite } from "./site/target";
 import { createThemeExport, createThemeOverrides, createThemePalette, getThemeContrast, isThemeNameValid, normalizeHex, parseThemeDraft, THEME_DRAFT_SCHEMA_VERSION, type ThemePalette, themePaletteFields } from "./theme-builder/palette";
 import { isPlaygroundTheme, playgroundThemeOptions } from "./themes";
 
@@ -86,7 +87,8 @@ const previewSelectPt = computed(() => ({ overlay: { "data-wl-theme": baseTheme.
 
 <template>
   <main
-    class="tb-page wl-container wl-stack"
+    class="tb-page wl-stack"
+    :class="hostedSite ? 'legato-site-container' : 'wl-container'"
     data-space="2xl"
     data-testid="theme-builder-page"
     aria-labelledby="tb-title"

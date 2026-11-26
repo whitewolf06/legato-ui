@@ -29,6 +29,6 @@ const busy = ref(true);
   display: inline-flex;
   padding: var(--wl-space-md);
   border-radius: var(--wl-corner-control);
-  background: var(--wl-gray-800);
+  background: var(--wl-action-primary-bg);
 }
 </style>

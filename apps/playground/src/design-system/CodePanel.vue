@@ -2,8 +2,10 @@
 import { usePlaygroundI18n } from "../i18n";
 const props = defineProps<{
   source: string;
+  excerpt?: string;
   title?: string;
   expanded?: boolean;
+  embedded?: boolean;
   language?: CodeLanguage;
   loading?: boolean;
   loadError?: boolean;
@@ -19,7 +21,9 @@ import CodeHighlight from "./CodeHighlight.vue";
 import { stackBlitzFields } from "./stackblitz";
 const clipboard = useWlClipboard();
 const copiedSource = ref<string>();
-const copied = computed(() => clipboard.copied.value && copiedSource.value === props.source);
+const fullOpen = ref(!!props.expanded);
+const visibleSource = computed(() => props.excerpt && !fullOpen.value ? props.excerpt : props.source);
+const copied = computed(() => clipboard.copied.value && copiedSource.value === visibleSource.value);
 const pending = ref(false);
 const manual = ref(false);
 let copyRevision = 0;
@@ -28,7 +32,7 @@ const runnable = computed(() => /<template[\s>]/.test(props.source) && /from ["'
 const sandboxFields = computed(() => runnable.value
   ? stackBlitzFields(props.source, gaviaProjectInfo.publishedVersion, gaviaProjectInfo.publishedName)
   : {});
-watch(() => props.source, () => {
+watch(visibleSource, () => {
   copyRevision++;
   copiedSource.value = undefined;
   pending.value = false;
@@ -44,7 +48,7 @@ async function copy(): Promise<void> {
   pending.value = true;
   copiedSource.value = undefined;
   manual.value = false;
-  const source = props.source;
+  const source = visibleSource.value;
   const success = await clipboard.copy(source);
   if (disposed || revision !== copyRevision) return;
   copiedSource.value = success ? source : undefined;
@@ -55,7 +59,7 @@ defineExpose({ copy });
 </script>
 
 <template>
-  <div class="ds-source wl-stack" data-space="sm">
+  <div class="ds-source wl-stack" :class="{ 'ds-source--embedded': embedded || excerpt }" data-space="sm">
     <form
       v-if="runnable"
       method="post"
@@ -74,22 +78,31 @@ defineExpose({ copy });
         size="sm"
         variant="ghost"
         type="submit"
+        icon-position="end"
         :disabled="loading || loadError"
       >
-        Open in StackBlitz
-        <WlIcon name="arrow-up-right" :size="14" />
+        {{ embedded || excerpt ? 'StackBlitz' : 'Open in StackBlitz' }}
+        <template #icon><WlIcon name="arrow-up-right" :size="14" /></template>
       </WlButton>
     </form>
     <div class="ds-source-frame">
-      <details :open="expanded">
+      <details :open="expanded" @toggle="fullOpen = ($event.currentTarget as HTMLDetailsElement).open">
         <summary class="ds-source-summary">{{ title ?? t('shell.design_system.CodePanel.text365') }}</summary>
         <pre
+          v-if="!excerpt || fullOpen"
           class="ds-source-code"
           tabindex="0"
           role="region"
           :aria-label="title ?? t('shell.design_system.CodePanel.text366')"
         ><CodeHighlight :source="source" :language="language" /></pre>
       </details>
+      <pre
+        v-if="excerpt && !fullOpen"
+        class="ds-source-code"
+        tabindex="0"
+        role="region"
+        :aria-label="t('shell.design_system.CodePanel.text366')"
+      ><CodeHighlight :source="excerpt" :language="language" /></pre>
       <!-- Keep copy reachable when details are collapsed; the button belongs to the code frame. -->
       <div class="ds-source-copy" :class="{ 'is-pending': pending }">
         <WlButton
@@ -120,7 +133,7 @@ defineExpose({ copy });
       v-if="manual"
       class="ds-source-manual"
       readonly
-      :value="source"
+      :value="visibleSource"
       :aria-label="t('shell.design_system.CodePanel.text373')"
       @focus="($event.target as HTMLTextAreaElement).select()"
     ></textarea>
@@ -193,4 +206,36 @@ defineExpose({ copy });
 }
 @media (hover: none), (pointer: coarse), (any-pointer: coarse) { .ds-source-copy { opacity: 1; pointer-events: auto; } }
 @media (prefers-reduced-motion: reduce) { .ds-source-copy { transition: none; } }
+.ds-source--embedded {
+  position: relative;
+  display: block;
+  border-top: 1px solid var(--wl-border);
+  border-radius: 0 0 var(--wl-corner-surface) var(--wl-corner-surface);
+  background: color-mix(in srgb, var(--wl-bg-soft) 48%, var(--wl-bg));
+}
+.ds-source--embedded .ds-source-frame { border: 0; border-radius: inherit; background: transparent; }
+.ds-source--embedded .ds-source-summary {
+  display: list-item;
+  width: fit-content;
+  max-width: calc(100% - 9rem);
+  min-height: calc(var(--wl-control-height-sm) + var(--wl-space-sm));
+  padding: var(--wl-space-sm) 0 var(--wl-space-xs);
+  margin-inline-start: var(--wl-space-md);
+  font-size: var(--wl-type-small-size);
+}
+.ds-source--embedded > form {
+  position: absolute;
+  inset-block-start: var(--wl-space-xs);
+  inset-inline-end: calc(var(--wl-control-height-sm) + var(--wl-space-sm));
+  z-index: 1;
+}
+.ds-source--embedded > form button { padding-inline: var(--wl-space-xs); color: var(--wl-text-muted); }
+.ds-source--embedded .ds-source-copy { opacity: 1; pointer-events: auto; }
+.ds-source--embedded .ds-source-copy-button { background: transparent; }
+.ds-source--embedded .ds-source-code { padding: var(--wl-space-xs) var(--wl-space-md) var(--wl-space-md); }
+.ds-source--embedded > [role="status"] { display: block; }
+.ds-source--embedded > [role="status"]:not(:empty) { padding: 0 var(--wl-space-md) var(--wl-space-sm); }
+@media (max-width: 640px) {
+  .ds-source--embedded .ds-source-frame > pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+}
 </style>

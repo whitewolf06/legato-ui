@@ -10,7 +10,7 @@ const format = ref<string | null>(null);
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlRadio">
     <fieldset class="docs-radio-group wl-stack" data-space="md">
-      <legend class="wl-text-title">{{ t("examples.one_value_for_the_entire_group_0807") }}</legend>
+      <legend class="wl-text-subheading">{{ t("examples.one_value_for_the_entire_group_0807") }}</legend>
       <WlRadio v-model="visibility" name="docs-input-visibility" value="personal">{{ t("examples.only_me_0808") }}</WlRadio>
       <WlRadio v-model="visibility" name="docs-input-visibility" value="team">{{ t("examples.team_0809") }}</WlRadio>
       <WlRadio
@@ -22,7 +22,7 @@ const format = ref<string | null>(null);
       <p class="wl-text-small wl-text-muted">{{ t("examples.a_shared_name_groups_native_radio_inputs_arrow_keys_change_the_0811") }}</p>
     </fieldset>
     <fieldset class="docs-radio-group wl-stack" data-space="md" :aria-describedby="format == null ? 'docs-radio-error' : undefined">
-      <legend class="wl-text-title">{{ t("examples.required_selection_and_invalid_0812") }}</legend>
+      <legend class="wl-text-subheading">{{ t("examples.required_selection_and_invalid_0812") }}</legend>
       <WlRadio
         v-model="format"
         name="docs-input-format"

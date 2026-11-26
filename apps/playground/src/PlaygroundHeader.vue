@@ -6,12 +6,14 @@ import { WlButton } from "legato-ui";
 import { WlDrawer } from "legato-ui";
 import { WlIcon } from "legato-ui";
 import { WlMenu } from "legato-ui";
-import { WlSelect } from "legato-ui";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type { PlaygroundRoute, PlaygroundView } from "./navigation";
 import { type PlaygroundLocale, usePlaygroundI18n } from "./i18n";
 import LegatoWordmark from "./LegatoWordmark.vue";
-import { isPlaygroundThemePreference, type PlaygroundThemePreference, withPlaygroundTheme } from "./themes";
+import PlaygroundHeaderControls from "./PlaygroundHeaderControls.vue";
+import { gaviaProjectInfo } from "./project/project-info";
+import GitHubMark from "./site/GitHubMark.vue";
+import { type PlaygroundThemePreference, withPlaygroundTheme } from "./themes";
 
 const props = defineProps<{
   secondary?: boolean;
@@ -30,8 +32,10 @@ const emit = defineEmits<{
   locale: [locale: PlaygroundLocale];
 }>();
 const { t, locale } = usePlaygroundI18n();
-const currentThemeLabel = computed(() => props.appliedThemeName
-  || (props.themePreference === "system" ? t("shell.theme.system") : props.theme));
+const actionProps = computed(() => ({
+  theme: props.theme, themePreference: props.themePreference,
+  themeOptions: props.themeOptions, appliedThemeName: props.appliedThemeName
+}));
 const allSections = () => [
   { view: "home", label: t("shell.PlaygroundHeader.text122"), icon: "home" },
   { view: "docs", label: t("shell.PlaygroundHeader.text123"), icon: "book" },
@@ -40,8 +44,7 @@ const allSections = () => [
   { view: "theme-builder", label: t("shell.PlaygroundHeader.text126"), icon: "sliders-h" },
   { view: "project", label: "Changelog", icon: "history" }
 ] as const satisfies ReadonlyArray<{ view: PlaygroundView; label: string; icon: WlIconName }>;
-const sections = computed(() => allSections().filter(({ view }) => !props.secondary || (view !== "home" && view !== "docs")));
-const languageOptions = [{ label: "EN", value: "en" }, { label: "RU", value: "ru" }];
+const sections = computed(() => allSections().filter(({ view }) => !props.secondary || (view !== "home" && view !== "docs" && view !== "font")));
 const headerElement = ref<HTMLElement | null>(null);
 const desktopNavigation = ref<HTMLElement | null>(null);
 const measurement = ref<HTMLElement | null>(null);
@@ -83,6 +86,10 @@ function restoreMenuFocus(): void {
   menuFocusFrame = window.requestAnimationFrame(() => {
     menuFocusFrame = undefined;
     if (menuVisible.value || overflowOpen.value) return;
+    if (compactViewport?.matches && props.secondary) {
+      document.querySelector<HTMLElement>(".legato-head-menu-toggle")?.focus({ preventScroll: true });
+      return;
+    }
     const selector = compactViewport?.matches ? ".pg-menu-trigger" : '.pg-views [aria-current="page"], .pg-overflow-trigger';
     headerElement.value?.querySelector<HTMLElement>(selector)?.focus({ preventScroll: true });
   });
@@ -97,8 +104,9 @@ function measureNavigation(): void {
   const widths = buttons.map((button) => button.getBoundingClientRect().width);
   const count: number = sections.value.length;
   if (widths.length !== count + 1) return;
-  const available = desktopNavigation.value.clientWidth;
   const gap = Number.parseFloat(getComputedStyle(desktopNavigation.value).columnGap) || 0;
+  const repository = desktopNavigation.value.querySelector<HTMLElement>(".pg-repository");
+  const available = desktopNavigation.value.clientWidth - (repository ? repository.offsetWidth + gap : 0);
   const total = widths.slice(0, count).reduce((sum, width) => sum + width, 0) + gap * (count - 1);
   let nextCount = count;
   if (total > available) {
@@ -147,11 +155,10 @@ function openMenu(): void {
 }
 function openOverflow(event: Event): void {
   cancelMenuFocus();
-  if (event.currentTarget instanceof HTMLElement) event.currentTarget.focus({ preventScroll: true });
   if (event instanceof KeyboardEvent) overflowMenu.value?.show(event);
   else overflowMenu.value?.toggle(event);
 }
-async function focusOverflow(): Promise<void> {
+async function markOverflowOpen(): Promise<void> {
   overflowOpen.value = true;
   await nextTick();
   const links = [...document.querySelectorAll<HTMLElement>('#pg-overflow-navigation [role="menuitem"]')];
@@ -159,7 +166,6 @@ async function focusOverflow(): Promise<void> {
     if (overflowSections.value[index]?.view === props.activeView) link.setAttribute("aria-current", "page");
     else link.removeAttribute("aria-current");
   });
-  links[0]?.focus({ preventScroll: true });
 }
 function activateMenuItem(event: KeyboardEvent): void {
   if (event.key !== "Enter" && event.key !== " ") return;
@@ -172,12 +178,6 @@ function navigate(view: PlaygroundView): void {
   menuVisible.value = false;
   emit("navigate", view);
   if (fromOverflow) void nextTick(restoreMenuFocus);
-}
-function selectTheme(value: unknown): void {
-  if (isPlaygroundThemePreference(value)) emit("theme", value);
-}
-function selectLocale(value: unknown): void {
-  if (value === "en" || value === "ru") emit("locale", value);
 }
 watch(() => props.activeView, () => {
   menuVisible.value = false;
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="headerElement" class="pg-header-inner wl-container" :class="{ 'pg-secondary': secondary }">
+  <div ref="headerElement" class="pg-header-inner" :class="secondary ? 'pg-secondary legato-site-container' : 'wl-container'">
     <a
       v-if="!secondary"
       class="pg-brand"
@@ -222,6 +222,13 @@ onBeforeUnmount(() => {
       <LegatoWordmark class="pg-logo" />
       <span class="pg-kit-version" :aria-label="t('shell.PlaygroundHeader.text128') + version">v{{ version }}</span>
     </a>
+    <PlaygroundHeaderControls
+      v-if="secondary"
+      v-bind="actionProps"
+      @search="emit('search')"
+      @theme="emit('theme', $event)"
+      @locale="emit('locale', $event)"
+    />
     <nav ref="desktopNavigation" class="pg-views" :aria-label="t('shell.PlaygroundHeader.text129')">
       <WlButton
         v-for="section in visibleSections"
@@ -248,50 +255,27 @@ onBeforeUnmount(() => {
       >
         {{ t('shell.header.more') }}<WlIcon name="chevron-down" :size="14" />
       </WlButton>
-    </nav>
-    <div class="pg-actions">
-      <div class="pg-utility-controls">
-        <WlButton
-          class="pg-search"
-          size="sm"
-          variant="secondary"
-          :aria-label="t('shell.PlaygroundHeader.text130')"
-          :title="t('shell.PlaygroundHeader.text131')"
-          @click="emit('search')"
-        >
-          <template #icon><WlIcon name="search" :size="16" /></template>
-          <span class="pg-search-text">{{ t('shell.PlaygroundHeader.text132') }}</span>
-        </WlButton>
-        <div class="pg-theme-control">
-          <WlSelect
-            class="pg-theme"
-            size="sm"
-            :model-value="appliedThemeName ? null : themePreference"
-            :placeholder="appliedThemeName ? t('shell.themeDraft.active', { name: appliedThemeName }) : undefined"
-            :options="themeOptions"
-            option-label="label"
-            option-value="value"
-            :aria-label="t('shell.PlaygroundHeader.text133')"
-            :title="t('shell.PlaygroundHeader.text134') + currentThemeLabel"
-            data-testid="pg-theme-selector"
-            @update:model-value="selectTheme"
-          />
-          <WlIcon class="pg-theme-mobile-icon" name="sliders-h" :size="18" />
-        </div>
-      </div>
-      <WlSelect
-        class="pg-language"
+      <WlButton
+        v-if="secondary"
+        class="pg-repository"
+        variant="ghost"
         size="sm"
-        :model-value="locale"
-        :options="languageOptions"
-        option-label="label"
-        option-value="value"
-        :aria-label="t('shell.language')"
-        data-testid="pg-language-selector"
-        @update:model-value="selectLocale"
-      />
-    </div>
+        :href="gaviaProjectInfo.repositoryUrl"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <template #icon><GitHubMark /></template>GitHub
+      </WlButton>
+    </nav>
+    <PlaygroundHeaderControls
+      v-if="!secondary"
+      v-bind="actionProps"
+      @search="emit('search')"
+      @theme="emit('theme', $event)"
+      @locale="emit('locale', $event)"
+    />
     <WlButton
+      v-if="!secondary"
       class="pg-menu-trigger"
       size="sm"
       variant="secondary"
@@ -334,10 +318,11 @@ onBeforeUnmount(() => {
     :items="overflowItems"
     :aria-label="t('shell.PlaygroundHeader.text138')"
     :pt="{ list: { id: 'pg-overflow-navigation' }, itemLink: { onKeydown: activateMenuItem } }"
-    @open="focusOverflow"
+    @open="markOverflowOpen"
     @close="overflowOpen = false"
   />
   <WlDrawer
+    v-if="!secondary"
     v-model:visible="menuVisible"
     :header="t('shell.PlaygroundHeader.text138')"
     position="right"
@@ -369,9 +354,9 @@ onBeforeUnmount(() => {
   gap: var(--wl-space-md);
   padding-block: var(--wl-space-md);
 }
-.pg-header-inner.pg-secondary { grid-template-columns: minmax(0, 1fr) auto; min-height: 42px; padding-block: 4px; }
-.pg-secondary .pg-views { justify-content: flex-start; }
-@media (max-width: 760px) { .pg-secondary .pg-actions { justify-self: start; } }
+.pg-header-inner.pg-secondary { grid-template-columns: auto minmax(0, 1fr); min-height: 42px; padding-block: 4px; }
+.pg-secondary .pg-views { justify-content: flex-end; }
+.pg-secondary :is(.pg-views, .pg-nav-measure) :deep(.wl-btn) { padding-inline: var(--wl-space-sm); }
 .pg-brand {
   color: var(--wl-text);
   text-decoration: none;
@@ -401,13 +386,6 @@ onBeforeUnmount(() => {
 .pg-views [aria-current="page"] { background: var(--wl-accent-soft); color: var(--wl-text); }
 .pg-overflow-trigger :deep(.wl-btn__label) { display: inline-flex; align-items: center; gap: 6px; }
 :global(.pg-overflow-menu [aria-current="page"]) { background: var(--wl-accent-soft); color: var(--wl-text); }
-.pg-actions { display: flex; align-items: center; gap: 8px; }
-.pg-utility-controls { display: grid; grid-template-columns: repeat(2, 120px); gap: 8px; }
-.pg-search, :deep(.pg-theme) { width: 100%; min-width: 0; }
-.pg-search { justify-content: flex-start; text-align: left; color: var(--wl-text-2); background: var(--wl-bg-raised); }
-.pg-theme-control { position: relative; min-width: 0; display: flex; align-items: center; }
-.pg-theme-mobile-icon { display: none; }
-:deep(.pg-language) { width: 68px; min-width: 0; flex: none; }
 .pg-menu-trigger { display: none; }
 .pg-menu-links { display: grid; gap: var(--wl-space-sm); }
 .pg-menu-links :deep(.wl-btn) { justify-content: flex-start; min-height: 44px; }
@@ -415,22 +393,16 @@ onBeforeUnmount(() => {
 .pg-measure-clip { position: fixed; top: 0; left: 0; width: 0; height: 0; overflow: hidden; visibility: hidden; pointer-events: none; }
 .pg-nav-measure { width: max-content; }
 @media (max-width: 760px) {
-  .pg-header-inner { grid-template-columns: minmax(0, 1fr) auto 44px; gap: 4px; padding-block: var(--wl-space-sm); }
-  .pg-brand { gap: 6px; min-width: 0; }
+  .pg-header-inner {
+    grid-template: "brand menu" auto "actions actions" auto / minmax(0, 1fr) auto;
+    gap: 7px;
+    padding-block: var(--wl-space-sm);
+  }
+  .pg-header-inner.pg-secondary { grid-template: "actions" auto / minmax(0, 1fr); padding-block: 6px; }
+  .pg-brand { grid-area: brand; gap: 6px; min-width: 0; }
   .pg-logo { width: 88px; }
-  .pg-kit-version, .pg-views, .pg-search-text { display: none; }
-  .pg-actions { gap: 4px; }
-  .pg-utility-controls { grid-template-columns: repeat(2, 44px); gap: 4px; }
-  :deep(.pg-language) { height: 44px; min-height: 44px; }
-  .pg-menu-trigger { display: inline-flex; width: 44px; height: 44px; min-height: 44px; padding: 0; justify-content: center; }
-  .pg-search, :deep(.pg-theme) { height: 44px; min-height: 44px; }
-  .pg-search { padding: 0; justify-content: center; }
-  .pg-search :deep(.wl-btn__label) { display: none; }
-  :deep(.pg-theme) { padding: 0; }
-  :deep(.pg-theme .wl-select__label), :deep(.pg-theme .wl-select__dropdown) { display: none; }
-  .pg-theme-mobile-icon { display: block; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none; }
-}
-@media (max-width: 360px) {
-  .pg-logo { width: 28px; aspect-ratio: 1; mask-image: url("./assets/brand/duetto/legato-icon.svg?no-inline"); }
+  .pg-kit-version, .pg-views { display: none; }
+  .pg-actions { grid-area: actions; }
+  .pg-menu-trigger { grid-area: menu; display: inline-flex; width: 44px; height: 44px; padding: 0; justify-content: center; }
 }
 </style>

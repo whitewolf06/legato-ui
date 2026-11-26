@@ -33,7 +33,7 @@ function reset() {
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlAutocomplete">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.find_an_owner_and_select_members_0623") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.find_an_owner_and_select_members_0623") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           id="docs-auto-single"
@@ -65,7 +65,7 @@ function reset() {
       <p class="wl-text-small wl-text-muted">{{ t("examples.the_button_opens_the_current_suggestions_the_initial_list_is_p_0628") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.sizes_compact_density_and_states_0629") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.sizes_compact_density_and_states_0629") }}</h3>
       <div class="wl-grid" data-space="lg">
         <WlField
           v-for="size in ['sm', 'md', 'lg'] as const"

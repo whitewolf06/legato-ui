@@ -1,9 +1,45 @@
 import type { DocumentationGuideSection } from "../navigation";
 import guideMetadata from "./guide-metadata.json";
 
-export const documentationGuideSections: readonly DocumentationGuideSection[] = ["why", "theming", "recipes", "accessibility", "how-it-is-built"];
-interface GuideSection { title: string; text: string; code?: string }
+export const documentationGuideSections: readonly DocumentationGuideSection[] = ["installation", "why", "theming", "recipes", "accessibility", "how-it-is-built"];
+interface GuideSection { id?: string; title: string; text: string; code?: string }
 export interface DocumentationGuide { title: string; description: string; sections: GuideSection[] }
+
+export function documentationGuideHeadingId(section: DocumentationGuideSection, entry: GuideSection, index: number): string {
+  return entry.id ?? `guide-${section}-${index}`;
+}
+
+const installationEntry = `import { createApp } from "vue";
+import App from "./App.vue";
+
+import "legato-ui/styles/reset.css";
+import "legato-ui/styles/base.css";
+import "legato-ui/styles/primitives.css";
+import "legato-ui/styles/fonts/legato.css";
+import "legato-ui/themes/legato.css";
+
+document.documentElement.dataset.wlTheme = "legato";
+createApp(App).mount("#app");`;
+
+function firstButton(label: string): string {
+  return `<script setup lang="ts">
+import { ref } from "vue";
+import { WlButton } from "legato-ui";
+
+const count = ref(0);
+</script>
+
+<template>
+  <WlButton @click="count++">${label} {{ count }}</WlButton>
+</template>`;
+}
+
+const russianLabels = `import { WlConfig, wlLocaleRu } from "legato-ui";
+
+const app = createApp(App);
+app.use(WlConfig, { locale: wlLocaleRu });
+app.mount("#app");`;
+
 const themes = `import "legato-ui/styles/base.css";
 import "legato-ui/styles/fonts/gavia.css";
 import "legato-ui/themes/gavia.css";
@@ -26,6 +62,36 @@ const themeCommand = `pnpm exec gavia-theme --config my-brand.theme.json --outpu
 pnpm exec gavia-theme --config my-brand.theme.json --output src/theme.css --check`;
 const sources: Record<"en" | "ru", Record<DocumentationGuideSection, DocumentationGuide>> = {
   en: {
+    installation: { ...guideMetadata.en.installation, sections: [
+      {
+        id: "install-requirements",
+        title: "Requirements",
+        text: "Start with a Vue 3 application. Legato UI requires Vue 3.4 or later in the Vue 3 series. If your project uses TypeScript, use version 5.4 or later."
+      },
+      {
+        id: "install-package",
+        title: "Install the package",
+        text: "Run the command from your application directory. If Vue is missing from its dependencies, add vue with the same package manager."
+      },
+      {
+        id: "install-styles",
+        title: "Load styles and a theme",
+        text: "Add the imports to your application entry, such as main.ts. The example uses Legato and Legato Sans. The reset and layout utilities are optional. For dark mode, import themes/legato-dark.css and set data-wl-theme to legato-dark. For SSR, set the attribute in the server-rendered HTML.",
+        code: installationEntry
+      },
+      {
+        id: "install-first-component",
+        title: "Render your first component",
+        text: "Paste this example into App.vue and start your application. The number on the button increases on each click.",
+        code: firstButton("Clicks")
+      },
+      {
+        id: "install-locale",
+        title: "Set built-in labels to Russian",
+        text: "Built-in labels use English by default. In main.ts replace the createApp and mount line with this setup to enable Russian labels for the application.",
+        code: russianLabels
+      }
+    ] },
     why: { ...guideMetadata.en.why, sections: [
       { title: "A small application contract", text: "Vue is the library's only required peer dependency. Routing, network requests and business state belong to your application. Import reset, base styles and a theme explicitly." },
       { title: "Choose built-in text for your application", text: "The 1.0 source uses English when locale configuration is omitted. To keep Russian text, install WlConfig with wlLocaleRu in your app entry point. Missing fields in partial locales use English; spread the full preset before custom overrides. The Playground selects a preset explicitly when its language changes. Copied SFCs use their host app's configuration. This migration is part of the prepared 1.0 release candidate; publication is a separate step.", code: 'import { WlConfig, wlLocaleRu } from "legato-ui";\napp.use(WlConfig, { locale: wlLocaleRu });\n// A Russian preset with one application-specific label:\n// app.use(WlConfig, { locale: { ...wlLocaleRu, accept: "Продолжить" } });' },
@@ -61,6 +127,36 @@ const sources: Record<"en" | "ru", Record<DocumentationGuideSection, Documentati
     ] }
   },
   ru: {
+    installation: { ...guideMetadata.ru.installation, sections: [
+      {
+        id: "install-requirements",
+        title: "Что понадобится",
+        text: "Начните с проекта на Vue 3. Legato UI поддерживает Vue начиная с 3.4 в ветке 3.x. Если используете TypeScript, понадобится версия 5.4 или новее."
+      },
+      {
+        id: "install-package",
+        title: "Установка пакета",
+        text: "Выполните команду из папки приложения. Если в зависимостях проекта ещё нет Vue, добавьте пакет vue тем же менеджером."
+      },
+      {
+        id: "install-styles",
+        title: "Стили и тема",
+        text: "Добавьте импорты в точку входа приложения, например в main.ts. В примере используются тема Legato и шрифт Legato Sans. Сброс стилей и классы для компоновки можно подключать по необходимости. Для тёмной темы импортируйте themes/legato-dark.css и задайте legato-dark в data-wl-theme. Если используете SSR, задайте атрибут в HTML на сервере.",
+        code: installationEntry
+      },
+      {
+        id: "install-first-component",
+        title: "Первый компонент",
+        text: "Вставьте пример в App.vue и запустите приложение. При каждом нажатии число на кнопке увеличится.",
+        code: firstButton("Нажатий")
+      },
+      {
+        id: "install-locale",
+        title: "Подписи на русском",
+        text: "По умолчанию встроенные подписи отображаются на английском. Чтобы перевести их на русский, замените в main.ts строку с createApp и mount на этот вариант.",
+        code: russianLabels
+      }
+    ] },
     why: { ...guideMetadata.ru.why, sections: [
       { title: "Понятный контракт приложения", text: "Vue — единственная обязательная peer-зависимость библиотеки. Роутинг, запросы и бизнес-состояние остаются в вашем приложении. Reset, базовые стили и тему вы подключаете явно." },
       { title: "Выберите язык встроенных подписей", text: "В исходниках для 1.0 без настройки локали используется английский. Чтобы сохранить русский, подключите WlConfig с wlLocaleRu в точке входа приложения. Пропущенные поля частичной локали берутся из английского пресета: для своей русской локали сначала разверните wlLocaleRu. Витрина явно выбирает пресет при смене языка. Скопированный SFC использует настройки приложения, в которое вы его вставите. Эта миграция входит в подготовленный релиз-кандидат 1.0. Публикация выполняется отдельно.", code: 'import { WlConfig, wlLocaleRu } from "legato-ui";\napp.use(WlConfig, { locale: wlLocaleRu });\n// Русский пресет со своей подписью:\n// app.use(WlConfig, { locale: { ...wlLocaleRu, accept: "Продолжить" } });' },

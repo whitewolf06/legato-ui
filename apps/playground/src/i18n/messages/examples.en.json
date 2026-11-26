@@ -294,7 +294,7 @@
   "examples.share_0292": "Share",
   "examples.delete_quietly_0293": "Delete quietly",
   "examples.learn_more_0294": "Learn more",
-  "examples.choose_any_variant_all_eight_buttons_perform_a_local_action_0295": "Choose any variant: all eight buttons perform a local action.",
+  "examples.choose_any_variant_all_eight_buttons_perform_a_local_action_0295": "Click a button to try its action.",
   "examples.setup_0296": "Setup",
   "examples.import_css_explicitly_and_import_components_from_gavia_ui_0297": "Import CSS explicitly and import components from legato-ui.",
   "examples.themes_0298": "Themes",
@@ -1084,5 +1084,6 @@
   "examples.sliderMarkedValue": "Value:",
   "examples.sliderRange": "Range with marks",
   "examples.sliderRangeValue": "Range:",
-  "examples.componentSizeRoles": "Field labels follow the label role, hints use small and tab labels use control. Use rem for a role that should follow the reader's font size."
+  "examples.componentSizeRoles": "Field labels follow the label role, hints use small and tab labels use control. Use rem for a role that should follow the reader's font size.",
+  "examples.buttonPrimaryTones": "Primary button tones"
 }

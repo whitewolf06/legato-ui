@@ -84,6 +84,7 @@ test("the language selector preserves deep routes, themes and anchors through re
   }
   async function expectCopiedSource(language: "en" | "ru"): Promise<void> {
     const example = workspace.locator('[data-docs-button-example="variants"]');
+    await example.locator(".button-topic-comparison:not([open]) > summary").click();
     await expect(example.getByTestId("docs-button-example-preview").getByRole("button", { name: language === "en" ? "Create" : "Создать", exact: true })).toBeVisible();
     const panel = example.getByTestId("docs-button-example-source");
     await panel.locator("summary").click();

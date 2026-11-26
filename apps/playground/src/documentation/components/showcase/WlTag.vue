@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../../i18n";
 const { t } = usePlaygroundI18n();
-import { WlButton, WlTag, type WlTagColor } from "legato-ui";
+import { WlButton, WlTag, type WlTagColor, type WlTone } from "legato-ui";
 import { nextTick, ref } from "vue";
 const labels = { gray: t("examples.default_0604"), blue: t("examples.release_0605"), green: t("examples.done_0047"), amber: t("examples.in_progress_0066"), red: t("examples.overdue_0606") } satisfies Record<WlTagColor, string>;
+const tones = ["neutral", "accent", "info", "success", "warning", "danger"] as const satisfies readonly WlTone[];
 const tags = ref([t("examples.design_0079"), t("examples.development_0080"), t("examples.review_0129")]);
 const controls = ref<HTMLElement | null>(null);
 async function remove(tag: string): Promise<void> {
@@ -15,8 +16,17 @@ async function remove(tag: string): Promise<void> {
 
 <template>
   <div class="wl-stack" data-space="lg">
-    <div class="wl-inline" data-space="sm">
-      <WlTag v-for="(label, color) in labels" :key="color" :color="color">{{ label }}</WlTag>
+    <div class="wl-stack" data-space="xs">
+      <code>tone</code>
+      <div class="wl-inline" data-space="sm">
+        <WlTag v-for="tone in tones" :key="tone" :tone="tone">{{ tone }}</WlTag>
+      </div>
+    </div>
+    <div class="wl-stack" data-space="xs">
+      <code>color</code>
+      <div class="wl-inline" data-space="sm">
+        <WlTag v-for="(label, color) in labels" :key="color" :color="color">{{ label }}</WlTag>
+      </div>
     </div>
     <div ref="controls" class="wl-inline" data-space="sm"><WlTag
                                                             v-for="tag in tags"

@@ -7,7 +7,28 @@ Historical generated Changeset paragraphs are preserved in [the maintainer archi
 
 ## Unreleased
 
+- Align checkbox and radio labels, keep avatar presence indicators attached, and keep optional field labels together. Prevent step text from overlapping, join the autocomplete clear button to the field, and add space between multiselect chips.
+- Wrap long alert actions below the message in narrow containers and keep the close button beside the title.
+- Place permissions captions above their panels and use smaller headings inside extended Playground examples.
+- Fix the direction and error controls in the choice group examples, apply the selected tag limit, and show the slider range as two values.
+- Add six independent project examples with framed previews and standalone links.
+- Expand the product landing, add team chat, a monitoring service, a photographer portfolio and mail, and give the shared preview a high-contrast header with desktop and phone modes.
+- Combine mobile site navigation into one menu and align the Playground controls across narrow screens.
+- Document core color tokens with live button tones and align the font page with the site's shared container.
+- Center avatar initials and keep the keyboard focus outline inside scrollable tabs.
+- Keep menu and option-list focus from scrolling the page. Show the selected radio in a group, center input adornments beside the text counter, and keep one focus outline around autocomplete.
+- Use neutral disabled field backgrounds, center chip removal icons, and truncate status pills on one line. Align the Playground theme builder and Changelog with the shared navigation and give example controls room between labels.
+- Keep the catalog search focus ring visible and distinguish focused and selected options in WlSelect and WlMultiSelect. Center badge and chip text using font metrics.
+
+## 1.3.1 — prepared
+
+- Keep one Installation entry in the getting-started menu and add a bilingual guide with setup commands, theme imports and a first component example.
+- Use the same right-hand outline throughout documentation and the design system. Remove duplicate section links from the documentation sidebar and keep the layout stable when a modal opens.
+- Distinguish keyboard focus from selected options in WlMultiSelect and align the count with the label in small WlChip instances.
+- Apply distinct semantic tones to component variants and improve status contrast in built-in themes. The Legato palettes use blue for information, amber for warnings and cherry red for destructive actions.
+- Organize component documentation into focused examples with inline controls, live previews and copyable Vue code.
 - Add a searchable component catalog in English and Russian, with shared navigation between documentation, examples and the project landing page.
+- Open the first live example when entering Components. The catalog sidebar lists every component, and the documentation sidebar links to the catalog. Both sections share the landing page width and Font link.
 - Clarify the WlNumberInput manifest description so the catalog loads only the core font subset on first visit.
 
 ## 1.3.0 — 2026-11-24

@@ -72,6 +72,64 @@ test("multiselect documentation filters and selects with the keyboard, removes c
   await expect(example.getByRole("combobox", { name: "Недоступный мультивыбор", exact: true })).toBeDisabled();
 });
 
+test("clearing a select removes the selection fill while keeping keyboard navigation", async ({ page, baseURL }) => {
+  const url = new URL(russianPlaygroundUrl(docsUrl(baseURL, "WlSelect")));
+  url.searchParams.set("theme", "legato");
+  await page.goto(url.href, { waitUntil: "domcontentloaded" });
+  const control = page.getByTestId("ds-example-preview").getByRole("combobox", { name: "Область", exact: true });
+  const clear = control.getByRole("button", { name: "Очистить", exact: true });
+  const list = page.getByRole("listbox");
+  const team = list.getByRole("option", { name: "Команда", exact: true });
+  await control.click();
+  await expect(team).toHaveAttribute("aria-selected", "true");
+  const selectedFill = await team.evaluate((option) => getComputedStyle(option).backgroundColor);
+
+  await clear.click();
+  await expect(clear).toHaveCount(0);
+  await control.click();
+  await page.mouse.move(0, 0);
+  await expect(list.getByRole("option", { selected: true })).toHaveCount(0);
+  await expect(team).toHaveAttribute("data-active", "true");
+  await expect(team).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(team).not.toHaveCSS("box-shadow", "none");
+  await team.hover();
+  await expect(team).not.toHaveCSS("background-color", selectedFill);
+
+  const filter = page.getByRole("combobox", { name: "Фильтр", exact: true });
+  await expect(filter).toBeFocused();
+  await filter.press("ArrowDown");
+  await filter.press("Enter");
+  await expect(control).toContainText("Личное");
+});
+
+test("clearing all multiselect choices removes selection while keyboard navigation keeps an active marker", async ({ page, baseURL }) => {
+  const url = new URL(russianPlaygroundUrl(docsUrl(baseURL, "WlMultiSelect")));
+  url.searchParams.set("theme", "legato");
+  await page.goto(url.href, { waitUntil: "domcontentloaded" });
+  const preview = page.getByTestId("ds-example-preview");
+  await preview.getByRole("combobox", { name: "Направления", exact: true }).press("ArrowDown");
+  const list = page.getByRole("listbox");
+  const design = list.getByRole("option", { name: "Дизайн", exact: true });
+  const all = page.getByRole("checkbox", { name: "Выбрать всё", exact: true });
+  await expect(design).toHaveAttribute("aria-selected", "true");
+  await expect(design.locator(".wl-multiselect__option-check")).toBeVisible();
+
+  await all.uncheck();
+  await expect(list.locator('[aria-selected="true"]')).toHaveCount(0);
+  await expect(preview.locator(".wl-multiselect__value-chip")).toHaveCount(0);
+  await expect(design.locator(".wl-multiselect__option-check")).toHaveCount(0);
+  await expect(design).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(design).toHaveCSS("box-shadow", "none");
+
+  const filter = page.getByRole("combobox", { name: "Фильтр", exact: true });
+  await filter.press("Home");
+  await expect(design).toHaveAttribute("data-active", "true");
+  await expect(design).not.toHaveCSS("box-shadow", "none");
+  await filter.press("Enter");
+  await expect(design).toHaveAttribute("aria-selected", "true");
+  await expect(design.locator(".wl-multiselect__option-check")).toBeVisible();
+});
+
 test("file documentation preserves cancelled batches and enforces local upload rejection, removal and replacement", async ({ page, baseURL }) => {
   await page.goto(russianPlaygroundUrl(docsUrl(baseURL, "WlFilePicker")), { waitUntil: "domcontentloaded" });
   const picker = page.locator('[data-input-example="WlFilePicker"]');

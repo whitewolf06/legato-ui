@@ -48,7 +48,7 @@ describe("playground query navigation", () => {
     expect(parsePlaygroundRoute(docs.search)).toEqual({ view: "docs", component: "WlButton" });
     const gallery = createPlaygroundUrl(docs, { view: "components" });
     expect(gallery.searchParams.get("component")).toBeNull();
-    expect(parsePlaygroundRoute(gallery.search)).toEqual({ view: "docs" });
+    expect(parsePlaygroundRoute(gallery.search)).toEqual({ view: "docs", section: "components" });
     const home = createPlaygroundUrl(docs, { view: "home" });
     expect(home.searchParams.get("view")).toBeNull();
     expect(home.searchParams.get("component")).toBeNull();
@@ -108,7 +108,7 @@ describe("playground query navigation", () => {
     expect(overview.searchParams.get("component")).toBeNull();
     for (const view of ["home", "components", "system", "project", "theme-builder", "font"] as const) {
       const destination = createPlaygroundUrl(foundations, { view });
-      expect(destination.searchParams.get("section")).toBeNull();
+      expect(destination.searchParams.get("section")).toBe(view === "components" ? "components" : null);
       expect(destination.searchParams.get("component")).toBeNull();
       expect(destination.searchParams.get("theme")).toBe("newspaper");
     }
@@ -116,7 +116,8 @@ describe("playground query navigation", () => {
     expect(current.hash).toBe("#old");
   });
   it("preserves legacy gallery component and asset deep links without changing other routes", () => {
-    expect(parsePlaygroundRoute("?view=components")).toEqual({ view: "docs" });
+    expect(parsePlaygroundRoute("?view=components")).toEqual({ view: "docs", section: "components" });
+    expect(parsePlaygroundRoute("", "", "/legato-ui/ru/components/")).toEqual({ view: "docs", section: "components" });
     expect(parsePlaygroundRoute("?view=components", "#component-WlTimePicker")).toEqual({ view: "docs", component: "WlTimePicker" });
     expect(parsePlaygroundRoute("?view=components", "#pg-colors")).toEqual({ view: "docs", section: "colors" });
     expect(parsePlaygroundRoute("?view=components", "#pg-icons")).toEqual({ view: "docs", section: "icons" });

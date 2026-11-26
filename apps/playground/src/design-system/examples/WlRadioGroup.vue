@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../i18n";
-defineProps<{ preview?: Record<string, unknown> }>();
+const props = defineProps<{ preview?: Record<string, unknown> }>();
 const { t } = usePlaygroundI18n();
 import { WlButton, WlRadioGroup } from "legato-ui";
 import { computed, ref } from "vue";
-const selected = ref<string>();
+const selected = ref<string | undefined>("basic");
+const invalid = computed(() => Boolean(props.preview?.invalid ?? !selected.value));
 const options = computed(() => [
   { value: "basic", label: t("documentation.strings.generatedWlRadioGroupBasic") },
   { value: "team", label: t("documentation.strings.generatedWlRadioGroupTeam") },
@@ -16,15 +17,15 @@ const options = computed(() => [
   <div class="wl-stack" data-space="md" data-review-example="WlRadioGroup">
     <WlRadioGroup
       v-model="selected"
+      orientation="horizontal"
       v-bind="preview"
       :options="options"
       option-value="value"
       option-disabled="disabled"
       :legend="t('documentation.strings.generatedWlRadioGroupLabel')"
-      orientation="horizontal"
-      :invalid="!selected"
+      :invalid="invalid"
     />
-    <p v-if="!selected" role="alert">{{ t("documentation.strings.generatedWlRadioGroupValidation") }}</p>
+    <p v-if="invalid" role="alert">{{ t("documentation.strings.generatedWlRadioGroupValidation") }}</p>
     <div class="wl-inline" data-space="sm">
       <WlButton size="sm" @click="selected = undefined">{{ t("documentation.strings.reviewNewClear") }}</WlButton>
       <WlButton size="sm" @click="selected = 'basic'">{{ t("documentation.strings.reviewNewReset") }}</WlButton>

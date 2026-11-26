@@ -25,7 +25,7 @@ function clear() {
 <template>
   <div class="wl-stack" data-space="xl" data-input-example="WlFilePicker">
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.custom_button_select_and_cancel_0715") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.custom_button_select_and_cancel_0715") }}</h3>
       <WlFilePicker
         ref="picker"
         multiple
@@ -53,7 +53,7 @@ function clear() {
       <p class="wl-text-small wl-text-muted">{{ t("examples.select_returns_a_new_file_list_it_replaces_the_application_lis_0720") }}</p>
     </section>
     <section class="wl-stack" data-space="md">
-      <h3 class="wl-text-title">{{ t("examples.default_button_sizes_and_disabled_0721") }}</h3>
+      <h3 class="wl-text-subheading">{{ t("examples.default_button_sizes_and_disabled_0721") }}</h3>
       <div class="wl-inline" data-space="md"><WlFilePicker
         v-for="size in ['sm', 'md', 'lg'] as const"
         :key="size"

@@ -294,7 +294,7 @@
   "examples.share_0292": "Поделиться",
   "examples.delete_quietly_0293": "Удалить тихо",
   "examples.learn_more_0294": "Подробнее",
-  "examples.choose_any_variant_all_eight_buttons_perform_a_local_action_0295": "Выберите любой вариант: все восемь кнопок выполняют локальное действие.",
+  "examples.choose_any_variant_all_eight_buttons_perform_a_local_action_0295": "Нажмите кнопку, чтобы попробовать действие.",
   "examples.setup_0296": "Подключение",
   "examples.import_css_explicitly_and_import_components_from_gavia_ui_0297": "Подключите CSS явно и импортируйте компоненты из legato-ui.",
   "examples.themes_0298": "Темы",
@@ -1084,5 +1084,6 @@
   "examples.sliderMarkedValue": "Значение:",
   "examples.sliderRange": "Диапазон с разметкой",
   "examples.sliderRangeValue": "Диапазон:",
-  "examples.componentSizeRoles": "Для подписи поля используется роль label, для подсказки — small, для вкладки — control. Задайте размер роли в rem, чтобы текст учитывал размер шрифта в браузере."
+  "examples.componentSizeRoles": "Для подписи поля используется роль label, для подсказки — small, для вкладки — control. Задайте размер роли в rem, чтобы текст учитывал размер шрифта в браузере.",
+  "examples.buttonPrimaryTones": "Тоны кнопки с заливкой"
 }

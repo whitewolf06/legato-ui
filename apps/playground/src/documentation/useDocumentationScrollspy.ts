@@ -13,6 +13,7 @@ export interface DocumentationScrollspyOptions {
   /** The content column only; navigation headings must not be observed. */
   root: Ref<HTMLElement | null>;
   key: () => unknown;
+  headingSelector?: string;
   /** Filter visible h2 elements without replacing their DOM order or title. */
   headingIds?: () => readonly string[] | undefined;
 }
@@ -43,8 +44,9 @@ export function headingActivationTop(top: number, scrollMarginTop: string): numb
 
 function isVisibleHeading(element: HTMLElement, view: Window): boolean {
   if (!element.getClientRects().length) return false;
+  // Modal isolation changes focus and accessibility, while the background keeps its layout.
   for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
-    if (ancestor.hidden || ancestor.hasAttribute("inert") || ancestor.getAttribute("aria-hidden") === "true") return false;
+    if (ancestor.hidden) return false;
     const style = view.getComputedStyle(ancestor);
     if (style.display === "none" || style.visibility === "hidden" || style.visibility === "collapse" || style.contentVisibility === "hidden") return false;
   }
@@ -79,14 +81,15 @@ export function useDocumentationScrollspy(options: DocumentationScrollspyOptions
     const allowedIds = options.headingIds?.();
     const allowed = allowedIds === undefined ? undefined : new Set(allowedIds);
     const seen = new Set<string>();
-    const elements = Array.from(root.querySelectorAll<HTMLElement>("h2[id]")).filter((heading) => {
+    const elements = Array.from(root.querySelectorAll<HTMLElement>(options.headingSelector ?? "h2[id]")).filter((heading) => {
       if (!heading.id || seen.has(heading.id) || (allowed && !allowed.has(heading.id)) || !isVisibleHeading(heading, view!)) return false;
       seen.add(heading.id);
       return true;
     });
     setHeadings(elements.map((heading) => ({
       id: heading.id,
-      title: heading.textContent?.trim().replace(/\s+/g, " ") || heading.getAttribute("aria-label") || heading.id
+      title: (heading.querySelector("h2") ?? heading).textContent?.trim().replace(/\s+/g, " ")
+        || heading.getAttribute("aria-label") || heading.id
     })));
     const viewportHeight = doc.documentElement.clientHeight || view.innerHeight;
     const scrollPadding = view.getComputedStyle(doc.documentElement).scrollPaddingTop.trim();
@@ -120,12 +123,12 @@ export function useDocumentationScrollspy(options: DocumentationScrollspyOptions
     if (root) {
       rootObserver?.observe(root, {
         childList: true, subtree: true, characterData: true,
-        attributes: true, attributeFilter: ["id", "style", "class", "hidden", "aria-hidden", "inert", "open"]
+        attributes: true, attributeFilter: ["id", "style", "class", "hidden", "open"]
       });
       // A containing tab or page can hide content without mutating the headings themselves.
       for (let ancestor = root.parentElement; ancestor; ancestor = ancestor.parentElement) {
         rootObserver?.observe(ancestor, {
-          attributes: true, attributeFilter: ["style", "class", "hidden", "aria-hidden", "inert", "open"]
+          attributes: true, attributeFilter: ["style", "class", "hidden", "open"]
         });
       }
       resizeObserver?.observe(root);

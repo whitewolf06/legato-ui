@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { usePlaygroundI18n } from "../../i18n";
 const { t } = usePlaygroundI18n();
-import { WlButton, type WlButtonVariant } from "legato-ui";
+import { WlButton, type WlButtonVariant, type WlTone } from "legato-ui";
 import { ref } from "vue";
 // The public union makes a missing or unsupported variant a type error.
 const labels = {
@@ -12,6 +12,7 @@ const labels = {
   link: t("examples.learn_more_0294")
 } satisfies Record<WlButtonVariant, string>;
 const variants = Object.keys(labels) as WlButtonVariant[];
+const tones = ["neutral", "accent", "info", "success", "warning", "danger"] as const satisfies readonly WlTone[];
 const lastAction = ref("");
 </script>
 
@@ -52,6 +53,18 @@ const lastAction = ref("");
         <code class="wl-text-small">soft + danger</code>
       </div>
     </div>
+    <fieldset class="button-tone-comparison">
+      <legend class="wl-text-label">{{ t("examples.buttonPrimaryTones") }}</legend>
+      <div class="wl-inline" data-space="sm">
+        <WlButton
+          v-for="tone in tones"
+          :key="tone"
+          variant="primary"
+          :tone="tone"
+          @click="lastAction = tone"
+        >{{ tone }}</WlButton>
+      </div>
+    </fieldset>
     <p class="wl-text-small wl-text-muted" role="status">
       {{ lastAction
         ? t("examples.last_action_0277") + lastAction
@@ -67,4 +80,6 @@ const lastAction = ref("");
   gap: var(--wl-space-lg);
   align-items: start;
 }
+.button-tone-comparison { min-inline-size: 0; margin: 0; padding: 0; border: 0; }
+.button-tone-comparison legend { padding: 0 0 var(--wl-space-sm); }
 </style>
