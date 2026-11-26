@@ -549,11 +549,17 @@
     color: var(--wl-text);
   }
   .wl-multiselect__chips {
-    display: var(--wl-multiselect-chips-display, flex);
+    /* The opt-in typography scale sets flex for wrapping. The default uses one row. */
+    display: var(--wl-multiselect-chips-display, grid);
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(calc(18px + var(--wl-space-sm) + var(--wl-space-xs) + 5 * var(--wl-space-unit)), max-content);
     flex-wrap: wrap;
     gap: var(--wl-space-xs);
+    overflow-x: auto;
+    scrollbar-width: none;
   }
   .wl-multiselect__value-chip {
+    min-width: 0;
     max-width: 100%;
     height: auto;
     min-height: 24px;
