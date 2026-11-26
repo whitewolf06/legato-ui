@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 
 PRIMARY = "https://legato-ui.ru/"
 VERIFY = "yandex_4ebe5cdcb9707dc7.html"
-APPLICATIONS = {"dashboard", "product", "subscription", "knowledge", "newsletter", "booking"}
+APPLICATIONS = {"dashboard", "product", "chat", "monitoring", "portfolio", "mail"}
 LEGACY_APPLICATIONS = {"dashboard", "board", "calendar", "orders", "settings"}
 SMOKE = ["", "ru/docs/", "docs/", "ru/docs/components/", "docs/components/",
          "ru/docs/components/WlTable/", "docs/components/WlTable/", "ru/docs/recipes/", "docs/why/"]
